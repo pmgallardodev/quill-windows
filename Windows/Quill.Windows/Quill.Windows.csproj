@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>quill</AssemblyName>
+    <RootNamespace>Quill.Windows</RootNamespace>
+    <ApplicationIcon>Assets\quill.ico</ApplicationIcon>
+    <PublishSingleFile>false</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="Whisper.net" Version="1.9.1" />
+    <PackageReference Include="Whisper.net.Runtime" Version="1.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Assets\quill.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../models/ggml-large-v3-q5_0.bin"
+          Link="models/ggml-large-v3-q5_0.bin"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest"
+          Condition="Exists('../../models/ggml-large-v3-q5_0.bin')" />
+  </ItemGroup>
+
+  <Target Name="RequireWhisperModel" BeforeTargets="Publish">
+    <Error Condition="!Exists('../../models/ggml-large-v3-q5_0.bin')"
+           Text="Missing models/ggml-large-v3-q5_0.bin. Run tools/Get-WhisperModel.ps1 before publishing." />
+  </Target>
+</Project>

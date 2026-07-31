@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Quill</title>
+  <desc id="desc">A pale feather on a deep mineral green field.</desc>
+  <defs>
+    <linearGradient id="field" x1="70" y1="34" x2="452" y2="484" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#173C36"/>
+      <stop offset="1" stop-color="#081A18"/>
+    </linearGradient>
+    <linearGradient id="feather" x1="165" y1="392" x2="358" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B9E8D7"/>
+      <stop offset="1" stop-color="#F5F0DF"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#02100E" flood-opacity=".42"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#field)"/>
+  <circle cx="383" cy="124" r="150" fill="#28665A" opacity=".18"/>
+  <path d="M141 405C154 321 177 238 229 170C272 114 324 84 373 89C377 138 354 191 316 239C266 302 201 352 141 405Z" fill="url(#feather)" filter="url(#shadow)"/>
+  <path d="M143 405C192 335 239 274 281 215C318 164 350 120 373 89" fill="none" stroke="#0B2823" stroke-linecap="round" stroke-width="16"/>
+  <path d="M197 337L177 265M232 289L204 210M270 239L244 157M310 185L292 117M207 333L281 325M245 281L326 262M284 229L353 199M320 176L375 143" fill="none" stroke="#2A6C5E" stroke-linecap="round" stroke-width="11" opacity=".8"/>
+  <path d="M143 405L111 440" fill="none" stroke="#F5F0DF" stroke-linecap="round" stroke-width="13"/>
+  <circle cx="389" cy="385" r="19" fill="#E77C62"/>
+  <circle cx="389" cy="385" r="8" fill="#FFF8E8" opacity=".9"/>
+</svg>

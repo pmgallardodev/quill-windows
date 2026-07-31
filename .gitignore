@@ -1,0 +1,6 @@
+.vs/
+artifacts/
+models/*.bin
+Windows/**/bin/
+Windows/**/obj/
+.DS_Store
