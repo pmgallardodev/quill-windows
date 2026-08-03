@@ -100,7 +100,8 @@ internal static class TranscriptExport
             }
 
             var document = JsonSerializer.Deserialize<TranscriptDocument>(File.ReadAllText(path));
-            return document?.Segments ?? Array.Empty<TranscriptSegment>();
+            return document?.Segments?.Where(segment => segment is not null).ToArray()
+                ?? Array.Empty<TranscriptSegment>();
         }
         catch (Exception exception) when (
             exception is JsonException or IOException or UnauthorizedAccessException or NotSupportedException)
