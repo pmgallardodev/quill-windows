@@ -11,17 +11,17 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Windows-11-0078D4?logo=windows&logoColor=white&style=flat-square" alt="Windows 11" />
   <img src="https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet&logoColor=white&style=flat-square" alt=".NET 8" />
-  <img src="https://img.shields.io/badge/Whisper-large--v3-412991?style=flat-square" alt="Whisper large-v3" />
+  <img src="https://img.shields.io/badge/Whisper-large--v3--turbo-412991?style=flat-square" alt="Whisper large-v3-turbo" />
   <img src="https://img.shields.io/badge/Audio-WASAPI-0078D4?style=flat-square" alt="WASAPI" />
   <img src="https://img.shields.io/badge/Transcription-local-0F766E?style=flat-square" alt="Local transcription" />
 </p>
 
-Quill captures microphone and Windows output as independent tracks. When a session stops, it runs Spanish Whisper `large-v3` locally and produces a timestamped transcript with deterministic speaker labels: `me` for the microphone and `them` for system audio.
+Quill captures microphone and Windows output as independent tracks. When a session stops, it runs Spanish Whisper `large-v3-turbo` locally and produces a timestamped transcript with deterministic speaker labels: `me` for the microphone and `them` for system audio.
 
 ```text
 Microphone --------+--> mic.wav ----+                         +--> transcript.json
                    |                |                         |
-Windows audio -----+--> system.wav -+--> Whisper large-v3 ---+--> transcript.md
+Windows audio -----+--> system.wav -+--> large-v3-turbo ------+--> transcript.md
 ```
 
 > Quill is a local recording tool. It visibly indicates when a recording is active. Use it only where recording is lawful and all required notice or consent has been given.
@@ -53,7 +53,10 @@ The Windows application lives in `Windows/Quill.Windows`.
 | Microphone | Implemented | WASAPI capture |
 | System audio | Implemented | WASAPI loopback |
 | Two tracks and metadata | Implemented | WAV + `meta.json` |
-| Local Spanish transcription | Implemented | Whisper.net / whisper.cpp + `large-v3` |
+| Local Spanish transcription | Implemented | Whisper.net / whisper.cpp + `large-v3-turbo` |
+| Model selection | Implemented | `transcription.model` in `config.json` |
+| GPU acceleration | Implemented | `Whisper.net.Runtime.Vulkan`, falls back to CPU |
+| Silence skipping | Optional | Silero VAD, off by default |
 | Pending-job recovery | Implemented | Scan sessions without `transcript.json` |
 | Sessions window | Implemented | WPF window with live per-track progress |
 | Start at login | Implemented | `HKCU\...\Run` value |
@@ -63,7 +66,9 @@ The Windows application lives in `Windows/Quill.Windows`.
 ## Features
 
 - Separate microphone and Windows playback capture.
-- Fully local Spanish transcription using Whisper `large-v3` Q5_0.
+- Fully local Spanish transcription using Whisper `large-v3-turbo` Q5_0.
+- Any whisper.cpp model can be selected, including one outside the package.
+- Uses the GPU through Vulkan when one is present, and CPU when it is not.
 - No accounts, telemetry, API keys, or audio upload to a service.
 - System-tray start/stop control, elapsed timer, and transcription status.
 - Recoverable sessions: completed sessions without a transcript are queued on the next launch.
@@ -82,7 +87,7 @@ The Windows application lives in `Windows/Quill.Windows`.
 | Capture | `Windows/Quill.Windows/Audio/` | WASAPI microphone and output loopback capture |
 | Sessions | `Windows/Quill.Windows/Sessions/` | Metadata, transcripts, and atomic file output |
 | Transcription | `Windows/Quill.Windows/Transcription/` | Serial queue, 16 kHz conversion, and Whisper |
-| Model | `models/` | `large-v3` Q5_0 included at publish time |
+| Model | `models/` | `large-v3-turbo` Q5_0 included at publish time |
 | Packaging | `tools/` | Controlled model download and portable ZIP build |
 
 ### Session flow
@@ -111,7 +116,7 @@ The Windows application lives in `Windows/Quill.Windows`.
 +-----------+------------+
 | Local serial queue     |
 | normalize to 16 kHz    |
-| Whisper large-v3 (es)  |
+| large-v3-turbo (es)    |
 +-----------+------------+
             |
             v
@@ -126,7 +131,7 @@ System audio uses global loopback. It captures everything Windows plays through 
 
 - Windows 11 x64.
 - A CPU with AVX, AVX2, FMA, and F16C support.
-- Enough free storage for the package and recordings. The bundled model exceeds 900 MB.
+- Enough free storage for the package and recordings. The bundled model is about 547 MB.
 - A default microphone and default audio-output device.
 - Microsoft Visual C++ 2022 Redistributable when it is not already installed.
 
@@ -149,7 +154,7 @@ The published ZIP is self-contained: it does not require the .NET SDK or runtime
 4. Select `Detener grabacion` when the meeting ends.
 5. Double-click the tray icon to open the sessions window and watch transcription progress.
 
-The `large-v3` model is already in `models\` inside the ZIP. Quill does not download it during normal use.
+The `large-v3-turbo` model is already in `models\` inside the ZIP. Quill does not download it during normal use.
 
 ### Build the portable ZIP
 
@@ -171,7 +176,13 @@ Build without allowing the script to download the model:
 .\tools\Publish-Portable.ps1 -SkipModelDownload
 ```
 
-In that case, `models\ggml-large-v3-q5_0.bin` must already exist.
+In that case, `models\ggml-large-v3-turbo-q5_0.bin` must already exist.
+
+Bundle the Silero VAD model too, so `"vad": true` can be enabled later:
+
+```powershell
+.\tools\Publish-Portable.ps1 -IncludeVad
+```
 
 ## Commands
 
@@ -193,18 +204,44 @@ It does not require elevation. If you move the portable folder after enabling st
 
 ## Bundled Whisper model
 
-The portable distribution uses `ggml-large-v3-q5_0.bin`:
+The portable distribution uses `ggml-large-v3-turbo-q5_0.bin`:
 
 | Property | Value |
 | --- | --- |
 | Engine | whisper.cpp through Whisper.net |
-| Model | Whisper large-v3 |
+| Model | Whisper large-v3-turbo |
 | Quantization | Q5_0 |
+| File | `ggml-large-v3-turbo-q5_0.bin`, about 547 MB |
 | Inference language | `es` |
 | Network during transcription | None |
-| Minimum validated size | 900 MB |
 
-Q5_0 reduces the full model size without turning it into a small model. CPU transcription time depends on audio duration and hardware. Quill processes one session at a time so a new recording is not competing for the same resources.
+`large-v3-turbo` prunes the decoder from 32 layers to 4. It is several times faster than `large-v3` at a comparable accuracy for Spanish, and takes up half the disk space. Q5_0 reduces the size further without turning it into a small model.
+
+Quill processes one session at a time so a new recording is not competing for the same resources.
+
+### Using a different model
+
+Any whisper.cpp `.bin` works. A bare file name is looked up in `models\` next to the executable; an absolute path is used as-is, so a model can be tried without copying it into the package:
+
+```json
+{
+  "transcription": {
+    "model": "D:\\models\\ggml-large-v3-q5_0.bin"
+  }
+}
+```
+
+Download another one into `models\` with:
+
+```powershell
+.\tools\Get-WhisperModel.ps1 -Model ggml-large-v3-q5_0.bin
+```
+
+The sessions window records which model produced each transcript and how long it took, so two models can be compared on the same recording.
+
+### GPU acceleration
+
+The package includes both the CPU and the Vulkan runtimes. Whisper.net probes them in order and falls back to the next one when a driver is missing, so a machine without a usable GPU keeps working on CPU with no configuration. `transcribe.log` records the thread count used for each track.
 
 ## Local data
 
@@ -246,10 +283,28 @@ Example:
   "transcription": {
     "enabled": true,
     "engine": "whisper",
-    "language": "es"
+    "language": "es",
+    "model": "ggml-large-v3-turbo-q5_0.bin",
+    "threads": null,
+    "vad": false
   }
 }
 ```
+
+| Key | Default | Meaning |
+| --- | --- | --- |
+| `model` | `ggml-large-v3-turbo-q5_0.bin` | File name inside `models\`, or an absolute path. |
+| `threads` | half the logical cores | Inference threads. whisper.cpp otherwise caps at four. |
+| `vad` | `false` | Skip silence before transcribing. Needs `vad_model` present. |
+| `vad_model` | `ggml-silero-v5.1.2.bin` | Silero model, bundled by `Publish-Portable.ps1 -IncludeVad`. |
+
+### Skipping silence
+
+Because Quill records two tracks, each one is mostly silence: `mic.wav` is quiet while the other side talks, and `system.wav` is quiet while you do. A one-hour meeting therefore produces two hours of audio to transcribe, roughly half of which is silence that Whisper processes anyway.
+
+Setting `"vad": true` runs Silero voice activity detection first and transcribes only the speech ranges, remapping each timestamp back to the original timeline so the `me` and `them` labels stay aligned.
+
+It is off by default because it changes how the audio is chunked, which can change where segments break. Compare a transcript both ways on a recording you know before relying on it.
 
 The sessions directory resolves in this order:
 
@@ -257,7 +312,7 @@ The sessions directory resolves in this order:
 --out > recordings_dir in config.json > %USERPROFILE%\Recordings
 ```
 
-Whisper is intentionally fixed to Spanish in the current implementation. The `language` field documents the configuration intent and is reserved for future explicit language selection.
+The `language` field is passed straight to Whisper, so a value other than `es` will work, but the `me` and `them` labelling and the bundled model were chosen with Spanish meetings in mind.
 
 ## Project structure
 
@@ -280,6 +335,7 @@ quill-windows/
 |   |-- Transcription/
 |   |   |-- ResumePolicy.cs
 |   |   |-- TranscriptionCoordinator.cs
+|   |   |-- TranscriptionOptions.cs
 |   |   |-- TranscriptionUpdate.cs
 |   |   `-- WhisperTranscriber.cs
 |   |-- UI/
@@ -316,6 +372,7 @@ Before creating a release, on Windows 11:
 
 ```powershell
 dotnet build .\Windows\Quill.Windows\Quill.Windows.csproj -c Release -r win-x64
+dotnet test .\Windows\Quill.Windows.Tests\Quill.Windows.Tests.csproj
 .\tools\Publish-Portable.ps1
 ```
 
@@ -331,7 +388,7 @@ The output must confirm:
 - A default microphone.
 - A default output device for loopback.
 - Access to the sessions folder.
-- The bundled `large-v3` model.
+- The configured model.
 
 Required manual smoke test before distribution:
 
@@ -347,13 +404,13 @@ Required manual smoke test before distribution:
 
 ### `doctor` cannot find the model
 
-The application requires this path relative to the executable:
+By default the application requires this path relative to the executable:
 
 ```text
-models\ggml-large-v3-q5_0.bin
+models\ggml-large-v3-turbo-q5_0.bin
 ```
 
-Extract the full ZIP again. Do not run a copied `quill.exe` without its `models` folder.
+Extract the full ZIP again. Do not run a copied `quill.exe` without its `models` folder. If `config.json` sets `transcription.model`, `doctor` reports the path it actually resolved.
 
 ### `system.wav` has no audio
 
@@ -365,7 +422,14 @@ Check the default input device and microphone permissions in Windows Settings. C
 
 ### Whisper is too slow
 
-`large-v3` prioritizes accuracy and uses CPU inference by default. Close resource-intensive applications and let Quill drain the queue. The first release does not use GPU acceleration so the portable package remains predictable.
+Run `quill.exe doctor` first: it reports the model in use and how many threads will run. Then, in rough order of impact:
+
+- Confirm the bundled `large-v3-turbo` is in use and not a `large-v3` set in `config.json`.
+- Set `"vad": true` to skip the silence in each track.
+- Raise `"threads"` if the machine has cores to spare.
+- Check `transcribe.log`: Whisper.net falls back to CPU when no Vulkan driver is present, and updating the graphics driver can enable the GPU path.
+
+Quill still processes one session at a time, so a queued recording waits for the current one.
 
 ### The portable folder was moved
 

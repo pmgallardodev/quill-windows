@@ -14,6 +14,12 @@
     <SelfContained>true</SelfContained>
   </PropertyGroup>
 
+  <!-- Unico sitio donde vive el nombre del modelo. Los scripts de tools/ lo leen
+       de aqui, y ConfigStore.DefaultModelFile debe coincidir. -->
+  <PropertyGroup>
+    <QuillWhisperModel>ggml-large-v3-turbo-q5_0.bin</QuillWhisperModel>
+  </PropertyGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="Quill.Windows.Tests" />
   </ItemGroup>
@@ -22,6 +28,10 @@
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Whisper.net" Version="1.9.1" />
     <PackageReference Include="Whisper.net.Runtime" Version="1.9.1" />
+    <!-- Whisper.net prueba los runtimes en orden y cae al siguiente si el driver no
+         esta, asi que anadir Vulkan acelera las maquinas con GPU sin romper las
+         que no la tienen. -->
+    <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,15 +39,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../../models/ggml-large-v3-q5_0.bin"
-          Link="models/ggml-large-v3-q5_0.bin"
+    <None Include="../../models/$(QuillWhisperModel)"
+          Link="models/$(QuillWhisperModel)"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest"
-          Condition="Exists('../../models/ggml-large-v3-q5_0.bin')" />
+          Condition="Exists('../../models/$(QuillWhisperModel)')" />
+    <None Include="../../models/*.silero.bin;../../models/ggml-silero-*.bin"
+          Link="models/%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="RequireWhisperModel" BeforeTargets="Publish">
-    <Error Condition="!Exists('../../models/ggml-large-v3-q5_0.bin')"
-           Text="Missing models/ggml-large-v3-q5_0.bin. Run tools/Get-WhisperModel.ps1 before publishing." />
+    <Error Condition="!Exists('../../models/$(QuillWhisperModel)')"
+           Text="Missing models/$(QuillWhisperModel). Run tools/Get-WhisperModel.ps1 before publishing." />
+  </Target>
+
+  <Target Name="PrintWhisperModel">
+    <Message Importance="High" Text="$(QuillWhisperModel)" />
   </Target>
 </Project>

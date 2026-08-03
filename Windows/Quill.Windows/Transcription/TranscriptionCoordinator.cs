@@ -14,6 +14,7 @@ internal sealed class TranscriptionCoordinator : IDisposable
     private readonly CancellationTokenSource _shutdown = new();
     private readonly Task _worker;
     private WhisperTranscriber? _transcriber;
+    private TranscriptionOptions? _options;
 
     public TranscriptionCoordinator(string recordingsRoot)
     {
@@ -144,7 +145,8 @@ internal sealed class TranscriptionCoordinator : IDisposable
         CancellationToken cancellationToken)
     {
         var metadata = SessionMetadata.Read(sessionDirectory);
-        var transcriber = _transcriber ??= new WhisperTranscriber(ConfigStore.ModelPath);
+        var options = _options ??= TranscriptionOptions.FromConfig();
+        var transcriber = _transcriber ??= new WhisperTranscriber(options);
         var merged = new List<TranscriptSegment>();
 
         foreach (var (name, speaker) in new[] { ("mic", "me"), ("system", "them") })
@@ -173,7 +175,8 @@ internal sealed class TranscriptionCoordinator : IDisposable
 
             try
             {
-                Log(sessionDirectory, $"transcribing {fileName} with Whisper large-v3");
+                Log(sessionDirectory, $"transcribing {fileName} with {options.ModelName} on {options.Threads} threads" +
+                    (options.VadModelPath is null ? string.Empty : " (vad)"));
                 var offset = metadata.StartOffsetMs.GetValueOrDefault(name);
                 merged.AddRange(await transcriber.TranscribeAsync(audioPath, speaker, offset, reporter, cancellationToken));
                 tracks[index] = new TrackProgress(name, 1d, true);
@@ -189,7 +192,7 @@ internal sealed class TranscriptionCoordinator : IDisposable
         new TranscriptDocument
         {
             Engine = "whisper.cpp",
-            Model = "large-v3-q5_0",
+            Model = options.ModelName,
             CreatedAt = DateTimeOffset.UtcNow,
             Segments = merged,
         }.Write(sessionDirectory);
@@ -208,7 +211,7 @@ internal sealed class TranscriptionCoordinator : IDisposable
             {
                 State = state,
                 UpdatedAt = DateTimeOffset.UtcNow,
-                Model = Path.GetFileNameWithoutExtension(ConfigStore.ModelPath),
+                Model = CurrentModelName(),
                 ElapsedSeconds = elapsedSeconds,
                 Error = error,
             }.Write(sessionDirectory);
@@ -216,6 +219,22 @@ internal sealed class TranscriptionCoordinator : IDisposable
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             Log(sessionDirectory, $"could not write status.json: {exception.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Se lee del config y no de las opciones ya resueltas porque el estado se escribe
+    /// tambien al encolar, antes de que exista un transcriptor.
+    /// </summary>
+    private static string? CurrentModelName()
+    {
+        try
+        {
+            return Path.GetFileNameWithoutExtension(ConfigStore.Load().Transcription.Model);
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
         }
     }
 
