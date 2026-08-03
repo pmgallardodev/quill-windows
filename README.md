@@ -63,6 +63,9 @@ The Windows application lives in `Windows/Quill.Windows`.
 | Voice-quality recording | Implemented | 16 kHz mono WAV, about 11x smaller |
 | Pause, markers, device warning | Implemented | Tray menu and default-device watch |
 | Titles, delete, export, search | Implemented | Sessions window |
+| Participation split | Implemented | Computed from `transcript.json` |
+| Meeting detection | Implemented | WASAPI capture sessions |
+| Global hotkeys | Implemented | `Ctrl+Shift+R` and `Ctrl+Shift+M` |
 | Sessions window | Implemented | WPF window with live per-track progress |
 | Start at login | Implemented | `HKCU\...\Run` value |
 | Portable package | Implemented | Self-contained `win-x64` ZIP |
@@ -81,6 +84,8 @@ The Windows application lives in `Windows/Quill.Windows`.
 - Recordings are stored at the resolution Whisper uses, not the device's.
 - Pause without ending the session, and mark moments while they happen.
 - Rename, read, search, export, and delete sessions from one window.
+- Shows how much each side spoke, and warns when a track captured nothing.
+- Notices when a meeting app opens the microphone, so a recording is not forgotten.
 - Self-contained Windows package: end users do not install .NET or download a model.
 - Optional per-user startup with no administrator privileges.
 
@@ -252,6 +257,8 @@ Double-click the tray icon, or select `Ver sesiones` from its menu, to see every
 
 Each session can be renamed, so the list shows `Reunion con Contoso` instead of `2026.08.03-1420`. The right-hand pane reads the transcript inline, with `me` and `them` in different colours and any markers shown in place. The box at the top searches across every session at once, ignoring case and accents.
 
+Above the transcript, a bar shows how the talking was split between `me` and `them`, measured over speech rather than over the session length, since the silences belong to neither. If one track produced no speech at all — a muted microphone, or loopback on the wrong device — it says so there, which is the only place that failure ever becomes visible.
+
 Buttons per session: `Renombrar`, `Abrir carpeta`, `Copiar` (to the clipboard), `SRT` and `VTT` (write `transcript.srt` / `transcript.vtt` next to the recording), `Reintentar` and `Log` for failures, and `Borrar`, which asks for confirmation and is refused while a session is recording or transcribing.
 
 Closing the window hides it; the tray icon keeps running. Progress updates come from the running transcription, so the window costs nothing while it is closed.
@@ -269,6 +276,27 @@ A session marked `error` is not retried automatically on the next launch. Earlie
 | `Marcar momento` | Records the current timestamp. Markers appear in place in the reader. |
 
 The tray icon shows a red dot while recording, so an active session is visible without hovering over it.
+
+### Keyboard shortcuts
+
+| Shortcut | Action |
+| --- | --- |
+| `Ctrl+Shift+R` | Start or stop recording. |
+| `Ctrl+Shift+M` | Mark the current moment. |
+
+They work without Quill having focus, which is the point: during a call you cannot go looking for the tray icon. If another application already owns a combination, registration fails and that shortcut simply does not exist — the tray menu still does the same thing. Set `"global_hotkeys": false` to skip them entirely.
+
+### Meeting detection
+
+The most expensive failure of any recorder is forgetting to press record. Quill checks every five seconds whether a known meeting application holds the default microphone, using the WASAPI capture sessions — it does not inspect windows or titles, only which process has the microphone open.
+
+| `recording.meeting_detection` | Behaviour |
+| --- | --- |
+| `ask` (default) | Shows a balloon once per call suggesting `Ctrl+Shift+R`. |
+| `auto` | Starts recording by itself. |
+| `off` | No detection at all. |
+
+Detected applications: Teams, Zoom, Webex, Slack, Discord, and calls in Chrome, Edge or Firefox. It never fires while a recording is already running, and it offers each application only once per call.
 
 If the default microphone or output device changes mid-meeting — plugging in headphones, for instance — Quill warns once with a balloon. WASAPI keeps capturing from the device it started with, so `system.wav` can go silent with nothing else to indicate it. The recording is not stopped: ending a meeting automatically would be worse than a track that may be incomplete.
 
@@ -354,7 +382,9 @@ Example:
   "recordings_dir": "D:\\Recordings",
   "recording": {
     "quality": "voice",
-    "delete_audio_after_transcription": false
+    "delete_audio_after_transcription": false,
+    "meeting_detection": "ask",
+    "global_hotkeys": true
   },
   "transcription": {
     "enabled": true,
@@ -372,6 +402,8 @@ Example:
 | --- | --- | --- |
 | `recording.quality` | `voice` | `voice` writes 16 kHz mono 16-bit. `native` keeps the device format, about 11x larger. |
 | `recording.delete_audio_after_transcription` | `false` | Removes the WAV tracks once a transcript exists. Never runs on a failed or empty transcription. |
+| `recording.meeting_detection` | `ask` | `ask`, `auto` or `off`. What to do when a meeting application opens the microphone. |
+| `recording.global_hotkeys` | `true` | Registers `Ctrl+Shift+R` and `Ctrl+Shift+M` system-wide. |
 | `model` | `ggml-large-v3-turbo-q5_0.bin` | File name inside `models\`, or an absolute path. |
 | `threads` | half the logical cores | Inference threads. whisper.cpp otherwise caps at four. |
 | `vad` | `false` | Skip silence before transcribing. Needs `vad_model` present. |

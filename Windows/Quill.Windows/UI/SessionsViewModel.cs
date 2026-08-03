@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Quill.Windows.Sessions;
@@ -24,6 +25,8 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
     private readonly ConcurrentDictionary<string, TranscriptionUpdate> _inFlight = new(StringComparer.OrdinalIgnoreCase);
 
     private string? _activeSessionDirectory;
+    private string _participationText = string.Empty;
+    private double _microphoneShare;
     private SessionRowViewModel? _selectedSession;
     private bool _restoringSelection;
     private string? _readerDirectory;
@@ -41,7 +44,7 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
         _transcription = transcription;
         _dispatcher = dispatcher;
 
-        RetryCommand = new RelayCommand(directory => _transcription.Retry((string)directory!));
+        RetryCommand = new RelayCommand(directory => Retry((string)directory!));
         OpenFolderCommand = new RelayCommand(directory => Open((string)directory!));
         OpenTranscriptCommand = new RelayCommand(directory => Open(Path.Combine((string)directory!, "transcript.md")));
         OpenLogCommand = new RelayCommand(directory => Open(Path.Combine((string)directory!, "transcribe.log")));
@@ -147,6 +150,46 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
 
     public bool HasReaderStatus => ReaderStatus.Length > 0;
 
+    /// <summary>
+    /// Reparto del habla de la sesion seleccionada. Se calcula sobre los segmentos
+    /// que el lector ya trajo del disco: no cuesta una segunda lectura.
+    /// </summary>
+    public string ParticipationText
+    {
+        get => _participationText;
+        private set
+        {
+            if (_participationText == value)
+            {
+                return;
+            }
+
+            _participationText = value;
+            Raise();
+            Raise(nameof(HasParticipation));
+        }
+    }
+
+    public bool HasParticipation => _participationText.Length > 0;
+
+    public double MicrophoneShare
+    {
+        get => _microphoneShare;
+        private set
+        {
+            if (Math.Abs(_microphoneShare - value) < 0.0001d)
+            {
+                return;
+            }
+
+            _microphoneShare = value;
+            Raise();
+            Raise(nameof(SystemShare));
+        }
+    }
+
+    public double SystemShare => 100d - _microphoneShare;
+
     public string SearchQuery
     {
         get => _searchQuery;
@@ -240,7 +283,7 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
             _restoringSelection = false;
         }
 
-        LoadReader(SelectedSession);
+        LoadReader(SelectedSession, force: true);
         Drain();
     }
 
@@ -255,6 +298,12 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
 
     private void OnUpdate(TranscriptionUpdate update) =>
         _inFlight[update.SessionDirectory] = update;
+
+    private void Retry(string directory)
+    {
+        _transcription.Retry(directory);
+        Refresh();
+    }
 
     private void Drain()
     {
@@ -297,6 +346,7 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
         {
             ReaderTitle = string.Empty;
             ReaderStatus = "Selecciona una sesion para leerla aqui.";
+            ParticipationText = string.Empty;
             return;
         }
 
@@ -305,12 +355,27 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
         if (!row.IsDone)
         {
             ReaderStatus = "Esta sesion todavia no tiene transcript.";
+            ParticipationText = string.Empty;
             return;
         }
 
         ReaderStatus = "Cargando...";
         var path = row.Directory;
-        var lines = await Task.Run(() => BuildLines(path)).ConfigureAwait(true);
+        IReadOnlyList<TranscriptLineViewModel> lines;
+        try
+        {
+            lines = await Task.Run(() => BuildLines(path)).ConfigureAwait(true);
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException or JsonException or InvalidDataException)
+        {
+            if (generation == _readerGeneration)
+            {
+                ReaderStatus = "No se pudo leer el transcript de esta sesion.";
+            }
+
+            return;
+        }
 
         // Otra seleccion gano la carrera mientras se leia el disco.
         if (generation != _readerGeneration)
@@ -326,6 +391,35 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
         ReaderStatus = ReaderLines.Count == 0
             ? "No se pudo leer el transcript de esta sesion."
             : string.Empty;
+
+        UpdateParticipation(path);
+    }
+
+    private void UpdateParticipation(string sessionDirectory)
+    {
+        var segments = TranscriptExport.TryReadSegments(sessionDirectory);
+        var summary = SessionInsights.Summarize(segments);
+        if (!summary.HasSpeech)
+        {
+            ParticipationText = string.Empty;
+            return;
+        }
+
+        MicrophoneShare = summary.MicrophoneShare * 100d;
+
+        var silent = SessionInsights.SilentTracks(segments);
+        var warning = silent.Count switch
+        {
+            0 => string.Empty,
+            _ when silent.Contains(SessionInsights.MicrophoneSpeaker) =>
+                "  ·  aviso: el microfono no capto nada",
+            _ => "  ·  aviso: el audio del sistema no capto nada",
+        };
+
+        ParticipationText =
+            $"me {summary.MicrophoneShare:P0} ({TranscriptExport.Clock((long)summary.Microphone.TotalMilliseconds)})" +
+            $"   ·   them {summary.SystemShare:P0} ({TranscriptExport.Clock((long)summary.System.TotalMilliseconds)})" +
+            warning;
     }
 
     private static IReadOnlyList<TranscriptLineViewModel> BuildLines(string sessionDirectory)

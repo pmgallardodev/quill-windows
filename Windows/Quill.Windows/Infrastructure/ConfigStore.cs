@@ -41,8 +41,14 @@ internal static class ConfigStore
 
         try
         {
-            return JsonSerializer.Deserialize<QuillConfig>(File.ReadAllText(ConfigPath), JsonOptions)
+            var config = JsonSerializer.Deserialize<QuillConfig>(File.ReadAllText(ConfigPath), JsonOptions)
                 ?? new QuillConfig();
+            if (config.Recording is null || config.Transcription is null)
+            {
+                throw new InvalidOperationException($"configuracion invalida: {ConfigPath}");
+            }
+
+            return config;
         }
         catch (JsonException exception)
         {
@@ -89,6 +95,10 @@ internal sealed class RecordingConfig
     public const string VoiceQuality = "voice";
     public const string NativeQuality = "native";
 
+    public const string OffDetection = "off";
+    public const string AskDetection = "ask";
+    public const string AutoDetection = "auto";
+
     /// <summary>
     /// "voice" graba a 16 kHz mono 16 bits, que es exactamente lo que consume
     /// Whisper y ocupa unas once veces menos que el formato del dispositivo.
@@ -100,6 +110,23 @@ internal sealed class RecordingConfig
     /// <summary>Borra mic.wav y system.wav cuando el transcript queda escrito.</summary>
     [JsonPropertyName("delete_audio_after_transcription")]
     public bool DeleteAudioAfterTranscription { get; init; }
+
+    /// <summary>
+    /// Que hacer cuando una aplicacion de reuniones abre el microfono: "off" no
+    /// mira nada, "ask" avisa con un globo y "auto" empieza a grabar solo. Por
+    /// defecto "ask": arrancar una grabacion sin permiso seria pasarse.
+    /// </summary>
+    [JsonPropertyName("meeting_detection")]
+    public string MeetingDetection { get; init; } = AskDetection;
+
+    /// <summary>Ctrl+Shift+R para grabar y Ctrl+Shift+M para marcar, sin foco.</summary>
+    [JsonPropertyName("global_hotkeys")]
+    public bool GlobalHotkeys { get; init; } = true;
+
+    public bool DetectsMeetings => !string.Equals(MeetingDetection, OffDetection, StringComparison.OrdinalIgnoreCase);
+
+    public bool StartsMeetingsAutomatically =>
+        string.Equals(MeetingDetection, AutoDetection, StringComparison.OrdinalIgnoreCase);
 
     public bool RecordsVoiceQuality =>
         !string.Equals(Quality, NativeQuality, StringComparison.OrdinalIgnoreCase);

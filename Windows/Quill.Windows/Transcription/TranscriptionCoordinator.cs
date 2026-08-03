@@ -36,14 +36,21 @@ internal sealed class TranscriptionCoordinator : IDisposable
             return;
         }
 
-        foreach (var directory in Directory.EnumerateDirectories(_recordingsRoot).OrderBy(Path.GetFileName, StringComparer.Ordinal))
+        try
         {
-            var hasMetadata = File.Exists(Path.Combine(directory, "meta.json"));
-            var hasTranscript = File.Exists(Path.Combine(directory, "transcript.json"));
-            if (ResumePolicy.ShouldEnqueue(hasMetadata, hasTranscript, SessionStatus.TryRead(directory)))
+            foreach (var directory in Directory.EnumerateDirectories(_recordingsRoot).OrderBy(Path.GetFileName, StringComparer.Ordinal))
             {
-                Enqueue(directory);
+                var hasMetadata = File.Exists(Path.Combine(directory, "meta.json"));
+                var hasTranscript = File.Exists(Path.Combine(directory, "transcript.json"));
+                if (ResumePolicy.ShouldEnqueue(hasMetadata, hasTranscript, SessionStatus.TryRead(directory)))
+                {
+                    Enqueue(directory);
+                }
             }
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // A locked or deleted session must not prevent the application from starting.
         }
     }
 

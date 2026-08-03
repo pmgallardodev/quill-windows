@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Windows.Threading;
 using Quill.Windows.Audio;
+using Quill.Windows.Infrastructure;
 using Quill.Windows.Sessions;
 using Quill.Windows.Transcription;
 using Forms = System.Windows.Forms;
@@ -37,7 +38,12 @@ internal sealed class TrayController : IDisposable
     private SessionsWindow? _sessionsWindow;
     private RecordingSession? _session;
     private DateTimeOffset? _recordingStartedAt;
+    private readonly GlobalHotkeys? _hotkeys;
+    private readonly bool _detectsMeetings;
+    private readonly bool _startsMeetingsAutomatically;
     private int _deviceCheckTicks;
+    private int _meetingCheckTicks;
+    private string? _meetingOffered;
     private bool _deviceChangeReported;
     private bool _disposed;
 
@@ -79,6 +85,23 @@ internal sealed class TrayController : IDisposable
         _transcription = new TranscriptionCoordinator(recordingsRoot);
         _transcription.StateChanged += update => _application.Dispatcher.BeginInvoke(() => ShowTranscriptionStatus(update));
         _sessionsViewModel = new SessionsViewModel(recordingsRoot, _transcription, _application.Dispatcher);
+        var recording = ConfigStore.Load().Recording;
+        _detectsMeetings = recording.DetectsMeetings;
+        _startsMeetingsAutomatically = recording.StartsMeetingsAutomatically;
+        if (recording.GlobalHotkeys)
+        {
+            _hotkeys = GlobalHotkeys.TryCreate(
+                () => _application.Dispatcher.BeginInvoke(() => _ = ToggleAsync()),
+                () => _application.Dispatcher.BeginInvoke(AddMarker));
+        }
+
+        // El ticker tiene que correr tambien sin grabacion: detectar una reunion
+        // solo sirve cuando aun no le has dado a grabar.
+        if (_detectsMeetings)
+        {
+            _ticker.Start();
+        }
+
         _transcription.ResumePending();
         _application.Exit += (_, _) => Dispose();
     }
@@ -113,6 +136,7 @@ internal sealed class TrayController : IDisposable
             _sessionsWindow = null;
         }
 
+        _hotkeys?.Dispose();
         _sessionsViewModel.Dispose();
         _transcription.Dispose();
         _icon.Visible = false;
@@ -155,6 +179,31 @@ internal sealed class TrayController : IDisposable
         }
         catch (Exception exception)
         {
+            var failedSession = _session;
+            _session = null;
+            _recordingStartedAt = null;
+            _ticker.Stop();
+            _pause.Visible = false;
+            _marker.Visible = false;
+            ApplyIcon(recording: false);
+            try
+            {
+                _sessionsViewModel.SetActiveSession(null);
+            }
+            catch
+            {
+                // The failed start is already being reported below.
+            }
+
+            try
+            {
+                failedSession?.Dispose();
+            }
+            catch
+            {
+                // Preserve the original startup error for the user.
+            }
+
             _icon.ShowBalloonTip(6_000, "quill - error", exception.Message, Forms.ToolTipIcon.Error);
         }
     }
@@ -168,7 +217,11 @@ internal sealed class TrayController : IDisposable
         }
 
         _session = null;
-        _ticker.Stop();
+        if (!_detectsMeetings)
+        {
+            _ticker.Stop();
+        }
+
         _recordingStartedAt = null;
         try
         {
@@ -294,6 +347,55 @@ internal sealed class TrayController : IDisposable
     {
         UpdateElapsedTime();
         WatchAudioDevices();
+        WatchForMeetings();
+    }
+
+    /// <summary>
+    /// El fallo mas caro de un grabador es olvidarse de darle a grabar. Se comprueba
+    /// cada cinco segundos y solo se ofrece una vez por aplicacion, para no convertir
+    /// una llamada larga en una fila de globos.
+    /// </summary>
+    private void WatchForMeetings()
+    {
+        if (!_detectsMeetings || ++_meetingCheckTicks < 5)
+        {
+            return;
+        }
+
+        _meetingCheckTicks = 0;
+        var application = MeetingDetector.DetectActiveMeeting();
+        if (application is null)
+        {
+            // Al colgar se olvida, de modo que la siguiente reunion vuelve a avisar.
+            _meetingOffered = null;
+            return;
+        }
+
+        if (_session is not null || string.Equals(application, _meetingOffered, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        _meetingOffered = application;
+        if (_startsMeetingsAutomatically)
+        {
+            StartRecording();
+            if (_session is not null)
+            {
+                _icon.ShowBalloonTip(4_000, "quill", $"Grabacion iniciada: {application} esta usando el microfono.", Forms.ToolTipIcon.Info);
+            }
+
+            return;
+        }
+
+        var shortcut = _hotkeys?.ToggleRegistered == true
+            ? "Ctrl+Shift+R"
+            : "el menu de la bandeja";
+        _icon.ShowBalloonTip(
+            6_000,
+            "quill",
+            $"{application} esta usando el microfono. Usa {shortcut} para grabar.",
+            Forms.ToolTipIcon.Info);
     }
 
     /// <summary>

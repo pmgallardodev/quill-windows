@@ -112,6 +112,7 @@
 
                                     <WrapPanel Margin="22,8,0,0">
                                         <Button Content="Renombrar" Style="{StaticResource RowButton}"
+                                                IsEnabled="{Binding CanRename}"
                                                 Command="{Binding DataContext.RenameCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                 CommandParameter="{Binding}" />
                                         <Button Content="Abrir carpeta" Style="{StaticResource RowButton}"
@@ -192,6 +193,19 @@
                     <TextBlock DockPanel.Dock="Top" Text="{Binding ReaderStatus}" Style="{StaticResource Secondary}"
                                TextWrapping="Wrap"
                                Visibility="{Binding HasReaderStatus, Converter={StaticResource BoolToVisibility}}" />
+
+                    <!-- Reparto del habla: sale de los mismos segmentos que el lector -->
+                    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10"
+                                Visibility="{Binding HasParticipation, Converter={StaticResource BoolToVisibility}}">
+                        <!-- Un ProgressBar da la barra partida sin necesidad de un
+                             converter a GridLength: relleno es "me", fondo es "them". -->
+                        <ProgressBar Height="8" Margin="0,0,0,4" Maximum="100"
+                                     Value="{Binding MicrophoneShare, Mode=OneWay}"
+                                     Foreground="#FF0F766E" Background="#FF7A5AF8"
+                                     BorderThickness="0" />
+                        <TextBlock Text="{Binding ParticipationText}" Style="{StaticResource Secondary}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding ReaderLines}">
                             <ItemsControl.ItemTemplate>

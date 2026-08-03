@@ -40,8 +40,29 @@ internal static class SessionCatalog
             return Array.Empty<SessionSnapshot>();
         }
 
-        return Directory.EnumerateDirectories(recordingsRoot)
-            .Select(directory => Describe(directory, activeSessionDirectory))
+        var snapshots = new List<SessionSnapshot>();
+        try
+        {
+            foreach (var directory in Directory.EnumerateDirectories(recordingsRoot))
+            {
+                try
+                {
+                    snapshots.Add(Describe(directory, activeSessionDirectory));
+                }
+                catch (Exception exception) when (
+                    exception is IOException or UnauthorizedAccessException)
+                {
+                    // A session deleted or locked while scanning should not take
+                    // down the sessions window.
+                }
+            }
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // Return the sessions already read when the root changes mid-enumeration.
+        }
+
+        return snapshots
             .OrderByDescending(snapshot => snapshot.Name, StringComparer.Ordinal)
             .ToList();
     }

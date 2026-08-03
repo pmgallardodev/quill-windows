@@ -93,9 +93,11 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
     public bool IsDone => _state == SessionState.Done;
 
     /// <summary>Grabando o transcribiendo: hay archivos abiertos, borrar destruiria trabajo en curso.</summary>
-    public bool IsBusy => IsRecording || IsRunning;
+    public bool IsBusy => IsRecording || _state == SessionState.Queued || IsRunning;
 
     public bool CanDelete => !IsBusy;
+
+    public bool CanRename => !IsRecording;
 
     public bool HasError => IsFailed && !string.IsNullOrWhiteSpace(_error);
 
@@ -198,6 +200,15 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
         _error = update.Error;
         _elapsed = update.Elapsed;
 
+        if ((update.State is SessionState.Queued or SessionState.Running) && update.Tracks.Count == 0)
+        {
+            // A retry starts from zero; do not let the previous failed run
+            // contaminate the ETA or the first progress frame.
+            _micProgress = 0d;
+            _systemProgress = 0d;
+            _transcriptionElapsed = null;
+        }
+
         foreach (var track in update.Tracks)
         {
             if (track.Track == "mic")
@@ -225,7 +236,7 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
         foreach (var property in new[]
                  {
                      nameof(StateText), nameof(StateGlyph), nameof(IsRecording), nameof(IsRunning),
-                     nameof(IsFailed), nameof(IsDone), nameof(IsBusy), nameof(CanDelete),
+                      nameof(IsFailed), nameof(IsDone), nameof(IsBusy), nameof(CanDelete), nameof(CanRename),
                      nameof(HasError), nameof(ErrorText), nameof(MicProgress),
                      nameof(SystemProgress), nameof(EtaText), nameof(ElapsedText),
                  })

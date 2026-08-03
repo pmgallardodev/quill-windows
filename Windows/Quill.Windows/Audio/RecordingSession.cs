@@ -39,11 +39,38 @@ internal sealed class RecordingSession : IDisposable
         _speakerDevice = speakers;
         MicrophoneDeviceId = microphone.ID;
         SystemDeviceId = speakers.ID;
-        _microphone = new WasapiCapture(microphone);
-        _systemAudio = new WasapiLoopbackCapture(speakers);
-        var voiceQuality = ConfigStore.Load().Recording.RecordsVoiceQuality;
-        _microphoneWriter = new TrackWriter(_microphone, Path.Combine(directory, "mic.wav"), voiceQuality);
-        _systemAudioWriter = new TrackWriter(_systemAudio, Path.Combine(directory, "system.wav"), voiceQuality);
+
+        WasapiCapture? microphoneCapture = null;
+        WasapiLoopbackCapture? systemAudioCapture = null;
+        TrackWriter? microphoneWriter = null;
+        TrackWriter? systemAudioWriter = null;
+        try
+        {
+            var voiceQuality = ConfigStore.Load().Recording.RecordsVoiceQuality;
+            microphoneCapture = new WasapiCapture(microphone);
+            systemAudioCapture = new WasapiLoopbackCapture(speakers);
+            microphoneWriter = new TrackWriter(
+                microphoneCapture,
+                Path.Combine(directory, "mic.wav"),
+                voiceQuality);
+            systemAudioWriter = new TrackWriter(
+                systemAudioCapture,
+                Path.Combine(directory, "system.wav"),
+                voiceQuality);
+        }
+        catch
+        {
+            DisposeQuietly(systemAudioWriter);
+            DisposeQuietly(microphoneWriter);
+            DisposeQuietly(systemAudioCapture);
+            DisposeQuietly(microphoneCapture);
+            throw;
+        }
+
+        _microphone = microphoneCapture;
+        _systemAudio = systemAudioCapture;
+        _microphoneWriter = microphoneWriter;
+        _systemAudioWriter = systemAudioWriter;
     }
 
     public string Directory { get; }
@@ -342,6 +369,18 @@ internal sealed class RecordingSession : IDisposable
         return System.IO.Directory.CreateDirectory(candidate).FullName;
     }
 
+    private static void DisposeQuietly(IDisposable? disposable)
+    {
+        try
+        {
+            disposable?.Dispose();
+        }
+        catch
+        {
+            // Preserve the startup error; cleanup is best effort here.
+        }
+    }
+
     /// <summary>
     /// Escribe una pista. Por defecto convierte a 16 kHz mono 16 bits, que es
     /// exactamente lo que consume Whisper: el formato nativo de WASAPI suele ser
@@ -376,6 +415,10 @@ internal sealed class RecordingSession : IDisposable
                 {
                     BufferDuration = TimeSpan.FromSeconds(10),
                     DiscardOnBufferOverflow = true,
+                    // The default pads every read with silence. The converter is
+                    // drained from the capture callback, so padding would stretch
+                    // each small callback into a full buffer of mostly-zero audio.
+                    ReadFully = false,
                 };
 
                 ISampleProvider source = _pending.ToSampleProvider();

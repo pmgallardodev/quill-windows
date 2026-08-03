@@ -32,8 +32,14 @@ internal sealed class SessionMetadata
     public static SessionMetadata Read(string sessionDirectory)
     {
         var path = Path.Combine(sessionDirectory, "meta.json");
-        return JsonSerializer.Deserialize<SessionMetadata>(File.ReadAllText(path))
+        var metadata = JsonSerializer.Deserialize<SessionMetadata>(File.ReadAllText(path))
             ?? throw new InvalidDataException($"no se pudo leer {path}");
+        if (metadata.Files is null || metadata.StartOffsetMs is null || metadata.Markers is null)
+        {
+            throw new InvalidDataException($"metadatos incompletos: {path}");
+        }
+
+        return metadata;
     }
 
     public static SessionMetadata? TryRead(string sessionDirectory)

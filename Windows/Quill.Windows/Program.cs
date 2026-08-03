@@ -47,6 +47,7 @@ internal static class CommandLine
 
         string? outputDirectory = null;
         var uninstall = false;
+        var launchAtLogin = false;
         for (var index = 1; index < args.Length; index++)
         {
             switch (args[index])
@@ -55,6 +56,7 @@ internal static class CommandLine
                     outputDirectory = args[++index];
                     break;
                 case "--launch-at-login":
+                    launchAtLogin = true;
                     break;
                 case "--uninstall":
                     uninstall = true;
@@ -67,6 +69,23 @@ internal static class CommandLine
         if (name is not ("run" or "doctor" or "install"))
         {
             throw new ArgumentException($"unknown command: {name}");
+        }
+
+        if (name == "install")
+        {
+            if (outputDirectory is not null)
+            {
+                throw new ArgumentException("--out solo se puede usar con run o doctor");
+            }
+
+            if (launchAtLogin == uninstall)
+            {
+                throw new ArgumentException("usa --launch-at-login o --uninstall, pero no ambos");
+            }
+        }
+        else if (launchAtLogin || uninstall)
+        {
+            throw new ArgumentException("esta opcion solo se puede usar con install");
         }
 
         return new Command(name, outputDirectory, uninstall);
