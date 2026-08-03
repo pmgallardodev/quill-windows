@@ -34,6 +34,7 @@ Windows audio -----+--> system.wav -+--> large-v3-turbo ------+--> transcript.md
 - [Requirements](#requirements)
 - [Quickstart](#quickstart)
 - [Commands](#commands)
+- [Sessions window](#sessions-window)
 - [Bundled Whisper model](#bundled-whisper-model)
 - [Local data](#local-data)
 - [Configuration](#configuration)
@@ -83,10 +84,11 @@ The Windows application lives in `Windows/Quill.Windows`.
 | Component | Location | Role |
 | --- | --- | --- |
 | Application and CLI | `Windows/Quill.Windows/Program.cs` | `run`, `doctor`, and start-at-login commands |
-| Tray UI | `Windows/Quill.Windows/UI/` | Visible state, recording controls, and notifications |
+| Tray UI | `Windows/Quill.Windows/UI/` | Tray state and controls, plus the sessions window |
 | Capture | `Windows/Quill.Windows/Audio/` | WASAPI microphone and output loopback capture |
-| Sessions | `Windows/Quill.Windows/Sessions/` | Metadata, transcripts, and atomic file output |
+| Sessions | `Windows/Quill.Windows/Sessions/` | Metadata, status, transcripts, and atomic file output |
 | Transcription | `Windows/Quill.Windows/Transcription/` | Serial queue, 16 kHz conversion, and Whisper |
+| Tests | `Windows/Quill.Windows.Tests/` | State derivation, resume policy, and audio normalization |
 | Model | `models/` | `large-v3-turbo` Q5_0 included at publish time |
 | Packaging | `tools/` | Controlled model download and portable ZIP build |
 
@@ -116,9 +118,13 @@ The Windows application lives in `Windows/Quill.Windows`.
 +-----------+------------+
 | Local serial queue     |
 | normalize to 16 kHz    |
+| optional silence skip  |
 | large-v3-turbo (es)    |
 +-----------+------------+
             |
+            +--> status.json ------> sessions window
+            |    queued/running/         (live progress)
+            |    done/failed
             v
  transcript.json + transcript.md + transcribe.log
 ```
@@ -201,6 +207,47 @@ HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Quill
 ```
 
 It does not require elevation. If you move the portable folder after enabling start at login, run the command again from its new location.
+
+## Sessions window
+
+Double-click the tray icon, or select `Ver sesiones` from its menu, to see every recording and what Quill is doing with it:
+
+```text
++-- Sesiones de quill ---------------------+
+|                                          |
+|  2026.08.03-1420        * GRABANDO       |
+|                                          |
+|  2026.08.03-1105        > transcribiendo |
+|    mic     ################--------  78% |
+|    system  ######----------------    31% |
+|    ~2:14 restantes                       |
+|                                          |
+|  2026.08.02-0930        . en cola        |
+|                                          |
+|  2026.08.01-1600        + listo          |
+|    transcrito en 4:05 - large-v3-turbo   |
+|              [Abrir carpeta] [Ver texto] |
+|                                          |
+|  2026.07.31-1130        x error          |
+|    no se encontro el modelo Whisper      |
+|    [Abrir carpeta] [Reintentar] [Log]    |
++------------------------------------------+
+```
+
+| State | Meaning |
+| --- | --- |
+| `GRABANDO` | The recording this process has open right now. |
+| `en cola` | Waiting for the serial transcription queue. |
+| `transcribiendo` | Live per-track progress and an estimate that corrects itself as it goes. |
+| `listo` | Transcript written, with the time it took and the model that produced it. |
+| `error` | Transcription failed. The reason is kept, and `Reintentar` queues it again. |
+| `incompleta` | Session folder with no `meta.json`: the process was killed before it could close the recording. Not queued. |
+
+Closing the window hides it; the tray icon keeps running. Progress updates come from the running transcription, so the window costs nothing while it is closed.
+
+**Note for existing users:** double-clicking the tray icon used to start and stop the recording. It now opens this window instead, so an accidental double-click cannot cut a meeting short. Recording is still on the right-click menu.
+
+A session marked `error` is not retried automatically on the next launch. Earlier versions re-queued every session without a `transcript.json`, so a permanently broken one was retried on every start with no way to see it.
 
 ## Bundled Whisper model
 
