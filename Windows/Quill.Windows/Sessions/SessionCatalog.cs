@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace Quill.Windows.Sessions;
 
 internal enum SessionState
@@ -19,6 +17,8 @@ internal enum SessionState
 internal sealed record SessionSnapshot(
     string Directory,
     string Name,
+    // Nombre puesto por el usuario en meta.json. Null si nunca la renombro.
+    string? Title,
     DateTimeOffset Started,
     TimeSpan Duration,
     SessionState State,
@@ -46,9 +46,32 @@ internal static class SessionCatalog
             .ToList();
     }
 
+    /// <summary>
+    /// Borra la carpeta entera. Devuelve el motivo del fallo, o null si salio bien:
+    /// el llamante tiene que poder decir por que no se pudo borrar, y una excepcion
+    /// aqui solo significa que el WAV sigue abierto o que falta permiso.
+    /// </summary>
+    public static string? TryDelete(string sessionDirectory)
+    {
+        try
+        {
+            if (Directory.Exists(sessionDirectory))
+            {
+                Directory.Delete(sessionDirectory, recursive: true);
+            }
+
+            return null;
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException)
+        {
+            return exception.Message;
+        }
+    }
+
     private static SessionSnapshot Describe(string directory, string? activeSessionDirectory)
     {
-        var metadata = TryReadMetadata(directory);
+        var metadata = SessionMetadata.TryRead(directory);
         var status = SessionStatus.TryRead(directory);
         var hasTranscript = File.Exists(Path.Combine(directory, "transcript.json"));
         var state = DetermineState(directory, activeSessionDirectory, metadata is not null, hasTranscript, status);
@@ -56,6 +79,7 @@ internal static class SessionCatalog
         return new SessionSnapshot(
             directory,
             Path.GetFileName(directory),
+            string.IsNullOrWhiteSpace(metadata?.Title) ? null : metadata.Title.Trim(),
             metadata?.Started ?? Directory.GetCreationTimeUtc(directory),
             TimeSpan.FromSeconds(metadata?.DurationSeconds ?? 0),
             state,
@@ -101,19 +125,4 @@ internal static class SessionCatalog
             Path.TrimEndingDirectorySeparator(Path.GetFullPath(directory)),
             Path.TrimEndingDirectorySeparator(Path.GetFullPath(other)),
             StringComparison.OrdinalIgnoreCase);
-
-    private static SessionMetadata? TryReadMetadata(string directory)
-    {
-        try
-        {
-            return File.Exists(Path.Combine(directory, "meta.json"))
-                ? SessionMetadata.Read(directory)
-                : null;
-        }
-        catch (Exception exception) when (
-            exception is JsonException or IOException or InvalidDataException or UnauthorizedAccessException)
-        {
-            return null;
-        }
-    }
 }
