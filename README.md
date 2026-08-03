@@ -35,6 +35,7 @@ Windows audio -----+--> system.wav -+--> large-v3-turbo ------+--> transcript.md
 - [Quickstart](#quickstart)
 - [Commands](#commands)
 - [Sessions window](#sessions-window)
+- [While recording](#while-recording)
 - [Bundled Whisper model](#bundled-whisper-model)
 - [Local data](#local-data)
 - [Configuration](#configuration)
@@ -59,6 +60,9 @@ The Windows application lives in `Windows/Quill.Windows`.
 | GPU acceleration | Implemented | `Whisper.net.Runtime.Vulkan`, falls back to CPU |
 | Silence skipping | Optional | Silero VAD, off by default |
 | Pending-job recovery | Implemented | Scan sessions without `transcript.json` |
+| Voice-quality recording | Implemented | 16 kHz mono WAV, about 11x smaller |
+| Pause, markers, device warning | Implemented | Tray menu and default-device watch |
+| Titles, delete, export, search | Implemented | Sessions window |
 | Sessions window | Implemented | WPF window with live per-track progress |
 | Start at login | Implemented | `HKCU\...\Run` value |
 | Portable package | Implemented | Self-contained `win-x64` ZIP |
@@ -73,7 +77,10 @@ The Windows application lives in `Windows/Quill.Windows`.
 - No accounts, telemetry, API keys, or audio upload to a service.
 - System-tray start/stop control, elapsed timer, and transcription status.
 - Recoverable sessions: completed sessions without a transcript are queued on the next launch.
-- Portable output: WAV, JSON, and Markdown files.
+- Portable output: WAV, JSON, Markdown, SRT, and VTT files.
+- Recordings are stored at the resolution Whisper uses, not the device's.
+- Pause without ending the session, and mark moments while they happen.
+- Rename, read, search, export, and delete sessions from one window.
 - Self-contained Windows package: end users do not install .NET or download a model.
 - Optional per-user startup with no administrator privileges.
 
@@ -137,7 +144,7 @@ System audio uses global loopback. It captures everything Windows plays through 
 
 - Windows 11 x64.
 - A CPU with AVX, AVX2, FMA, and F16C support.
-- Enough free storage for the package and recordings. The bundled model is about 547 MB.
+- Enough free storage for the package and recordings. The bundled model is about 547 MB, and an hour of meeting is about 230 MB of audio.
 - A default microphone and default audio-output device.
 - Microsoft Visual C++ 2022 Redistributable when it is not already installed.
 
@@ -243,11 +250,27 @@ Double-click the tray icon, or select `Ver sesiones` from its menu, to see every
 | `error` | Transcription failed. The reason is kept, and `Reintentar` queues it again. |
 | `incompleta` | Session folder with no `meta.json`: the process was killed before it could close the recording. Not queued. |
 
+Each session can be renamed, so the list shows `Reunion con Contoso` instead of `2026.08.03-1420`. The right-hand pane reads the transcript inline, with `me` and `them` in different colours and any markers shown in place. The box at the top searches across every session at once, ignoring case and accents.
+
+Buttons per session: `Renombrar`, `Abrir carpeta`, `Copiar` (to the clipboard), `SRT` and `VTT` (write `transcript.srt` / `transcript.vtt` next to the recording), `Reintentar` and `Log` for failures, and `Borrar`, which asks for confirmation and is refused while a session is recording or transcribing.
+
 Closing the window hides it; the tray icon keeps running. Progress updates come from the running transcription, so the window costs nothing while it is closed.
 
 **Note for existing users:** double-clicking the tray icon used to start and stop the recording. It now opens this window instead, so an accidental double-click cannot cut a meeting short. Recording is still on the right-click menu.
 
 A session marked `error` is not retried automatically on the next launch. Earlier versions re-queued every session without a `transcript.json`, so a permanently broken one was retried on every start with no way to see it.
+
+## While recording
+
+| Tray menu item | What it does |
+| --- | --- |
+| `Iniciar grabacion` / `Detener grabacion` | Starts and ends the session. |
+| `Pausar grabacion` / `Reanudar grabacion` | Stops writing audio without closing the session. Both tracks pause together, so they stay aligned, and paused time is excluded from the duration. |
+| `Marcar momento` | Records the current timestamp. Markers appear in place in the reader. |
+
+The tray icon shows a red dot while recording, so an active session is visible without hovering over it.
+
+If the default microphone or output device changes mid-meeting — plugging in headphones, for instance — Quill warns once with a balloon. WASAPI keeps capturing from the device it started with, so `system.wav` can go silent with nothing else to indicate it. The recording is not stopped: ending a meeting automatically would be worse than a track that may be incomplete.
 
 ## Bundled Whisper model
 
@@ -304,6 +327,8 @@ By default, each session is saved at:
 | `system.wav` | Windows output audio. |
 | `meta.json` | Start, end, duration, files, and track offsets. |
 | `status.json` | Transcription state, model used, and elapsed time. |
+| `transcript.srt` | Subtitles, written on demand from the window. |
+| `transcript.vtt` | WebVTT subtitles, written on demand from the window. |
 | `transcript.json` | Canonical transcript with timed segments. |
 | `transcript.md` | Human-readable Markdown transcript. |
 | `transcribe.log` | Transcription progress and errors. |
@@ -327,6 +352,10 @@ Example:
 ```json
 {
   "recordings_dir": "D:\\Recordings",
+  "recording": {
+    "quality": "voice",
+    "delete_audio_after_transcription": false
+  },
   "transcription": {
     "enabled": true,
     "engine": "whisper",
@@ -334,18 +363,39 @@ Example:
     "model": "ggml-large-v3-turbo-q5_0.bin",
     "threads": null,
     "vad": false,
-    "prompt": "Nombres propios y vocabulario de la empresa"
+    "prompt": null
   }
 }
 ```
 
 | Key | Default | Meaning |
 | --- | --- | --- |
+| `recording.quality` | `voice` | `voice` writes 16 kHz mono 16-bit. `native` keeps the device format, about 11x larger. |
+| `recording.delete_audio_after_transcription` | `false` | Removes the WAV tracks once a transcript exists. Never runs on a failed or empty transcription. |
 | `model` | `ggml-large-v3-turbo-q5_0.bin` | File name inside `models\`, or an absolute path. |
 | `threads` | half the logical cores | Inference threads. whisper.cpp otherwise caps at four. |
 | `vad` | `false` | Skip silence before transcribing. Needs `vad_model` present. |
 | `vad_model` | `ggml-silero-v5.1.2.bin` | Silero model, bundled by `Publish-Portable.ps1 -IncludeVad`. |
 | `prompt` | `null` | Optional vocabulary and names passed to Whisper as an initial prompt. |
+
+### Recording size
+
+WASAPI hands over audio in the device's own format, normally 48 kHz stereo float32. Two tracks of that come to roughly **2.6 GB per hour of meeting**, and Whisper only ever reads 16 kHz mono. Quill therefore converts while recording:
+
+| `recording.quality` | One hour of meeting |
+| --- | --- |
+| `voice` (default) | about 230 MB |
+| `native` | about 2.6 GB |
+
+`voice` loses nothing that transcription uses, and speech stays perfectly intelligible to listen back to. Choose `native` only if the recordings are meant for something other than a transcript.
+
+To reclaim the audio once the transcript exists:
+
+```json
+{ "recording": { "delete_audio_after_transcription": true } }
+```
+
+The tracks are removed only after `transcript.json` is written and only when it has segments. A failed or empty transcription keeps its audio, because at that point the audio is all that is left. Note that a session whose audio was deleted can no longer be retried.
 
 ### Skipping silence
 
@@ -447,7 +497,11 @@ Required manual smoke test before distribution:
 4. Wait for Whisper and inspect `transcript.json` and `transcript.md`.
 5. Close Quill during transcription and confirm that it resumes after reopening.
 6. Double-click the tray icon and confirm the sessions window lists the session with live progress.
-7. Confirm a failed session shows `error` after a restart and can be retried from the window.
+7. Pause and resume, and confirm the tray reads `PAUSADO` and the timer stops.
+8. Mark a moment and confirm it appears in the reader at the right position.
+9. Rename a session and confirm the new name survives restarting Quill.
+10. Export SRT and confirm the timestamps line up when played against the audio.
+11. Confirm a failed session shows `error` after a restart and can be retried from the window.
 
 ## Troubleshooting
 

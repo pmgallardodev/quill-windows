@@ -453,10 +453,13 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
         }
 
         var failure = SessionCatalog.TryDelete(row.Directory);
-        StatusText = failure is null
-            ? $"{row.DisplayName} borrada."
-            : $"No se pudo borrar: {failure}";
+        if (failure is not null)
+        {
+            StatusText = $"No se pudo borrar: {failure}";
+            return;
+        }
 
+        StatusText = $"{row.DisplayName} borrada.";
         if (ReferenceEquals(row, _selectedSession))
         {
             SelectedSession = null;

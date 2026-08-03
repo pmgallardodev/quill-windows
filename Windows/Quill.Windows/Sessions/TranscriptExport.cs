@@ -218,7 +218,7 @@ internal static class TranscriptSearch
                         session.Title ?? session.Name,
                         segment.StartMs,
                         segment.Speaker,
-                        segment.Text.Trim());
+                        segment.Text?.Trim() ?? string.Empty);
                 }
             }
         }

@@ -221,6 +221,9 @@ internal sealed class RecordingSession : IDisposable
         }
 
         var endedAt = DateTimeOffset.UtcNow;
+        var pausedTotal = _pausedTotal + (_pausedAt is { } pausedAt
+            ? endedAt - pausedAt
+            : TimeSpan.Zero);
         var microphoneStarted = _microphoneWriter.FirstBufferAt ?? _startedAt;
         var systemStarted = _systemAudioWriter.FirstBufferAt ?? _startedAt;
         var earliest = microphoneStarted <= systemStarted ? microphoneStarted : systemStarted;
@@ -228,7 +231,7 @@ internal sealed class RecordingSession : IDisposable
         {
             Started = _startedAt,
             Ended = endedAt,
-            DurationSeconds = (long)(endedAt - _startedAt - _pausedTotal).TotalSeconds,
+            DurationSeconds = Math.Max(0L, (long)(endedAt - _startedAt - pausedTotal).TotalSeconds),
             Files = new Dictionary<string, string>
             {
                 ["mic"] = "mic.wav",

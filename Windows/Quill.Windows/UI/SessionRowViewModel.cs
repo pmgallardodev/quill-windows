@@ -262,7 +262,7 @@ internal sealed class TranscriptLineViewModel
         return new TranscriptLineViewModel(segment.StartMs, isMarker: false)
         {
             SpeakerText = speaker,
-            Text = segment.Text.Trim(),
+            Text = segment.Text?.Trim() ?? string.Empty,
             IsMe = string.Equals(speaker, "me", StringComparison.OrdinalIgnoreCase),
         };
     }

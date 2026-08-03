@@ -183,17 +183,27 @@ internal sealed class TranscriptionCoordinator : IDisposable
         }
 
         var merged = new List<TranscriptSegment>();
+        var allTracksSucceeded = true;
 
         foreach (var (name, speaker) in new[] { ("mic", "me"), ("system", "them") })
         {
             if (!metadata.Files.TryGetValue(name, out var fileName))
             {
+                allTracksSucceeded = false;
+                Log(sessionDirectory, $"missing track entry: {name}");
                 continue;
             }
 
-            var audioPath = Path.Combine(sessionDirectory, fileName);
+            if (!TryResolveSessionFile(sessionDirectory, fileName, out var audioPath))
+            {
+                allTracksSucceeded = false;
+                Log(sessionDirectory, $"invalid track path: {fileName}");
+                continue;
+            }
+
             if (!File.Exists(audioPath))
             {
+                allTracksSucceeded = false;
                 Log(sessionDirectory, $"missing track: {fileName}");
                 continue;
             }
@@ -218,6 +228,7 @@ internal sealed class TranscriptionCoordinator : IDisposable
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
+                allTracksSucceeded = false;
                 Log(sessionDirectory, $"skipping {fileName}: {exception.Message}");
                 tracks[index] = tracks[index] with { Completed = true };
             }
@@ -232,7 +243,7 @@ internal sealed class TranscriptionCoordinator : IDisposable
             Segments = merged,
         }.Write(sessionDirectory);
         Log(sessionDirectory, $"done: {merged.Count} segments");
-        DeleteAudioIfConfigured(sessionDirectory, metadata, merged.Count);
+        DeleteAudioIfConfigured(sessionDirectory, metadata, merged.Count, allTracksSucceeded);
         return options;
     }
 
@@ -241,16 +252,21 @@ internal sealed class TranscriptionCoordinator : IDisposable
     /// es lo unico que queda. Un transcript sin segmentos tambien conserva el audio
     /// porque suele indicar que algo fue mal sin llegar a lanzar.
     /// </summary>
-    private static void DeleteAudioIfConfigured(string sessionDirectory, SessionMetadata metadata, int segmentCount)
+    private static void DeleteAudioIfConfigured(
+        string sessionDirectory,
+        SessionMetadata metadata,
+        int segmentCount,
+        bool allTracksSucceeded)
     {
         try
         {
-            if (segmentCount == 0 || !ConfigStore.Load().Recording.DeleteAudioAfterTranscription)
+            if (!allTracksSucceeded || segmentCount == 0 || !ConfigStore.Load().Recording.DeleteAudioAfterTranscription)
             {
                 return;
             }
         }
-        catch (InvalidOperationException exception)
+        catch (Exception exception) when (
+            exception is InvalidOperationException or IOException or UnauthorizedAccessException or ArgumentException)
         {
             Log(sessionDirectory, $"could not read config to delete audio: {exception.Message}");
             return;
@@ -258,11 +274,18 @@ internal sealed class TranscriptionCoordinator : IDisposable
 
         var deleted = new List<string>();
         var freedBytes = 0L;
-        foreach (var fileName in metadata.Files.Values)
+        foreach (var name in new[] { "mic", "system" })
         {
+            if (!metadata.Files.TryGetValue(name, out var fileName) ||
+                !TryResolveSessionFile(sessionDirectory, fileName, out var audioPath))
+            {
+                Log(sessionDirectory, $"could not delete invalid track path: {name}");
+                continue;
+            }
+
             try
             {
-                var file = new FileInfo(Path.Combine(sessionDirectory, fileName));
+                var file = new FileInfo(audioPath);
                 if (!file.Exists)
                 {
                     continue;
@@ -273,7 +296,8 @@ internal sealed class TranscriptionCoordinator : IDisposable
                 freedBytes += length;
                 deleted.Add(fileName);
             }
-            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            catch (Exception exception) when (
+                exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
             {
                 // Un WAV bloqueado deja la sesion igual de valida: el transcript ya esta.
                 Log(sessionDirectory, $"could not delete {fileName}: {exception.Message}");
@@ -285,6 +309,33 @@ internal sealed class TranscriptionCoordinator : IDisposable
             Log(sessionDirectory,
                 $"deleted audio ({string.Join(", ", deleted)}): freed {freedBytes / 1024 / 1024} MB; " +
                 "retry is no longer possible for this session");
+        }
+    }
+
+    private static bool TryResolveSessionFile(string sessionDirectory, string? fileName, out string path)
+    {
+        path = string.Empty;
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        try
+        {
+            var root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(sessionDirectory));
+            var candidate = Path.GetFullPath(Path.Combine(root, fileName));
+            var rootPrefix = root + Path.DirectorySeparatorChar;
+            if (!candidate.StartsWith(rootPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            path = candidate;
+            return true;
+        }
+        catch (Exception exception) when (exception is ArgumentException or IOException or NotSupportedException)
+        {
+            return false;
         }
     }
 
