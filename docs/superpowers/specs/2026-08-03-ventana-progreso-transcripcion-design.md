@@ -345,10 +345,14 @@ real. Todas son verificables sobre carpetas temporales, sin audio ni GPU:
 - **Regla de reanudación** — `running` reencola, `failed` no, ausencia de `status.json`
   reencola.
 
-**Limitación conocida:** el proyecto es `net8.0-windows`, así que los tests solo se
-ejecutan en Windows. El entorno de desarrollo actual es macOS, donde tampoco se puede
-ejecutar la aplicación. Aislar la lógica en un `Quill.Core` multiplataforma sería posible,
-pero es un refactor que este trabajo no requiere.
+**Limitación conocida:** el proyecto es `net8.0-windows`, así que `dotnet test` solo corre
+en Windows. El entorno de desarrollo actual es macOS, donde tampoco se puede ejecutar la
+aplicación.
+
+Ninguna de las cuatro piezas bajo test depende de WPF ni de WinForms, cosa que se comprobó
+compilándolas en un proyecto `net8.0` puro donde los 28 tests pasan. Extraer un
+`Quill.Core` multiplataforma haría eso permanente y es la mejora natural si los tests
+crecen, pero es un refactor que este trabajo no requiere.
 
 La UI y Whisper se siguen verificando con el smoke test manual que el README documenta en
 la sección "Verification".

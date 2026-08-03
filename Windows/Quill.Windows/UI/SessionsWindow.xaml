@@ -1,6 +1,7 @@
 <Window x:Class="Quill.Windows.UI.SessionsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:ClassModifier="internal"
         Title="Sesiones de quill"
         Height="560" Width="520"
         WindowStartupLocation="CenterScreen"
