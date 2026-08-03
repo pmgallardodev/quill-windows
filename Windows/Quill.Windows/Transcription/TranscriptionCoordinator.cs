@@ -273,7 +273,8 @@ internal sealed class TranscriptionCoordinator : IDisposable
         {
             return Path.GetFileNameWithoutExtension(ConfigStore.Load().Transcription.Model);
         }
-        catch (InvalidOperationException)
+        catch (Exception exception) when (
+            exception is InvalidOperationException or IOException or UnauthorizedAccessException or ArgumentException)
         {
             return null;
         }

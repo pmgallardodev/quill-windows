@@ -79,11 +79,18 @@ internal sealed class TrayController : IDisposable
 
         _disposed = true;
         _ticker.Stop();
-        if (_session is not null)
+        var activeSession = _session;
+        _session = null;
+        if (activeSession is not null)
         {
-            _session.Stop();
-            _session.Dispose();
-            _session = null;
+            try
+            {
+                activeSession.Dispose();
+            }
+            catch
+            {
+                // Shutdown must continue even if an audio device already failed.
+            }
         }
 
         if (_sessionsWindow is not null)
@@ -158,8 +165,25 @@ internal sealed class TrayController : IDisposable
         {
             // Enqueue first so the freshly scanned row includes the model written
             // to status.json instead of capturing a null model from the active state.
-            _sessionsViewModel.SetActiveSession(null);
-            session.Dispose();
+            try
+            {
+                _sessionsViewModel.SetActiveSession(null);
+            }
+            catch
+            {
+                // A refresh failure must not leave the audio session undisposed.
+            }
+
+            try
+            {
+                session.Dispose();
+            }
+            catch (Exception exception)
+            {
+                _icon.Text = "quill - error al cerrar audio";
+                _icon.ShowBalloonTip(6_000, "quill - error", exception.Message, Forms.ToolTipIcon.Error);
+            }
+
             _toggle.Text = "Iniciar grabacion";
         }
     }

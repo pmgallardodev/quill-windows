@@ -11,7 +11,8 @@ internal sealed record TranscriptionOptions(
     string ModelName,
     string Language,
     int Threads,
-    string? VadModelPath)
+    string? VadModelPath,
+    string? Prompt)
 {
     public static TranscriptionOptions FromConfig()
     {
@@ -21,7 +22,8 @@ internal sealed record TranscriptionOptions(
             Path.GetFileNameWithoutExtension(config.Model),
             config.Language,
             ResolveThreads(config.Threads),
-            config.Vad ? ConfigStore.ResolveModelPath(config.VadModel) : null);
+            config.Vad ? ConfigStore.ResolveModelPath(config.VadModel) : null,
+            string.IsNullOrWhiteSpace(config.Prompt) ? null : config.Prompt.Trim());
     }
 
     /// <summary>

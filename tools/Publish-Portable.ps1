@@ -12,6 +12,7 @@ $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $project = Join-Path $repositoryRoot "Windows\Quill.Windows\Quill.Windows.csproj"
 $publishDirectory = Join-Path $repositoryRoot "artifacts\quill-win-x64"
 $zip = Join-Path $repositoryRoot "artifacts\quill-win-x64.zip"
+$minimumModelBytes = 1MB
 
 # El nombre del modelo vive solo en el csproj; aqui se lee para no duplicarlo.
 $modelName = (dotnet msbuild $project -target:PrintWhisperModel -verbosity:minimal -nologo).Trim()
@@ -27,6 +28,10 @@ if (-not $SkipModelDownload -and (-not (Test-Path -LiteralPath $model) -or $Incl
 
 if (-not (Test-Path -LiteralPath $model)) {
     throw "Falta $model. El paquete portable debe incluir el modelo Whisper."
+}
+
+if ((Get-Item -LiteralPath $model).Length -lt $minimumModelBytes) {
+    throw "La descarga de $model esta incompleta."
 }
 
 if ($IncludeVad) {

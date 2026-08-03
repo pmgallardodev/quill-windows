@@ -92,14 +92,52 @@ internal sealed class RecordingSession : IDisposable
 
         _stopped = true;
         var completedCapture = _capturing;
+        Exception? stopError = null;
         if (completedCapture)
         {
-            _microphone.StopRecording();
-            _systemAudio.StopRecording();
+            try
+            {
+                _microphone.StopRecording();
+            }
+            catch (Exception exception)
+            {
+                stopError = exception;
+            }
+
+            try
+            {
+                _systemAudio.StopRecording();
+            }
+            catch (Exception exception)
+            {
+                stopError ??= exception;
+            }
+
             _capturing = false;
         }
-        _microphoneWriter.Dispose();
-        _systemAudioWriter.Dispose();
+
+        try
+        {
+            _microphoneWriter.Dispose();
+        }
+        catch (Exception exception)
+        {
+            stopError ??= exception;
+        }
+
+        try
+        {
+            _systemAudioWriter.Dispose();
+        }
+        catch (Exception exception)
+        {
+            stopError ??= exception;
+        }
+
+        if (stopError is not null)
+        {
+            throw stopError;
+        }
 
         if (!completedCapture)
         {
@@ -133,12 +171,35 @@ internal sealed class RecordingSession : IDisposable
 
     public void Dispose()
     {
-        Stop();
-        _microphone.Dispose();
-        _systemAudio.Dispose();
-        _microphoneDevice.Dispose();
-        _speakerDevice.Dispose();
-        _devices.Dispose();
+        Exception? disposeError = null;
+        try
+        {
+            Stop();
+        }
+        catch (Exception exception)
+        {
+            disposeError = exception;
+        }
+
+        foreach (var disposable in new IDisposable[]
+                 {
+                     _microphone, _systemAudio, _microphoneDevice, _speakerDevice, _devices,
+                 })
+        {
+            try
+            {
+                disposable.Dispose();
+            }
+            catch (Exception exception)
+            {
+                disposeError ??= exception;
+            }
+        }
+
+        if (disposeError is not null)
+        {
+            throw disposeError;
+        }
     }
 
     private void StartCapture()

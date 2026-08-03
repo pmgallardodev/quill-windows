@@ -167,10 +167,15 @@ internal sealed class WhisperTranscriber : IDisposable
 
         try
         {
-            using var processor = _factory.CreateBuilder()
+            var builder = _factory.CreateBuilder()
                 .WithLanguage(_options.Language)
-                .WithThreads(_options.Threads)
-                .Build();
+                .WithThreads(_options.Threads);
+            if (_options.Prompt is { } prompt)
+            {
+                builder.WithPrompt(prompt);
+            }
+
+            using var processor = builder.Build();
             await using var audio = File.OpenRead(sourcePath);
             var segments = new List<TranscriptSegment>();
             await foreach (var result in processor.ProcessAsync(audio).WithCancellation(cancellationToken))

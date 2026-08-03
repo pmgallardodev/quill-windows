@@ -4,3 +4,4 @@ models/*.bin
 Windows/**/bin/
 Windows/**/obj/
 .DS_Store
+.claude/worktrees/

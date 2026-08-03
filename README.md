@@ -333,7 +333,8 @@ Example:
     "language": "es",
     "model": "ggml-large-v3-turbo-q5_0.bin",
     "threads": null,
-    "vad": false
+    "vad": false,
+    "prompt": "Nombres propios y vocabulario de la empresa"
   }
 }
 ```
@@ -344,6 +345,7 @@ Example:
 | `threads` | half the logical cores | Inference threads. whisper.cpp otherwise caps at four. |
 | `vad` | `false` | Skip silence before transcribing. Needs `vad_model` present. |
 | `vad_model` | `ggml-silero-v5.1.2.bin` | Silero model, bundled by `Publish-Portable.ps1 -IncludeVad`. |
+| `prompt` | `null` | Optional vocabulary and names passed to Whisper as an initial prompt. |
 
 ### Skipping silence
 

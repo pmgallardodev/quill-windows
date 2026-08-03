@@ -15,9 +15,9 @@ if (-not $Destination) {
     $Destination = Join-Path $modelsDirectory $Model
 }
 
-# Umbral de cordura, no el tamano exacto: large-v3 q5_0 ocupa 1,1 GB y
-# large-v3-turbo q5_0 unos 547 MB. Solo descarta descargas cortadas.
-$minimumBytes = 100MB
+# Umbral comun para todos los modelos Whisper, incluidos los modelos tiny. No es
+# un tamano exacto: solo descarta respuestas claramente truncadas.
+$minimumBytes = 1MB
 $baseUri = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main"
 $vadBaseUri = "https://huggingface.co/sandrohanea/whisper.net/resolve/v4/vad"
 

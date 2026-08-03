@@ -49,22 +49,29 @@ internal static class Doctor
         }
 
         var transcription = ConfigStore.Load().Transcription;
-        var modelPath = ConfigStore.ResolveModelPath(transcription.Model);
-        var model = new FileInfo(modelPath);
-        checks.Add(($"modelo {Path.GetFileNameWithoutExtension(transcription.Model)}",
-            model.Exists && model.Length >= MinimumModelBytes,
-            model.Exists ? $"{model.Length / 1024 / 1024} MB" : modelPath));
-
-        if (transcription.Vad)
+        if (!transcription.Enabled)
         {
-            var vadPath = ConfigStore.ResolveModelPath(transcription.VadModel);
-            var vad = new FileInfo(vadPath);
-            checks.Add(("modelo VAD", vad.Exists && vad.Length >= MinimumModelBytes,
-                vad.Exists ? $"{vad.Length / 1024} KB" : vadPath));
+            checks.Add(("transcripcion", true, "desactivada"));
         }
+        else
+        {
+            var modelPath = ConfigStore.ResolveModelPath(transcription.Model);
+            var model = new FileInfo(modelPath);
+            checks.Add(($"modelo {Path.GetFileNameWithoutExtension(transcription.Model)}",
+                model.Exists && model.Length >= MinimumModelBytes,
+                model.Exists ? $"{model.Length / 1024 / 1024} MB" : modelPath));
 
-        checks.Add(("hilos de inferencia", true,
-            $"{TranscriptionOptions.ResolveThreads(transcription.Threads)} de {Environment.ProcessorCount} logicos"));
+            if (transcription.Vad)
+            {
+                var vadPath = ConfigStore.ResolveModelPath(transcription.VadModel);
+                var vad = new FileInfo(vadPath);
+                checks.Add(("modelo VAD", vad.Exists && vad.Length >= MinimumModelBytes,
+                    vad.Exists ? $"{vad.Length / 1024} KB" : vadPath));
+            }
+
+            checks.Add(("hilos de inferencia", true,
+                $"{TranscriptionOptions.ResolveThreads(transcription.Threads)} de {Environment.ProcessorCount} logicos"));
+        }
 
         foreach (var check in checks)
         {
