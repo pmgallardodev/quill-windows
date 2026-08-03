@@ -69,6 +69,16 @@ internal sealed class RecordingSession : IDisposable
             microphone?.Dispose();
             speakers?.Dispose();
             devices.Dispose();
+            try
+            {
+                System.IO.Directory.Delete(directory, recursive: true);
+            }
+            catch (Exception cleanupException) when (
+                cleanupException is IOException or UnauthorizedAccessException)
+            {
+                // The startup error is more useful than a failed best-effort cleanup.
+            }
+
             throw;
         }
     }
@@ -133,16 +143,40 @@ internal sealed class RecordingSession : IDisposable
 
     private void StartCapture()
     {
+        var systemStarted = false;
+        var microphoneStarted = false;
         try
         {
             _systemAudio.StartRecording();
+            systemStarted = true;
             _microphone.StartRecording();
+            microphoneStarted = true;
             _capturing = true;
         }
         catch
         {
-            _microphone.StopRecording();
-            _systemAudio.StopRecording();
+            if (microphoneStarted)
+            {
+                try
+                {
+                    _microphone.StopRecording();
+                }
+                catch
+                {
+                }
+            }
+
+            if (systemStarted)
+            {
+                try
+                {
+                    _systemAudio.StopRecording();
+                }
+                catch
+                {
+                }
+            }
+
             throw;
         }
     }

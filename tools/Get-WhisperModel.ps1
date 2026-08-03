@@ -19,12 +19,14 @@ if (-not $Destination) {
 # large-v3-turbo q5_0 unos 547 MB. Solo descarta descargas cortadas.
 $minimumBytes = 100MB
 $baseUri = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main"
+$vadBaseUri = "https://huggingface.co/sandrohanea/whisper.net/resolve/v4/vad"
 
 function Get-Model {
     param(
         [string]$Name,
         [string]$Target,
-        [long]$Minimum
+        [long]$Minimum,
+        [string]$BaseUri
     )
 
     if ((Test-Path -LiteralPath $Target) -and ((Get-Item -LiteralPath $Target).Length -ge $Minimum)) {
@@ -37,7 +39,7 @@ function Get-Model {
     Remove-Item -LiteralPath $partial -Force -ErrorAction SilentlyContinue
 
     Write-Host "Descargando $Name..."
-    Invoke-WebRequest -Uri "$baseUri/$Name" -OutFile $partial
+    Invoke-WebRequest -Uri "$BaseUri/$Name" -OutFile $partial
 
     if ((Get-Item -LiteralPath $partial).Length -lt $Minimum) {
         Remove-Item -LiteralPath $partial -Force
@@ -48,9 +50,10 @@ function Get-Model {
     Write-Host "Guardado en $Target"
 }
 
-Get-Model -Name $Model -Target $Destination -Minimum $minimumBytes
+Get-Model -Name $Model -Target $Destination -Minimum $minimumBytes -BaseUri $baseUri
 
 if ($IncludeVad) {
     $vad = "ggml-silero-v5.1.2.bin"
-    Get-Model -Name $vad -Target (Join-Path $modelsDirectory $vad) -Minimum 1MB
+    # The VAD model is hosted by Whisper.net and is smaller than 1 MB.
+    Get-Model -Name $vad -Target (Join-Path $modelsDirectory $vad) -Minimum 500KB -BaseUri $vadBaseUri
 }

@@ -15,6 +15,7 @@ internal sealed class TranscriptionCoordinator : IDisposable
     private readonly Task _worker;
     private WhisperTranscriber? _transcriber;
     private TranscriptionOptions? _options;
+    private bool _disposed;
 
     public TranscriptionCoordinator(string recordingsRoot)
     {
@@ -48,22 +49,29 @@ internal sealed class TranscriptionCoordinator : IDisposable
 
     public void Enqueue(string sessionDirectory)
     {
-        if (!ConfigStore.Load().Transcription.Enabled ||
+        if (_disposed ||
+            !ConfigStore.Load().Transcription.Enabled ||
             !_pending.TryAdd(sessionDirectory, 0))
         {
             return;
         }
 
-        WriteStatus(sessionDirectory, SessionStatus.Queued, null, null);
-        _queue.Writer.TryWrite(sessionDirectory);
+        WriteStatus(sessionDirectory, SessionStatus.Queued, null, null, CurrentModelName());
+        // Publish before writing to the channel. Otherwise the worker can dequeue
+        // immediately and publish Running before this method publishes Queued.
         StateChanged?.Invoke(new TranscriptionUpdate(
             sessionDirectory, SessionState.Queued, _pending.Count, Array.Empty<TrackProgress>(), null, TimeSpan.Zero));
+
+        if (!_queue.Writer.TryWrite(sessionDirectory))
+        {
+            _pending.TryRemove(sessionDirectory, out _);
+        }
     }
 
     /// <summary>Vuelve a encolar una sesion que fallo. Es la unica forma de reintentar un "failed".</summary>
     public void Retry(string sessionDirectory)
     {
-        if (!Directory.Exists(sessionDirectory))
+        if (_disposed || !Directory.Exists(sessionDirectory))
         {
             return;
         }
@@ -82,6 +90,12 @@ internal sealed class TranscriptionCoordinator : IDisposable
 
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
         _shutdown.Cancel();
         _queue.Writer.TryComplete();
         var workerCompleted = false;
@@ -91,16 +105,30 @@ internal sealed class TranscriptionCoordinator : IDisposable
         }
         catch (AggregateException)
         {
-            // Shutdown only needs to leave a session without transcript.json so it resumes later.
+            // The worker is complete even when a subscriber faulted it.
+            workerCompleted = true;
         }
-        finally
+
+        if (workerCompleted)
         {
-            if (workerCompleted)
-            {
-                _transcriber?.Dispose();
-            }
-            _shutdown.Dispose();
+            DisposeResources();
         }
+        else
+        {
+            // Do not dispose the token source or native Whisper context while a
+            // native call is still unwinding after cancellation.
+            _ = _worker.ContinueWith(
+                _ => DisposeResources(),
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+        }
+    }
+
+    private void DisposeResources()
+    {
+        _transcriber?.Dispose();
+        _shutdown.Dispose();
     }
 
     private async Task DrainAsync()
@@ -113,12 +141,12 @@ internal sealed class TranscriptionCoordinator : IDisposable
                 var clock = Stopwatch.StartNew();
                 var tracks = new List<TrackProgress>();
 
-                WriteStatus(sessionDirectory, SessionStatus.Running, null, null);
+                WriteStatus(sessionDirectory, SessionStatus.Running, null, null, _options?.ModelName);
                 PublishState(sessionDirectory, SessionState.Running, tracks, null, clock.Elapsed);
                 try
                 {
-                    await TranscribeSessionAsync(sessionDirectory, tracks, clock, _shutdown.Token);
-                    WriteStatus(sessionDirectory, SessionStatus.Done, clock.Elapsed.TotalSeconds, null);
+                    var options = await TranscribeSessionAsync(sessionDirectory, tracks, clock, _shutdown.Token);
+                    WriteStatus(sessionDirectory, SessionStatus.Done, clock.Elapsed.TotalSeconds, null, options.ModelName);
                     PublishState(sessionDirectory, SessionState.Done, tracks, null, clock.Elapsed);
                 }
                 catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
@@ -128,7 +156,7 @@ internal sealed class TranscriptionCoordinator : IDisposable
                 catch (Exception exception)
                 {
                     Log(sessionDirectory, $"transcription failed: {exception}");
-                    WriteStatus(sessionDirectory, SessionStatus.Failed, clock.Elapsed.TotalSeconds, exception.Message);
+                    WriteStatus(sessionDirectory, SessionStatus.Failed, clock.Elapsed.TotalSeconds, exception.Message, _options?.ModelName);
                     PublishState(sessionDirectory, SessionState.Failed, tracks, exception.Message, clock.Elapsed);
                 }
             }
@@ -138,15 +166,22 @@ internal sealed class TranscriptionCoordinator : IDisposable
         }
     }
 
-    private async Task TranscribeSessionAsync(
+    private async Task<TranscriptionOptions> TranscribeSessionAsync(
         string sessionDirectory,
         List<TrackProgress> tracks,
         Stopwatch clock,
         CancellationToken cancellationToken)
     {
         var metadata = SessionMetadata.Read(sessionDirectory);
-        var options = _options ??= TranscriptionOptions.FromConfig();
-        var transcriber = _transcriber ??= new WhisperTranscriber(options);
+        var options = _options ?? TranscriptionOptions.FromConfig();
+        var transcriber = _transcriber;
+        if (transcriber is null)
+        {
+            transcriber = new WhisperTranscriber(options);
+            _options = options;
+            _transcriber = transcriber;
+        }
+
         var merged = new List<TranscriptSegment>();
 
         foreach (var (name, speaker) in new[] { ("mic", "me"), ("system", "them") })
@@ -197,13 +232,19 @@ internal sealed class TranscriptionCoordinator : IDisposable
             Segments = merged,
         }.Write(sessionDirectory);
         Log(sessionDirectory, $"done: {merged.Count} segments");
+        return options;
     }
 
     /// <summary>
     /// Fallar al escribir el estado no puede interrumpir una transcripcion: el
     /// estado siempre es rederivable de que archivos existen.
     /// </summary>
-    private static void WriteStatus(string sessionDirectory, string state, double? elapsedSeconds, string? error)
+    private void WriteStatus(
+        string sessionDirectory,
+        string state,
+        double? elapsedSeconds,
+        string? error,
+        string? modelName = null)
     {
         try
         {
@@ -211,7 +252,7 @@ internal sealed class TranscriptionCoordinator : IDisposable
             {
                 State = state,
                 UpdatedAt = DateTimeOffset.UtcNow,
-                Model = CurrentModelName(),
+                Model = modelName ?? _options?.ModelName ?? CurrentModelName(),
                 ElapsedSeconds = elapsedSeconds,
                 Error = error,
             }.Write(sessionDirectory);

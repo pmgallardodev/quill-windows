@@ -145,7 +145,6 @@ internal sealed class TrayController : IDisposable
         try
         {
             session.Stop();
-            _sessionsViewModel.SetActiveSession(null);
             _transcription.Enqueue(session.Directory);
             _icon.Text = "quill - transcripcion en cola";
             _icon.ShowBalloonTip(3_000, "quill", "Grabacion terminada. La transcripcion local inicio en segundo plano.", Forms.ToolTipIcon.Info);
@@ -157,6 +156,9 @@ internal sealed class TrayController : IDisposable
         }
         finally
         {
+            // Enqueue first so the freshly scanned row includes the model written
+            // to status.json instead of capturing a null model from the active state.
+            _sessionsViewModel.SetActiveSession(null);
             session.Dispose();
             _toggle.Text = "Iniciar grabacion";
         }
@@ -176,22 +178,32 @@ internal sealed class TrayController : IDisposable
     private void ShowTranscriptionStatus(TranscriptionUpdate update)
     {
         var name = Path.GetFileName(update.SessionDirectory);
+        var isRecording = _session is not null;
         switch (update.State)
         {
             case SessionState.Queued:
             case SessionState.Running:
-                _icon.Text = update.Queued > 0
-                    ? $"quill - transcribiendo ({update.Queued} en cola)"
-                    : "quill - transcribiendo";
+                if (!isRecording)
+                {
+                    _icon.Text = update.Queued > 0
+                        ? $"quill - transcribiendo ({update.Queued} en cola)"
+                        : "quill - transcribiendo";
+                }
                 break;
 
             case SessionState.Done:
-                _icon.Text = "quill - listo";
+                if (!isRecording)
+                {
+                    _icon.Text = "quill - listo";
+                }
                 _icon.ShowBalloonTip(4_000, "quill", $"Transcripcion lista: {name}", Forms.ToolTipIcon.Info);
                 break;
 
             case SessionState.Failed:
-                _icon.Text = "quill - error de transcripcion";
+                if (!isRecording)
+                {
+                    _icon.Text = "quill - error de transcripcion";
+                }
                 _icon.ShowBalloonTip(6_000, "quill - error", $"{name}: {update.Error}", Forms.ToolTipIcon.Error);
                 break;
         }

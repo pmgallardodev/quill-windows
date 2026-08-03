@@ -6,11 +6,10 @@ namespace Quill.Windows.Infrastructure;
 internal static class Doctor
 {
     /// <summary>
-    /// Umbral de cordura, no el tamano de un modelo concreto: large-v3 q5_0 ocupa
-    /// 1,1 GB y large-v3-turbo q5_0 unos 547 MB, asi que solo se comprueba que el
-    /// archivo no sea un resto de una descarga cortada.
+    /// No se puede imponer el tamano de un modelo concreto porque config.json puede
+    /// seleccionar cualquier modelo whisper.cpp, incluidos los modelos tiny.
     /// </summary>
-    private const long MinimumModelBytes = 100_000_000;
+    private const long MinimumModelBytes = 1;
 
     public static int Run(string recordingsRoot)
     {
@@ -60,7 +59,8 @@ internal static class Doctor
         {
             var vadPath = ConfigStore.ResolveModelPath(transcription.VadModel);
             var vad = new FileInfo(vadPath);
-            checks.Add(("modelo VAD", vad.Exists, vad.Exists ? $"{vad.Length / 1024} KB" : vadPath));
+            checks.Add(("modelo VAD", vad.Exists && vad.Length >= MinimumModelBytes,
+                vad.Exists ? $"{vad.Length / 1024} KB" : vadPath));
         }
 
         checks.Add(("hilos de inferencia", true,

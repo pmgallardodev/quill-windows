@@ -77,8 +77,32 @@ internal sealed class QuillConfig
     [JsonPropertyName("recordings_dir")]
     public string? RecordingsDirectory { get; init; }
 
+    [JsonPropertyName("recording")]
+    public RecordingConfig Recording { get; init; } = new();
+
     [JsonPropertyName("transcription")]
     public TranscriptionConfig Transcription { get; init; } = new();
+}
+
+internal sealed class RecordingConfig
+{
+    public const string VoiceQuality = "voice";
+    public const string NativeQuality = "native";
+
+    /// <summary>
+    /// "voice" graba a 16 kHz mono 16 bits, que es exactamente lo que consume
+    /// Whisper y ocupa unas once veces menos que el formato del dispositivo.
+    /// "native" conserva el formato original de WASAPI.
+    /// </summary>
+    [JsonPropertyName("quality")]
+    public string Quality { get; init; } = VoiceQuality;
+
+    /// <summary>Borra mic.wav y system.wav cuando el transcript queda escrito.</summary>
+    [JsonPropertyName("delete_audio_after_transcription")]
+    public bool DeleteAudioAfterTranscription { get; init; }
+
+    public bool RecordsVoiceQuality =>
+        !string.Equals(Quality, NativeQuality, StringComparison.OrdinalIgnoreCase);
 }
 
 internal sealed class TranscriptionConfig
@@ -109,4 +133,11 @@ internal sealed class TranscriptionConfig
 
     [JsonPropertyName("vad_model")]
     public string VadModel { get; init; } = ConfigStore.DefaultVadModelFile;
+
+    /// <summary>
+    /// Vocabulario propio que se pasa a Whisper como contexto inicial: nombres de
+    /// empresa, clientes y jerga tecnica que de otro modo transcribe fonéticamente.
+    /// </summary>
+    [JsonPropertyName("prompt")]
+    public string? Prompt { get; init; }
 }

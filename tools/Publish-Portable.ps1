@@ -21,12 +21,19 @@ if (-not $modelName) {
 
 $model = Join-Path $repositoryRoot "models\$modelName"
 
-if (-not $SkipModelDownload -and -not (Test-Path -LiteralPath $model)) {
+if (-not $SkipModelDownload -and (-not (Test-Path -LiteralPath $model) -or $IncludeVad)) {
     & (Join-Path $PSScriptRoot "Get-WhisperModel.ps1") -Model $modelName -IncludeVad:$IncludeVad
 }
 
 if (-not (Test-Path -LiteralPath $model)) {
     throw "Falta $model. El paquete portable debe incluir el modelo Whisper."
+}
+
+if ($IncludeVad) {
+    $vad = Join-Path $repositoryRoot "models\ggml-silero-v5.1.2.bin"
+    if (-not (Test-Path -LiteralPath $vad)) {
+        throw "Falta $vad. El paquete portable debe incluir el modelo VAD solicitado."
+    }
 }
 
 Remove-Item -LiteralPath $publishDirectory -Recurse -Force -ErrorAction SilentlyContinue

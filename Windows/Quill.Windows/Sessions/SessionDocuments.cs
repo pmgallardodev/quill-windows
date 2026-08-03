@@ -21,11 +21,70 @@ internal sealed class SessionMetadata
     [JsonPropertyName("start_offset_ms")]
     public Dictionary<string, long> StartOffsetMs { get; init; } = new();
 
+    /// <summary>Nombre que el usuario da a la sesion. El de la carpeta si esta vacio.</summary>
+    [JsonPropertyName("title")]
+    public string? Title { get; init; }
+
+    /// <summary>Marcas puestas durante la grabacion, en ms desde el inicio.</summary>
+    [JsonPropertyName("markers")]
+    public List<long> Markers { get; init; } = new();
+
     public static SessionMetadata Read(string sessionDirectory)
     {
         var path = Path.Combine(sessionDirectory, "meta.json");
         return JsonSerializer.Deserialize<SessionMetadata>(File.ReadAllText(path))
             ?? throw new InvalidDataException($"no se pudo leer {path}");
+    }
+
+    public static SessionMetadata? TryRead(string sessionDirectory)
+    {
+        try
+        {
+            return File.Exists(Path.Combine(sessionDirectory, "meta.json"))
+                ? Read(sessionDirectory)
+                : null;
+        }
+        catch (Exception exception) when (
+            exception is JsonException or IOException or InvalidDataException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    public void Write(string sessionDirectory) => AtomicFile.Write(
+        Path.Combine(sessionDirectory, "meta.json"),
+        JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+
+    /// <summary>
+    /// Renombrar no puede perder los offsets ni las marcas, asi que se relee el
+    /// archivo entero y solo se sustituye el titulo.
+    /// </summary>
+    public static bool TryUpdateTitle(string sessionDirectory, string? title)
+    {
+        var metadata = TryRead(sessionDirectory);
+        if (metadata is null)
+        {
+            return false;
+        }
+
+        try
+        {
+            new SessionMetadata
+            {
+                Started = metadata.Started,
+                Ended = metadata.Ended,
+                DurationSeconds = metadata.DurationSeconds,
+                Files = metadata.Files,
+                StartOffsetMs = metadata.StartOffsetMs,
+                Markers = metadata.Markers,
+                Title = string.IsNullOrWhiteSpace(title) ? null : title.Trim(),
+            }.Write(sessionDirectory);
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            return false;
+        }
     }
 }
 
@@ -45,10 +104,13 @@ internal sealed class TranscriptDocument
 
     public void Write(string sessionDirectory)
     {
+        // transcript.json is the completion marker used by recovery. Write the
+        // human-readable copy first so a crash or failure cannot expose a JSON-only
+        // transcript as complete.
+        AtomicFile.Write(Path.Combine(sessionDirectory, "transcript.md"), Render(sessionDirectory));
         AtomicFile.Write(
             Path.Combine(sessionDirectory, "transcript.json"),
             JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
-        AtomicFile.Write(Path.Combine(sessionDirectory, "transcript.md"), Render(sessionDirectory));
     }
 
     private string Render(string sessionDirectory)
@@ -88,7 +150,24 @@ internal static class AtomicFile
     public static void Write(string path, string contents)
     {
         var temporaryPath = $"{path}.{Guid.NewGuid():N}.tmp";
-        File.WriteAllText(temporaryPath, contents, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-        File.Move(temporaryPath, path, overwrite: true);
+        try
+        {
+            File.WriteAllText(temporaryPath, contents, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            File.Move(temporaryPath, path, overwrite: true);
+        }
+        catch
+        {
+            try
+            {
+                File.Delete(temporaryPath);
+            }
+            catch (Exception cleanupException) when (
+                cleanupException is IOException or UnauthorizedAccessException)
+            {
+                // The original write error is the useful one to report.
+            }
+
+            throw;
+        }
     }
 }

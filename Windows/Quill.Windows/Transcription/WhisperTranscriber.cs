@@ -24,8 +24,22 @@ internal sealed class WhisperTranscriber : IDisposable
         }
 
         _options = options;
-        _factory = WhisperFactory.FromPath(options.ModelPath);
-        _vadFactory = options.VadModelPath is null ? null : WhisperVadFactory.FromPath(options.VadModelPath);
+        WhisperFactory? factory = null;
+        WhisperVadFactory? vadFactory = null;
+        try
+        {
+            factory = WhisperFactory.FromPath(options.ModelPath);
+            vadFactory = options.VadModelPath is null ? null : WhisperVadFactory.FromPath(options.VadModelPath);
+        }
+        catch
+        {
+            vadFactory?.Dispose();
+            factory?.Dispose();
+            throw;
+        }
+
+        _factory = factory;
+        _vadFactory = vadFactory;
     }
 
     public async Task<IReadOnlyList<TranscriptSegment>> TranscribeAsync(
