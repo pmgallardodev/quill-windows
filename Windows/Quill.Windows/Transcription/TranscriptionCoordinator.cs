@@ -232,7 +232,60 @@ internal sealed class TranscriptionCoordinator : IDisposable
             Segments = merged,
         }.Write(sessionDirectory);
         Log(sessionDirectory, $"done: {merged.Count} segments");
+        DeleteAudioIfConfigured(sessionDirectory, metadata, merged.Count);
         return options;
+    }
+
+    /// <summary>
+    /// Solo se llama con transcript.json ya escrito: si la transcripcion falla, el audio
+    /// es lo unico que queda. Un transcript sin segmentos tambien conserva el audio
+    /// porque suele indicar que algo fue mal sin llegar a lanzar.
+    /// </summary>
+    private static void DeleteAudioIfConfigured(string sessionDirectory, SessionMetadata metadata, int segmentCount)
+    {
+        try
+        {
+            if (segmentCount == 0 || !ConfigStore.Load().Recording.DeleteAudioAfterTranscription)
+            {
+                return;
+            }
+        }
+        catch (InvalidOperationException exception)
+        {
+            Log(sessionDirectory, $"could not read config to delete audio: {exception.Message}");
+            return;
+        }
+
+        var deleted = new List<string>();
+        var freedBytes = 0L;
+        foreach (var fileName in metadata.Files.Values)
+        {
+            try
+            {
+                var file = new FileInfo(Path.Combine(sessionDirectory, fileName));
+                if (!file.Exists)
+                {
+                    continue;
+                }
+
+                var length = file.Length;
+                file.Delete();
+                freedBytes += length;
+                deleted.Add(fileName);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                // Un WAV bloqueado deja la sesion igual de valida: el transcript ya esta.
+                Log(sessionDirectory, $"could not delete {fileName}: {exception.Message}");
+            }
+        }
+
+        if (deleted.Count > 0)
+        {
+            Log(sessionDirectory,
+                $"deleted audio ({string.Join(", ", deleted)}): freed {freedBytes / 1024 / 1024} MB; " +
+                "retry is no longer possible for this session");
+        }
     }
 
     /// <summary>

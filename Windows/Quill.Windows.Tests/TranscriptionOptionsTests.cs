@@ -54,6 +54,51 @@ public class TranscriptionOptionsTests
     }
 
     [Fact]
+    public void FromConfig_CarriesThePromptThrough_SoWhisperGetsTheVocabulary()
+    {
+        var options = TranscriptionOptions.FromConfig(new TranscriptionConfig { Prompt = "Quill, Contoso, WASAPI" });
+
+        Assert.Equal("Quill, Contoso, WASAPI", options.Prompt);
+    }
+
+    [Fact]
+    public void FromConfig_TrimsThePrompt()
+    {
+        var options = TranscriptionOptions.FromConfig(new TranscriptionConfig { Prompt = "  Contoso  " });
+
+        Assert.Equal("Contoso", options.Prompt);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void FromConfig_LeavesThePromptUnset_WhenItHasNoText(string? configured)
+    {
+        // Un prompt en blanco se tokeniza igual y gasta contexto de whisper.cpp.
+        Assert.Null(TranscriptionOptions.FromConfig(new TranscriptionConfig { Prompt = configured }).Prompt);
+    }
+
+    [Fact]
+    public void FromConfig_KeepsTheRestOfTheOptions_WhenAPromptIsConfigured()
+    {
+        var config = new TranscriptionConfig { Prompt = "Contoso", Threads = 6, Language = "en" };
+
+        var options = TranscriptionOptions.FromConfig(config);
+
+        Assert.Equal(6, options.Threads);
+        Assert.Equal("en", options.Language);
+        Assert.Equal(ConfigStore.ResolveModelPath(ConfigStore.DefaultModelFile), options.ModelPath);
+        Assert.Null(options.VadModelPath);
+    }
+
+    [Fact]
+    public void TranscriptionConfig_DefaultsToNoPrompt()
+    {
+        Assert.Null(new TranscriptionConfig().Prompt);
+    }
+
+    [Fact]
     public void TranscriptionConfig_DefaultsToTheBundledModelWithVadOff()
     {
         var config = new TranscriptionConfig();
