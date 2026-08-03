@@ -55,6 +55,7 @@ The Windows application lives in `Windows/Quill.Windows`.
 | Two tracks and metadata | Implemented | WAV + `meta.json` |
 | Local Spanish transcription | Implemented | Whisper.net / whisper.cpp + `large-v3` |
 | Pending-job recovery | Implemented | Scan sessions without `transcript.json` |
+| Sessions window | Implemented | WPF window with live per-track progress |
 | Start at login | Implemented | `HKCU\...\Run` value |
 | Portable package | Implemented | Self-contained `win-x64` ZIP |
 | Windows 11 hardware smoke test | Pending | Requires a Windows device with audio hardware |
@@ -146,7 +147,7 @@ The published ZIP is self-contained: it does not require the .NET SDK or runtime
 2. Run `quill.exe`.
 3. Right-click the Quill tray icon and select `Iniciar grabacion`.
 4. Select `Detener grabacion` when the meeting ends.
-5. Open `Recordings` from the tray menu after the transcript notification appears.
+5. Double-click the tray icon to open the sessions window and watch transcription progress.
 
 The `large-v3` model is already in `models\` inside the ZIP. Quill does not download it during normal use.
 
@@ -218,6 +219,7 @@ By default, each session is saved at:
 | `mic.wav` | Microphone audio. |
 | `system.wav` | Windows output audio. |
 | `meta.json` | Start, end, duration, files, and track offsets. |
+| `status.json` | Transcription state, model used, and elapsed time. |
 | `transcript.json` | Canonical transcript with timed segments. |
 | `transcript.md` | Human-readable Markdown transcript. |
 | `transcribe.log` | Transcription progress and errors. |
@@ -225,6 +227,8 @@ By default, each session is saved at:
 The tracks are transcribed independently. Their offsets are applied before they are merged by timestamp, which makes `me` and `them` labels possible without sending audio to a diarization service.
 
 If Windows or Quill closes while transcription is running, the session retains `meta.json` but has no `transcript.json`; Quill queues it when it next starts. Transcripts are written atomically, so their presence means the output was completed.
+
+`status.json` records the outcome so it survives a restart. A session marked `failed` is not queued again automatically: open the sessions window and select `Reintentar`. The file is a convenience, not the source of truth — deleting it makes Quill derive the state from which files exist, exactly as it did before.
 
 ## Configuration
 
@@ -270,14 +274,22 @@ quill-windows/
 |   |   |-- ConfigStore.cs
 |   |   `-- Doctor.cs
 |   |-- Sessions/
-|   |   `-- SessionDocuments.cs
+|   |   |-- SessionCatalog.cs
+|   |   |-- SessionDocuments.cs
+|   |   `-- SessionStatus.cs
 |   |-- Transcription/
+|   |   |-- ResumePolicy.cs
 |   |   |-- TranscriptionCoordinator.cs
+|   |   |-- TranscriptionUpdate.cs
 |   |   `-- WhisperTranscriber.cs
 |   |-- UI/
+|   |   |-- SessionRowViewModel.cs
+|   |   |-- SessionsViewModel.cs
+|   |   |-- SessionsWindow.xaml
 |   |   `-- TrayApplication.cs
 |   |-- Program.cs
 |   `-- Quill.Windows.csproj
+|-- Windows/Quill.Windows.Tests/
 |-- models/
 |   `-- MANIFEST.md
 |-- tools/
@@ -328,6 +340,8 @@ Required manual smoke test before distribution:
 3. Stop the recording and verify `mic.wav`, `system.wav`, and `meta.json`.
 4. Wait for Whisper and inspect `transcript.json` and `transcript.md`.
 5. Close Quill during transcription and confirm that it resumes after reopening.
+6. Double-click the tray icon and confirm the sessions window lists the session with live progress.
+7. Confirm a failed session shows `error` after a restart and can be retried from the window.
 
 ## Troubleshooting
 

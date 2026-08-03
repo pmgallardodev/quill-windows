@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading.Channels;
 using Quill.Windows.Infrastructure;
 using Quill.Windows.Sessions;
@@ -20,7 +21,11 @@ internal sealed class TranscriptionCoordinator : IDisposable
         _worker = Task.Run(DrainAsync);
     }
 
-    public event Action<TranscriptionStatus>? StatusChanged;
+    /// <summary>Transiciones de estado. Unas cinco por sesion: seguro para trabajo caro.</summary>
+    public event Action<TranscriptionUpdate>? StateChanged;
+
+    /// <summary>Avance dentro de una pista. Cientos por minuto: el consumidor debe limitar su ritmo.</summary>
+    public event Action<TranscriptionUpdate>? ProgressChanged;
 
     public void ResumePending()
     {
@@ -29,10 +34,11 @@ internal sealed class TranscriptionCoordinator : IDisposable
             return;
         }
 
-        foreach (var directory in Directory.EnumerateDirectories(_recordingsRoot).OrderBy(Path.GetFileName))
+        foreach (var directory in Directory.EnumerateDirectories(_recordingsRoot).OrderBy(Path.GetFileName, StringComparer.Ordinal))
         {
-            if (File.Exists(Path.Combine(directory, "meta.json")) &&
-                !File.Exists(Path.Combine(directory, "transcript.json")))
+            var hasMetadata = File.Exists(Path.Combine(directory, "meta.json"));
+            var hasTranscript = File.Exists(Path.Combine(directory, "transcript.json"));
+            if (ResumePolicy.ShouldEnqueue(hasMetadata, hasTranscript, SessionStatus.TryRead(directory)))
             {
                 Enqueue(directory);
             }
@@ -47,7 +53,30 @@ internal sealed class TranscriptionCoordinator : IDisposable
             return;
         }
 
+        WriteStatus(sessionDirectory, SessionStatus.Queued, null, null);
         _queue.Writer.TryWrite(sessionDirectory);
+        StateChanged?.Invoke(new TranscriptionUpdate(
+            sessionDirectory, SessionState.Queued, _pending.Count, Array.Empty<TrackProgress>(), null, TimeSpan.Zero));
+    }
+
+    /// <summary>Vuelve a encolar una sesion que fallo. Es la unica forma de reintentar un "failed".</summary>
+    public void Retry(string sessionDirectory)
+    {
+        if (!Directory.Exists(sessionDirectory))
+        {
+            return;
+        }
+
+        try
+        {
+            File.Delete(SessionStatus.PathFor(sessionDirectory));
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Log(sessionDirectory, $"could not clear status.json: {exception.Message}");
+        }
+
+        Enqueue(sessionDirectory);
     }
 
     public void Dispose()
@@ -80,11 +109,16 @@ internal sealed class TranscriptionCoordinator : IDisposable
             await foreach (var sessionDirectory in _queue.Reader.ReadAllAsync(_shutdown.Token))
             {
                 _pending.TryRemove(sessionDirectory, out _);
-                Publish(new TranscriptionStatus(sessionDirectory, _pending.Count, false, null));
+                var clock = Stopwatch.StartNew();
+                var tracks = new List<TrackProgress>();
+
+                WriteStatus(sessionDirectory, SessionStatus.Running, null, null);
+                PublishState(sessionDirectory, SessionState.Running, tracks, null, clock.Elapsed);
                 try
                 {
-                    await TranscribeSessionAsync(sessionDirectory, _shutdown.Token);
-                    Publish(new TranscriptionStatus(sessionDirectory, _pending.Count, true, null));
+                    await TranscribeSessionAsync(sessionDirectory, tracks, clock, _shutdown.Token);
+                    WriteStatus(sessionDirectory, SessionStatus.Done, clock.Elapsed.TotalSeconds, null);
+                    PublishState(sessionDirectory, SessionState.Done, tracks, null, clock.Elapsed);
                 }
                 catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
                 {
@@ -93,7 +127,8 @@ internal sealed class TranscriptionCoordinator : IDisposable
                 catch (Exception exception)
                 {
                     Log(sessionDirectory, $"transcription failed: {exception}");
-                    Publish(new TranscriptionStatus(sessionDirectory, _pending.Count, true, exception.Message));
+                    WriteStatus(sessionDirectory, SessionStatus.Failed, clock.Elapsed.TotalSeconds, exception.Message);
+                    PublishState(sessionDirectory, SessionState.Failed, tracks, exception.Message, clock.Elapsed);
                 }
             }
         }
@@ -102,7 +137,11 @@ internal sealed class TranscriptionCoordinator : IDisposable
         }
     }
 
-    private async Task TranscribeSessionAsync(string sessionDirectory, CancellationToken cancellationToken)
+    private async Task TranscribeSessionAsync(
+        string sessionDirectory,
+        List<TrackProgress> tracks,
+        Stopwatch clock,
+        CancellationToken cancellationToken)
     {
         var metadata = SessionMetadata.Read(sessionDirectory);
         var transcriber = _transcriber ??= new WhisperTranscriber(ConfigStore.ModelPath);
@@ -122,15 +161,27 @@ internal sealed class TranscriptionCoordinator : IDisposable
                 continue;
             }
 
+            // Las pistas se procesan en serie, asi que un solo hilo escribe en la lista.
+            var index = tracks.Count;
+            tracks.Add(new TrackProgress(name, 0d, false));
+            var reporter = new TrackReporter(fraction =>
+            {
+                tracks[index] = new TrackProgress(name, fraction, false);
+                ProgressChanged?.Invoke(new TranscriptionUpdate(
+                    sessionDirectory, SessionState.Running, _pending.Count, tracks.ToArray(), null, clock.Elapsed));
+            });
+
             try
             {
                 Log(sessionDirectory, $"transcribing {fileName} with Whisper large-v3");
                 var offset = metadata.StartOffsetMs.GetValueOrDefault(name);
-                merged.AddRange(await transcriber.TranscribeAsync(audioPath, speaker, offset, cancellationToken));
+                merged.AddRange(await transcriber.TranscribeAsync(audioPath, speaker, offset, reporter, cancellationToken));
+                tracks[index] = new TrackProgress(name, 1d, true);
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
                 Log(sessionDirectory, $"skipping {fileName}: {exception.Message}");
+                tracks[index] = tracks[index] with { Completed = true };
             }
         }
 
@@ -145,14 +196,54 @@ internal sealed class TranscriptionCoordinator : IDisposable
         Log(sessionDirectory, $"done: {merged.Count} segments");
     }
 
-    private static void Log(string sessionDirectory, string message)
+    /// <summary>
+    /// Fallar al escribir el estado no puede interrumpir una transcripcion: el
+    /// estado siempre es rederivable de que archivos existen.
+    /// </summary>
+    private static void WriteStatus(string sessionDirectory, string state, double? elapsedSeconds, string? error)
     {
-        File.AppendAllText(
-            Path.Combine(sessionDirectory, "transcribe.log"),
-            $"{DateTimeOffset.UtcNow:O} {message}{Environment.NewLine}");
+        try
+        {
+            new SessionStatus
+            {
+                State = state,
+                UpdatedAt = DateTimeOffset.UtcNow,
+                Model = Path.GetFileNameWithoutExtension(ConfigStore.ModelPath),
+                ElapsedSeconds = elapsedSeconds,
+                Error = error,
+            }.Write(sessionDirectory);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Log(sessionDirectory, $"could not write status.json: {exception.Message}");
+        }
     }
 
-    private void Publish(TranscriptionStatus status) => StatusChanged?.Invoke(status);
-}
+    private void PublishState(
+        string sessionDirectory,
+        SessionState state,
+        List<TrackProgress> tracks,
+        string? error,
+        TimeSpan elapsed) =>
+        StateChanged?.Invoke(new TranscriptionUpdate(
+            sessionDirectory, state, _pending.Count, tracks.ToArray(), error, elapsed));
 
-internal sealed record TranscriptionStatus(string SessionDirectory, int Queued, bool Finished, string? Error);
+    private static void Log(string sessionDirectory, string message)
+    {
+        try
+        {
+            File.AppendAllText(
+                Path.Combine(sessionDirectory, "transcribe.log"),
+                $"{DateTimeOffset.UtcNow:O} {message}{Environment.NewLine}");
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // Perder una linea de log no justifica abortar la transcripcion.
+        }
+    }
+
+    private sealed class TrackReporter(Action<double> report) : IProgress<double>
+    {
+        public void Report(double value) => report(value);
+    }
+}

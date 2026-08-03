@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Windows.Threading;
 using Quill.Windows.Audio;
+using Quill.Windows.Sessions;
 using Quill.Windows.Transcription;
 using Forms = System.Windows.Forms;
 using WpfApplication = System.Windows.Application;
@@ -28,6 +29,8 @@ internal sealed class TrayController : IDisposable
     private readonly Forms.ToolStripMenuItem _toggle;
     private readonly DispatcherTimer _ticker;
     private readonly TranscriptionCoordinator _transcription;
+    private readonly SessionsViewModel _sessionsViewModel;
+    private SessionsWindow? _sessionsWindow;
     private RecordingSession? _session;
     private DateTimeOffset? _recordingStartedAt;
     private bool _disposed;
@@ -41,6 +44,7 @@ internal sealed class TrayController : IDisposable
         var menu = new Forms.ContextMenuStrip();
         _toggle = new Forms.ToolStripMenuItem("Iniciar grabacion", null, async (_, _) => await ToggleAsync());
         menu.Items.Add(_toggle);
+        menu.Items.Add(new Forms.ToolStripMenuItem("Ver sesiones", null, (_, _) => ShowSessions()));
         menu.Items.Add(new Forms.ToolStripMenuItem("Abrir grabaciones", null, (_, _) => OpenRecordings()));
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add(new Forms.ToolStripMenuItem("Salir", null, (_, _) => _application.Shutdown()));
@@ -52,13 +56,16 @@ internal sealed class TrayController : IDisposable
             ContextMenuStrip = menu,
             Visible = true,
         };
-        _icon.DoubleClick += async (_, _) => await ToggleAsync();
+        // Abrir la ventana en lugar de grabar: un doble clic accidental ya no puede
+        // cortar una reunion en curso.
+        _icon.DoubleClick += (_, _) => ShowSessions();
 
         _ticker = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _ticker.Tick += (_, _) => UpdateElapsedTime();
 
         _transcription = new TranscriptionCoordinator(recordingsRoot);
-        _transcription.StatusChanged += status => _application.Dispatcher.BeginInvoke(() => ShowTranscriptionStatus(status));
+        _transcription.StateChanged += update => _application.Dispatcher.BeginInvoke(() => ShowTranscriptionStatus(update));
+        _sessionsViewModel = new SessionsViewModel(recordingsRoot, _transcription, _application.Dispatcher);
         _transcription.ResumePending();
         _application.Exit += (_, _) => Dispose();
     }
@@ -79,6 +86,14 @@ internal sealed class TrayController : IDisposable
             _session = null;
         }
 
+        if (_sessionsWindow is not null)
+        {
+            _sessionsWindow.AllowClose = true;
+            _sessionsWindow.Close();
+            _sessionsWindow = null;
+        }
+
+        _sessionsViewModel.Dispose();
         _transcription.Dispose();
         _icon.Visible = false;
         _icon.Dispose();
@@ -107,6 +122,7 @@ internal sealed class TrayController : IDisposable
             _toggle.Text = "Detener grabacion";
             _icon.Text = "quill - GRABANDO 0:00";
             _ticker.Start();
+            _sessionsViewModel.SetActiveSession(_session.Directory);
             _icon.ShowBalloonTip(3_000, "quill", "Grabacion activa: microfono y audio del sistema.", Forms.ToolTipIcon.Info);
         }
         catch (Exception exception)
@@ -129,6 +145,7 @@ internal sealed class TrayController : IDisposable
         try
         {
             session.Stop();
+            _sessionsViewModel.SetActiveSession(null);
             _transcription.Enqueue(session.Directory);
             _icon.Text = "quill - transcripcion en cola";
             _icon.ShowBalloonTip(3_000, "quill", "Grabacion terminada. La transcripcion local inicio en segundo plano.", Forms.ToolTipIcon.Info);
@@ -156,27 +173,34 @@ internal sealed class TrayController : IDisposable
         _icon.Text = $"quill - GRABANDO {FormatDuration(elapsed)}";
     }
 
-    private void ShowTranscriptionStatus(TranscriptionStatus status)
+    private void ShowTranscriptionStatus(TranscriptionUpdate update)
     {
-        var name = Path.GetFileName(status.SessionDirectory);
-        if (!status.Finished)
+        var name = Path.GetFileName(update.SessionDirectory);
+        switch (update.State)
         {
-            _icon.Text = status.Queued > 0
-                ? $"quill - transcribiendo ({status.Queued} en cola)"
-                : "quill - transcribiendo";
-            return;
-        }
+            case SessionState.Queued:
+            case SessionState.Running:
+                _icon.Text = update.Queued > 0
+                    ? $"quill - transcribiendo ({update.Queued} en cola)"
+                    : "quill - transcribiendo";
+                break;
 
-        if (status.Error is null)
-        {
-            _icon.Text = "quill - listo";
-            _icon.ShowBalloonTip(4_000, "quill", $"Transcripcion lista: {name}", Forms.ToolTipIcon.Info);
+            case SessionState.Done:
+                _icon.Text = "quill - listo";
+                _icon.ShowBalloonTip(4_000, "quill", $"Transcripcion lista: {name}", Forms.ToolTipIcon.Info);
+                break;
+
+            case SessionState.Failed:
+                _icon.Text = "quill - error de transcripcion";
+                _icon.ShowBalloonTip(6_000, "quill - error", $"{name}: {update.Error}", Forms.ToolTipIcon.Error);
+                break;
         }
-        else
-        {
-            _icon.Text = "quill - error de transcripcion";
-            _icon.ShowBalloonTip(6_000, "quill - error", $"{name}: {status.Error}", Forms.ToolTipIcon.Error);
-        }
+    }
+
+    private void ShowSessions()
+    {
+        _sessionsWindow ??= new SessionsWindow(_sessionsViewModel);
+        _sessionsWindow.ShowRefreshed();
     }
 
     private void OpenRecordings()
