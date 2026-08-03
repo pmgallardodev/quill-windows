@@ -160,17 +160,19 @@ internal static class TranscriptExport
 internal static class TranscriptSearch
 {
     /// <summary>
-    /// Minusculas y sin diacriticos, para que "sesion" encuentre "sesión". La forma D
-    /// separa la letra de su acento y descartar los NonSpacingMark deja solo la base.
+    /// Minusculas, sin diacriticos y sin espacios en los extremos, para que "sesion"
+    /// encuentre "sesión". La forma D separa la letra de su acento y descartar los
+    /// NonSpacingMark deja solo la base. El recorte importa porque esto normaliza
+    /// tambien lo tecleado: un espacio de mas no debe dejar la busqueda sin resultados.
     /// </summary>
     public static string Normalize(string? text)
     {
-        if (string.IsNullOrEmpty(text))
+        if (string.IsNullOrWhiteSpace(text))
         {
             return string.Empty;
         }
 
-        var decomposed = text.Normalize(NormalizationForm.FormD);
+        var decomposed = text.Trim().Normalize(NormalizationForm.FormD);
         var output = new StringBuilder(decomposed.Length);
 
         foreach (var character in decomposed)
