@@ -11,6 +11,12 @@ internal static class Doctor
     /// </summary>
     private const long MinimumModelBytes = 1;
 
+    /// <summary>
+    /// Una hora de reunion a formato nativo pasa del gigabyte por pista. Dos GB es el
+    /// minimo con el que una reunion normal cabe entera sin cortarse a media frase.
+    /// </summary>
+    private const long MinimumFreeBytes = 2L * 1024 * 1024 * 1024;
+
     public static int Run(string recordingsRoot)
     {
         var checks = new List<(string Name, bool Ok, string Detail)>();
@@ -48,6 +54,8 @@ internal static class Doctor
             checks.Add(("carpeta de grabaciones", false, exception.Message));
         }
 
+        checks.Add(CheckFreeSpace(recordingsRoot));
+
         var transcription = ConfigStore.Load().Transcription;
         var modelPath = ConfigStore.ResolveModelPath(transcription.Model);
         var model = new FileInfo(modelPath);
@@ -72,5 +80,25 @@ internal static class Doctor
         }
 
         return checks.All(check => check.Ok) ? 0 : 1;
+    }
+
+    /// <summary>
+    /// DriveInfo lanza en rutas UNC y en unidades que no estan listas. Ahi el fallo es
+    /// justo el resultado del check: quedarse sin espacio a mitad de reunion pierde el
+    /// audio, y hacer reventar "doctor" ocultaria el resto de comprobaciones.
+    /// </summary>
+    private static (string Name, bool Ok, string Detail) CheckFreeSpace(string recordingsRoot)
+    {
+        try
+        {
+            var drive = new DriveInfo(Path.GetFullPath(recordingsRoot));
+            var free = drive.AvailableFreeSpace;
+            return ("espacio libre", free >= MinimumFreeBytes,
+                $"{free / 1024d / 1024d / 1024d:0.0} GB en {drive.Name} (minimo {MinimumFreeBytes / 1024 / 1024 / 1024} GB)");
+        }
+        catch (Exception exception)
+        {
+            return ("espacio libre", false, exception.Message);
+        }
     }
 }

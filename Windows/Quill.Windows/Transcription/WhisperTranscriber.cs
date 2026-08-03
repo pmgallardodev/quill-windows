@@ -1,5 +1,6 @@
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using Quill.Windows.Audio;
 using Quill.Windows.Sessions;
 using Whisper.net;
 
@@ -85,20 +86,17 @@ internal sealed class WhisperTranscriber : IDisposable
     /// <summary>
     /// Convierte a 16 kHz mono y devuelve la duracion del original. AudioFileReader
     /// ya la conoce, y es mas fiable que meta.json porque las pistas tienen offsets
-    /// distintos y pueden no durar lo mismo.
+    /// distintos y pueden no durar lo mismo. Cualquier numero de canales se promedia:
+    /// un dispositivo 5.1 o 7.1 no puede dejar la sesion sin transcribir.
     /// </summary>
     internal static TimeSpan NormalizeToWhisperWav(string inputPath, string outputPath)
     {
         using var reader = new AudioFileReader(inputPath);
         var duration = reader.TotalTime;
         ISampleProvider source = reader;
-        if (source.WaveFormat.Channels == 2)
+        if (source.WaveFormat.Channels > 1)
         {
-            source = new StereoToMonoSampleProvider(source);
-        }
-        else if (source.WaveFormat.Channels != 1)
-        {
-            throw new InvalidDataException($"canales no compatibles: {source.WaveFormat.Channels}");
+            source = new MonoDownmixSampleProvider(source);
         }
 
         var resampled = new WdlResamplingSampleProvider(source, 16_000);
@@ -167,10 +165,18 @@ internal sealed class WhisperTranscriber : IDisposable
 
         try
         {
-            using var processor = _factory.CreateBuilder()
+            var builder = _factory.CreateBuilder()
                 .WithLanguage(_options.Language)
-                .WithThreads(_options.Threads)
-                .Build();
+                .WithThreads(_options.Threads);
+            var prompt = _options.Prompt;
+            if (!string.IsNullOrWhiteSpace(prompt))
+            {
+                // Contexto inicial por bloque, no acumulado: sin esto Whisper inventa
+                // una grafia fonetica para los nombres propios y la jerga del equipo.
+                builder = builder.WithPrompt(prompt);
+            }
+
+            using var processor = builder.Build();
             await using var audio = File.OpenRead(sourcePath);
             var segments = new List<TranscriptSegment>();
             await foreach (var result in processor.ProcessAsync(audio).WithCancellation(cancellationToken))

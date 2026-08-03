@@ -11,18 +11,25 @@ internal sealed record TranscriptionOptions(
     string ModelName,
     string Language,
     int Threads,
-    string? VadModelPath)
+    string? VadModelPath,
+    string? Prompt)
 {
-    public static TranscriptionOptions FromConfig()
-    {
-        var config = ConfigStore.Load().Transcription;
-        return new TranscriptionOptions(
-            ConfigStore.ResolveModelPath(config.Model),
-            Path.GetFileNameWithoutExtension(config.Model),
-            config.Language,
-            ResolveThreads(config.Threads),
-            config.Vad ? ConfigStore.ResolveModelPath(config.VadModel) : null);
-    }
+    public static TranscriptionOptions FromConfig() => FromConfig(ConfigStore.Load().Transcription);
+
+    internal static TranscriptionOptions FromConfig(TranscriptionConfig config) => new(
+        ConfigStore.ResolveModelPath(config.Model),
+        Path.GetFileNameWithoutExtension(config.Model),
+        config.Language,
+        ResolveThreads(config.Threads),
+        config.Vad ? ConfigStore.ResolveModelPath(config.VadModel) : null,
+        NormalizePrompt(config.Prompt));
+
+    /// <summary>
+    /// Un prompt en blanco no es lo mismo que ninguno: whisper.cpp lo tokeniza igual
+    /// y gasta contexto, asi que solo se conserva cuando trae texto.
+    /// </summary>
+    internal static string? NormalizePrompt(string? prompt) =>
+        string.IsNullOrWhiteSpace(prompt) ? null : prompt.Trim();
 
     /// <summary>
     /// whisper.cpp trae un tope de cuatro hilos que desaprovecha los CPU actuales.
