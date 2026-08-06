@@ -5,3 +5,4 @@ Windows/**/bin/
 Windows/**/obj/
 .DS_Store
 .claude/worktrees/
+docs/superpowers/
