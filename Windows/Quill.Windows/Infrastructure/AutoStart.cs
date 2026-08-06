@@ -9,19 +9,20 @@ internal static class AutoStart
 
     public static int Configure(bool uninstall)
     {
-        using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true)
-            ?? throw new InvalidOperationException("no se pudo abrir la configuracion de inicio de Windows");
-
         if (uninstall)
         {
-            key.DeleteValue(ValueName, throwOnMissingValue: false);
+            using var existingKey = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
+            existingKey?.DeleteValue(ValueName, throwOnMissingValue: false);
             Console.WriteLine("inicio automatico desactivado");
             return 0;
         }
 
+        using var runKey = Registry.CurrentUser.CreateSubKey(RunKey)
+            ?? throw new InvalidOperationException("no se pudo abrir la configuracion de inicio de Windows");
+
         var executable = Environment.ProcessPath
             ?? throw new InvalidOperationException("no se pudo determinar la ruta del ejecutable");
-        key.SetValue(ValueName, $"\"{executable}\" run");
+        runKey.SetValue(ValueName, $"\"{executable}\" run");
         Console.WriteLine("inicio automatico activado");
         return 0;
     }

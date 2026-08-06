@@ -9,7 +9,13 @@ internal static class Doctor
     /// No se puede imponer el tamano de un modelo concreto porque config.json puede
     /// seleccionar cualquier modelo whisper.cpp, incluidos los modelos tiny.
     /// </summary>
-    private const long MinimumModelBytes = 1;
+    private const long MinimumModelBytes = 1L * 1024 * 1024;
+
+    /// <summary>
+    /// Silero es mucho mas pequeno que Whisper, pero un archivo vacio o truncado
+    /// tampoco puede inicializar el detector.
+    /// </summary>
+    private const long MinimumVadModelBytes = 500L * 1024;
 
     /// <summary>
     /// Una hora de reunion a formato nativo pasa del gigabyte por pista. Dos GB es el
@@ -44,15 +50,7 @@ internal static class Doctor
             checks.Add(("audio del sistema", false, exception.Message));
         }
 
-        try
-        {
-            Directory.CreateDirectory(recordingsRoot);
-            checks.Add(("carpeta de grabaciones", true, recordingsRoot));
-        }
-        catch (Exception exception)
-        {
-            checks.Add(("carpeta de grabaciones", false, exception.Message));
-        }
+        checks.Add(CheckRecordingsFolder(recordingsRoot));
 
         checks.Add(CheckFreeSpace(recordingsRoot));
 
@@ -67,14 +65,18 @@ internal static class Doctor
             var model = new FileInfo(modelPath);
             checks.Add(($"modelo {Path.GetFileNameWithoutExtension(transcription.Model)}",
                 model.Exists && model.Length >= MinimumModelBytes,
-                model.Exists ? $"{model.Length / 1024 / 1024} MB" : modelPath));
+                model.Exists
+                    ? $"{model.Length / 1024 / 1024} MB (minimo {MinimumModelBytes / 1024 / 1024} MB)"
+                    : modelPath));
 
             if (transcription.Vad)
             {
                 var vadPath = ConfigStore.ResolveModelPath(transcription.VadModel);
                 var vad = new FileInfo(vadPath);
-                checks.Add(("modelo VAD", vad.Exists && vad.Length >= MinimumModelBytes,
-                    vad.Exists ? $"{vad.Length / 1024} KB" : vadPath));
+                checks.Add(("modelo VAD", vad.Exists && vad.Length >= MinimumVadModelBytes,
+                    vad.Exists
+                        ? $"{vad.Length / 1024} KB (minimo {MinimumVadModelBytes / 1024} KB)"
+                        : vadPath));
             }
 
             checks.Add(("hilos de inferencia", true,
@@ -87,6 +89,40 @@ internal static class Doctor
         }
 
         return checks.All(check => check.Ok) ? 0 : 1;
+    }
+
+    /// <summary>
+    /// Crear el directorio no demuestra que se puedan guardar los WAV y metadatos.
+    /// La prueba deja la carpeta como estaba antes de devolver el resultado.
+    /// </summary>
+    private static (string Name, bool Ok, string Detail) CheckRecordingsFolder(string recordingsRoot)
+    {
+        string? probe = null;
+        try
+        {
+            Directory.CreateDirectory(recordingsRoot);
+            probe = Path.Combine(recordingsRoot, $".quill-doctor-{Guid.NewGuid():N}.tmp");
+            File.WriteAllText(probe, "quill doctor");
+            File.Delete(probe);
+            return ("carpeta de grabaciones", true, recordingsRoot);
+        }
+        catch (Exception exception)
+        {
+            if (probe is not null)
+            {
+                try
+                {
+                    File.Delete(probe);
+                }
+                catch (Exception cleanupException) when (
+                    cleanupException is IOException or UnauthorizedAccessException)
+                {
+                    // Conserva el error original: es el que explica el fallo del check.
+                }
+            }
+
+            return ("carpeta de grabaciones", false, exception.Message);
+        }
     }
 
     /// <summary>

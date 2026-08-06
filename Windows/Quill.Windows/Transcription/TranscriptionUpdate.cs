@@ -2,7 +2,11 @@ using Quill.Windows.Sessions;
 
 namespace Quill.Windows.Transcription;
 
-internal sealed record TrackProgress(string Track, double Fraction, bool Completed);
+internal sealed record TrackProgress(
+    string Track,
+    double Fraction,
+    bool Completed,
+    TimeSpan? Duration = null);
 
 /// <summary>
 /// Se publica por dos eventos distintos con contratos de coste opuestos:
@@ -15,4 +19,5 @@ internal sealed record TranscriptionUpdate(
     int Queued,
     IReadOnlyList<TrackProgress> Tracks,
     string? Error,
-    TimeSpan Elapsed);
+    TimeSpan Elapsed,
+    string? Model = null);

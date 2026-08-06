@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace Quill.Windows.Sessions;
@@ -32,11 +33,27 @@ internal sealed class SessionMetadata
     public static SessionMetadata Read(string sessionDirectory)
     {
         var path = Path.Combine(sessionDirectory, "meta.json");
+        if (File.Exists(path) && (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new InvalidDataException($"metadatos enlazados no permitidos: {path}");
+        }
+
         var metadata = JsonSerializer.Deserialize<SessionMetadata>(File.ReadAllText(path))
             ?? throw new InvalidDataException($"no se pudo leer {path}");
         if (metadata.Files is null || metadata.StartOffsetMs is null || metadata.Markers is null)
         {
             throw new InvalidDataException($"metadatos incompletos: {path}");
+        }
+
+        if (metadata.Started == default || metadata.Ended < metadata.Started ||
+            metadata.DurationSeconds < 0 ||
+            metadata.DurationSeconds > (long)TimeSpan.MaxValue.TotalSeconds ||
+            metadata.Files.Any(pair => string.IsNullOrWhiteSpace(pair.Key) || string.IsNullOrWhiteSpace(pair.Value)) ||
+            metadata.StartOffsetMs.Any(pair =>
+                pair.Value < 0 || pair.Value > (long)TimeSpan.MaxValue.TotalMilliseconds) ||
+            metadata.Markers.Any(marker => marker < 0))
+        {
+            throw new InvalidDataException($"metadatos invalidos: {path}");
         }
 
         return metadata;
@@ -75,19 +92,35 @@ internal sealed class SessionMetadata
 
         try
         {
-            new SessionMetadata
+            var path = Path.Combine(sessionDirectory, "meta.json");
+            if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
             {
-                Started = metadata.Started,
-                Ended = metadata.Ended,
-                DurationSeconds = metadata.DurationSeconds,
-                Files = metadata.Files,
-                StartOffsetMs = metadata.StartOffsetMs,
-                Markers = metadata.Markers,
-                Title = string.IsNullOrWhiteSpace(title) ? null : title.Trim(),
-            }.Write(sessionDirectory);
+                return false;
+            }
+
+            var document = JsonNode.Parse(File.ReadAllText(path)) as JsonObject;
+            if (document is null)
+            {
+                return false;
+            }
+
+            var normalizedTitle = string.IsNullOrWhiteSpace(title) ? null : title.Trim();
+            var existingTitle = document.Select(pair => pair.Key).FirstOrDefault(key =>
+                string.Equals(key, "title", StringComparison.OrdinalIgnoreCase));
+            if (existingTitle is not null)
+            {
+                document[existingTitle] = normalizedTitle;
+            }
+            else if (normalizedTitle is not null)
+            {
+                document["title"] = normalizedTitle;
+            }
+
+            AtomicFile.Write(path, document.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
             return true;
         }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        catch (Exception exception) when (
+            exception is JsonException or IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             return false;
         }
@@ -108,8 +141,55 @@ internal sealed class TranscriptDocument
     [JsonPropertyName("segments")]
     public required IReadOnlyList<TranscriptSegment> Segments { get; init; }
 
+    public static bool TryRead(string sessionDirectory, out TranscriptDocument? document)
+    {
+        document = null;
+        var path = Path.Combine(sessionDirectory, "transcript.json");
+        try
+        {
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+
+            if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+            {
+                return false;
+            }
+
+            var candidate = JsonSerializer.Deserialize<TranscriptDocument>(File.ReadAllText(path));
+            if (candidate is null || string.IsNullOrWhiteSpace(candidate.Engine) ||
+                string.IsNullOrWhiteSpace(candidate.Model) || candidate.Segments is null ||
+                candidate.Segments.Any(segment => segment is null ||
+                    string.IsNullOrWhiteSpace(segment.Speaker) || segment.Text is null ||
+                    segment.StartMs < 0 || segment.EndMs < segment.StartMs ||
+                    segment.EndMs > (long)TimeSpan.MaxValue.TotalMilliseconds))
+            {
+                return false;
+            }
+
+            document = candidate;
+            return true;
+        }
+        catch (Exception exception) when (
+            exception is JsonException or IOException or UnauthorizedAccessException or
+                NotSupportedException or ArgumentException)
+        {
+            return false;
+        }
+    }
+
     public void Write(string sessionDirectory)
     {
+        if (string.IsNullOrWhiteSpace(Engine) || string.IsNullOrWhiteSpace(Model) || Segments is null ||
+            Segments.Any(segment => segment is null || string.IsNullOrWhiteSpace(segment.Speaker) ||
+                string.IsNullOrWhiteSpace(segment.Text) || segment.StartMs < 0 ||
+                segment.EndMs < segment.StartMs ||
+                segment.EndMs > (long)TimeSpan.MaxValue.TotalMilliseconds))
+        {
+            throw new InvalidDataException("transcript invalido");
+        }
+
         // transcript.json is the completion marker used by recovery. Write the
         // human-readable copy first so a crash or failure cannot expose a JSON-only
         // transcript as complete.
@@ -138,7 +218,8 @@ internal sealed class TranscriptDocument
 
     private static string Clock(long milliseconds)
     {
-        var span = TimeSpan.FromMilliseconds(milliseconds);
+        var span = TimeSpan.FromMilliseconds(
+            Math.Clamp(milliseconds, 0L, (long)TimeSpan.MaxValue.TotalMilliseconds));
         return span.TotalHours >= 1
             ? $"{(int)span.TotalHours}:{span.Minutes:D2}:{span.Seconds:D2}"
             : $"{span.Minutes}:{span.Seconds:D2}";

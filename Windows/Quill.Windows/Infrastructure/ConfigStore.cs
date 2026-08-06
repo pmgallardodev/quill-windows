@@ -59,7 +59,10 @@ internal static class ConfigStore
     public static string ResolveRecordingsRoot(string? commandLineOverride)
     {
         var configured = Load().RecordingsDirectory;
-        var path = commandLineOverride ?? configured ?? DefaultRecordingsRoot;
+        var path = string.IsNullOrWhiteSpace(commandLineOverride)
+            ? configured
+            : commandLineOverride;
+        path = string.IsNullOrWhiteSpace(path) ? DefaultRecordingsRoot : path;
         return Path.GetFullPath(Environment.ExpandEnvironmentVariables(path));
     }
 
@@ -70,9 +73,21 @@ internal static class ConfigStore
     public static string ResolveModelPath(string fileName)
     {
         var expanded = Environment.ExpandEnvironmentVariables(fileName);
-        return Path.IsPathRooted(expanded)
-            ? Path.GetFullPath(expanded)
-            : Path.Combine(ModelsDirectory, expanded);
+        if (Path.IsPathRooted(expanded))
+        {
+            return Path.GetFullPath(expanded);
+        }
+
+        if (string.IsNullOrWhiteSpace(expanded) ||
+            expanded.Contains(Path.DirectorySeparatorChar) ||
+            expanded.Contains(Path.AltDirectorySeparatorChar) ||
+            expanded.Contains('\\') || expanded.Contains('/') ||
+            expanded is "." or "..")
+        {
+            throw new InvalidOperationException("el modelo debe ser un nombre de archivo o una ruta absoluta");
+        }
+
+        return Path.Combine(ModelsDirectory, expanded);
     }
 
     public static string ModelPath => ResolveModelPath(Load().Transcription.Model);

@@ -55,7 +55,9 @@ internal static class SessionInsights
     public static TimeSpan SpeakingTime(IReadOnlyList<TranscriptSegment> segments, string speaker)
     {
         var ranges = segments
-            .Where(segment => string.Equals(segment.Speaker, speaker, StringComparison.OrdinalIgnoreCase))
+            .Where(segment =>
+                string.Equals(segment.Speaker, speaker, StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrWhiteSpace(segment.Text))
             .Select(segment => (Start: Math.Max(0, segment.StartMs), End: Math.Max(0, segment.EndMs)))
             .Where(range => range.End > range.Start)
             .OrderBy(range => range.Start)
@@ -67,6 +69,7 @@ internal static class SessionInsights
         }
 
         var total = 0L;
+        var maximum = (long)TimeSpan.MaxValue.TotalMilliseconds;
         var currentStart = ranges[0].Start;
         var currentEnd = ranges[0].End;
 
@@ -78,12 +81,13 @@ internal static class SessionInsights
                 continue;
             }
 
-            total += currentEnd - currentStart;
+            total = Math.Min(maximum, total + Math.Min(maximum - total, currentEnd - currentStart));
             currentStart = range.Start;
             currentEnd = range.End;
         }
 
-        return TimeSpan.FromMilliseconds(total + currentEnd - currentStart);
+        total = Math.Min(maximum, total + Math.Min(maximum - total, currentEnd - currentStart));
+        return TimeSpan.FromMilliseconds(total);
     }
 
     /// <summary>
@@ -92,7 +96,8 @@ internal static class SessionInsights
     /// </summary>
     public static IReadOnlyList<TimelineSlot> Timeline(
         IReadOnlyList<TranscriptSegment> segments,
-        int slots)
+        int slots,
+        TimeSpan? sessionDuration = null)
     {
         if (segments.Count == 0 || slots <= 0)
         {
@@ -100,6 +105,10 @@ internal static class SessionInsights
         }
 
         var lastMs = segments.Max(segment => Math.Max(segment.StartMs, segment.EndMs));
+        if (sessionDuration is { } duration && duration > TimeSpan.Zero)
+        {
+            lastMs = Math.Max(lastMs, (long)duration.TotalMilliseconds);
+        }
         if (lastMs <= 0)
         {
             return Array.Empty<TimelineSlot>();
@@ -111,6 +120,11 @@ internal static class SessionInsights
 
         foreach (var segment in segments)
         {
+            if (string.IsNullOrWhiteSpace(segment.Text))
+            {
+                continue;
+            }
+
             var start = Math.Max(0, segment.StartMs);
             var end = Math.Max(0, segment.EndMs);
             if (end <= start)

@@ -16,13 +16,26 @@ internal sealed record TranscriptionOptions(
 {
     public static TranscriptionOptions FromConfig() => FromConfig(ConfigStore.Load().Transcription);
 
-    internal static TranscriptionOptions FromConfig(TranscriptionConfig config) => new(
-        ConfigStore.ResolveModelPath(config.Model),
-        Path.GetFileNameWithoutExtension(config.Model),
-        config.Language,
-        ResolveThreads(config.Threads),
-        config.Vad ? ConfigStore.ResolveModelPath(config.VadModel) : null,
-        NormalizePrompt(config.Prompt));
+    internal static TranscriptionOptions FromConfig(TranscriptionConfig config)
+    {
+        if (!string.Equals(config.Engine, "whisper", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException($"engine no soportado: {config.Engine}");
+        }
+
+        if (string.IsNullOrWhiteSpace(config.Language))
+        {
+            throw new InvalidOperationException("el idioma de transcripcion no puede estar vacio");
+        }
+
+        return new TranscriptionOptions(
+            ConfigStore.ResolveModelPath(config.Model),
+            Path.GetFileNameWithoutExtension(config.Model),
+            config.Language.Trim(),
+            ResolveThreads(config.Threads),
+            config.Vad ? ConfigStore.ResolveModelPath(config.VadModel) : null,
+            NormalizePrompt(config.Prompt));
+    }
 
     /// <summary>
     /// Un prompt en blanco no es lo mismo que ninguno: whisper.cpp lo tokeniza igual

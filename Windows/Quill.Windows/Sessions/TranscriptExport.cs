@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Text;
-using System.Text.Json;
 
 namespace Quill.Windows.Sessions;
 
@@ -82,32 +81,32 @@ internal static class TranscriptExport
     /// <summary>Reloj corto para la interfaz: m:ss, o h:mm:ss si la reunion pasa de la hora.</summary>
     public static string Clock(long milliseconds)
     {
-        var span = TimeSpan.FromMilliseconds(Math.Max(0, milliseconds));
+        var span = TimeSpan.FromMilliseconds(ClampMilliseconds(milliseconds));
         return span.TotalHours >= 1
             ? string.Create(CultureInfo.InvariantCulture, $"{(int)span.TotalHours}:{span.Minutes:D2}:{span.Seconds:D2}")
             : string.Create(CultureInfo.InvariantCulture, $"{span.Minutes}:{span.Seconds:D2}");
     }
 
+    /// <summary>Lee transcript.json y distingue un transcript vacio de uno corrupto.</summary>
+    public static TranscriptReadResult Read(string sessionDirectory)
+    {
+        var path = Path.Combine(sessionDirectory, "transcript.json");
+        if (!File.Exists(path))
+        {
+            return new TranscriptReadResult(TranscriptReadStatus.Missing, Array.Empty<TranscriptSegment>());
+        }
+
+        return TranscriptDocument.TryRead(sessionDirectory, out var document)
+            ? new TranscriptReadResult(
+                document!.Segments.Count == 0 ? TranscriptReadStatus.Empty : TranscriptReadStatus.Valid,
+                document.Segments)
+            : new TranscriptReadResult(TranscriptReadStatus.Invalid, Array.Empty<TranscriptSegment>());
+    }
+
     /// <summary>Lee transcript.json. Devuelve la lista vacia ante cualquier problema.</summary>
     public static IReadOnlyList<TranscriptSegment> TryReadSegments(string sessionDirectory)
     {
-        var path = Path.Combine(sessionDirectory, "transcript.json");
-        try
-        {
-            if (!File.Exists(path))
-            {
-                return Array.Empty<TranscriptSegment>();
-            }
-
-            var document = JsonSerializer.Deserialize<TranscriptDocument>(File.ReadAllText(path));
-            return document?.Segments?.Where(segment => segment is not null).ToArray()
-                ?? Array.Empty<TranscriptSegment>();
-        }
-        catch (Exception exception) when (
-            exception is JsonException or IOException or UnauthorizedAccessException or NotSupportedException)
-        {
-            return Array.Empty<TranscriptSegment>();
-        }
+        return Read(sessionDirectory).Segments;
     }
 
     /// <summary>
@@ -146,12 +145,27 @@ internal static class TranscriptExport
 
     private static string Timestamp(long milliseconds, char decimalSeparator)
     {
-        var span = TimeSpan.FromMilliseconds(Math.Max(0, milliseconds));
+        var span = TimeSpan.FromMilliseconds(ClampMilliseconds(milliseconds));
         return string.Create(
             CultureInfo.InvariantCulture,
             $"{(int)span.TotalHours:D2}:{span.Minutes:D2}:{span.Seconds:D2}{decimalSeparator}{span.Milliseconds:D3}");
     }
+
+    private static long ClampMilliseconds(long milliseconds) =>
+        Math.Clamp(milliseconds, 0L, (long)TimeSpan.MaxValue.TotalMilliseconds);
 }
+
+internal enum TranscriptReadStatus
+{
+    Missing,
+    Invalid,
+    Empty,
+    Valid,
+}
+
+internal sealed record TranscriptReadResult(
+    TranscriptReadStatus Status,
+    IReadOnlyList<TranscriptSegment> Segments);
 
 /// <summary>
 /// Busqueda sobre los transcript.json de todas las sesiones. Perezosa a proposito:
