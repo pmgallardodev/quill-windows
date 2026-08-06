@@ -17,7 +17,8 @@ if (-not $Destination) {
 
 # Umbral comun para todos los modelos Whisper, incluidos los modelos tiny. No es
 # un tamano exacto: solo descarta respuestas claramente truncadas.
-$minimumBytes = 1MB
+$minimumWhisperBytes = 1MB
+$minimumVadBytes = 500KB
 $baseUri = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main"
 $vadBaseUri = "https://huggingface.co/sandrohanea/whisper.net/resolve/v4/vad"
 
@@ -50,10 +51,10 @@ function Get-Model {
     Write-Host "Guardado en $Target"
 }
 
-Get-Model -Name $Model -Target $Destination -Minimum $minimumBytes -BaseUri $baseUri
+Get-Model -Name $Model -Target $Destination -Minimum $minimumWhisperBytes -BaseUri $baseUri
 
 if ($IncludeVad) {
     $vad = "ggml-silero-v5.1.2.bin"
     # The VAD model is hosted by Whisper.net and is smaller than 1 MB.
-    Get-Model -Name $vad -Target (Join-Path $modelsDirectory $vad) -Minimum 500KB -BaseUri $vadBaseUri
+    Get-Model -Name $vad -Target (Join-Path $modelsDirectory $vad) -Minimum $minimumVadBytes -BaseUri $vadBaseUri
 }

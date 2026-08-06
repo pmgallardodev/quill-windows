@@ -12,10 +12,16 @@ $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $project = Join-Path $repositoryRoot "Windows\Quill.Windows\Quill.Windows.csproj"
 $publishDirectory = Join-Path $repositoryRoot "artifacts\quill-win-x64"
 $zip = Join-Path $repositoryRoot "artifacts\quill-win-x64.zip"
-$minimumModelBytes = 1MB
+$minimumWhisperBytes = 1MB
+$minimumVadBytes = 500KB
 
 # El nombre del modelo vive solo en el csproj; aqui se lee para no duplicarlo.
-$modelName = (dotnet msbuild $project -target:PrintWhisperModel -verbosity:minimal -nologo).Trim()
+$modelOutput = dotnet msbuild $project -target:PrintWhisperModel -verbosity:minimal -nologo
+if ($LASTEXITCODE -ne 0) {
+    throw "No se pudo leer QuillWhisperModel del proyecto."
+}
+
+$modelName = ($modelOutput -join [Environment]::NewLine).Trim()
 if (-not $modelName) {
     throw "No se pudo leer QuillWhisperModel del proyecto."
 }
@@ -30,7 +36,7 @@ if (-not (Test-Path -LiteralPath $model)) {
     throw "Falta $model. El paquete portable debe incluir el modelo Whisper."
 }
 
-if ((Get-Item -LiteralPath $model).Length -lt $minimumModelBytes) {
+if ((Get-Item -LiteralPath $model).Length -lt $minimumWhisperBytes) {
     throw "La descarga de $model esta incompleta."
 }
 
@@ -39,10 +45,20 @@ if ($IncludeVad) {
     if (-not (Test-Path -LiteralPath $vad)) {
         throw "Falta $vad. El paquete portable debe incluir el modelo VAD solicitado."
     }
+
+    if ((Get-Item -LiteralPath $vad).Length -lt $minimumVadBytes) {
+        throw "La descarga de $vad esta incompleta."
+    }
 }
 
 Remove-Item -LiteralPath $publishDirectory -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $zip -Force -ErrorAction SilentlyContinue
 dotnet publish $project -c Release -r win-x64 --self-contained true -o $publishDirectory
-Compress-Archive -Path $publishDirectory -DestinationPath $zip
+if ($LASTEXITCODE -ne 0) {
+    throw "No se pudo publicar Quill para win-x64."
+}
+
+# El ZIP representa la carpeta extraida: quill.exe queda en la raiz, no dentro de
+# artifacts\quill-win-x64\.
+Compress-Archive -Path (Join-Path $publishDirectory "*") -DestinationPath $zip
 Write-Host "Paquete portable creado: $zip ($modelName)"
