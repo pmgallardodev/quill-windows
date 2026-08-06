@@ -1,5 +1,6 @@
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
+using System.Runtime.InteropServices;
 
 namespace Quill.Windows.Audio;
 
@@ -47,16 +48,26 @@ internal static class MeetingDetector
 
             for (var index = 0; index < sessions.Count; index++)
             {
-                var session = sessions[index];
-                if (session.State != AudioSessionState.AudioSessionStateActive)
+                try
                 {
-                    continue;
-                }
+                    using var session = sessions[index];
+                    if (session.State != AudioSessionState.AudioSessionStateActive)
+                    {
+                        continue;
+                    }
 
-                var name = ProcessName(session);
-                if (name is not null && KnownApplications.Contains(name, StringComparer.OrdinalIgnoreCase))
+                    var name = ProcessName(session);
+                    if (name is not null && KnownApplications.Contains(name, StringComparer.OrdinalIgnoreCase))
+                    {
+                        return name;
+                    }
+                }
+                catch (Exception exception) when (
+                    exception is InvalidOperationException or System.ComponentModel.Win32Exception or
+                        UnauthorizedAccessException or COMException)
                 {
-                    return name;
+                    // A session can disappear between enumeration and inspection.
+                    continue;
                 }
             }
 

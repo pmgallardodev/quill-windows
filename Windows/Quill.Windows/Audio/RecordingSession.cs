@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
@@ -26,6 +25,9 @@ internal sealed class RecordingSession : IDisposable
     private TimeSpan _pausedTotal;
     private bool _stopped;
     private bool _capturing;
+    private Exception? _captureError;
+    private readonly object _captureStateLock = new();
+    private SessionMetadata? _pendingMetadata;
 
     private RecordingSession(
         string directory,
@@ -57,6 +59,8 @@ internal sealed class RecordingSession : IDisposable
                 systemAudioCapture,
                 Path.Combine(directory, "system.wav"),
                 voiceQuality);
+            microphoneWriter.CaptureStopped += OnCaptureStopped;
+            systemAudioWriter.CaptureStopped += OnCaptureStopped;
         }
         catch
         {
@@ -80,6 +84,8 @@ internal sealed class RecordingSession : IDisposable
     public string SystemDeviceId { get; }
 
     public bool IsPaused => _pausedAt is not null;
+
+    public event Action<Exception>? CaptureFailed;
 
     /// <summary>Tiempo grabado de verdad: lo que se pasa en pausa no cuenta.</summary>
     public TimeSpan Elapsed => (_pausedAt ?? DateTimeOffset.UtcNow) - _startedAt - _pausedTotal;
@@ -127,18 +133,20 @@ internal sealed class RecordingSession : IDisposable
     /// WASAPI sigue apuntando al dispositivo que habia al empezar. Si el usuario
     /// cambia de auriculares, la pista se queda muda sin que nada lo indique.
     /// </summary>
-    public bool DefaultDevicesChanged()
+    public AudioDeviceChange DefaultDevicesChanged()
     {
         try
         {
             using var microphone = _devices.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Multimedia);
             using var speakers = _devices.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            return microphone.ID != MicrophoneDeviceId || speakers.ID != SystemDeviceId;
+            return new AudioDeviceChange(
+                microphone.ID != MicrophoneDeviceId,
+                speakers.ID != SystemDeviceId);
         }
-        catch (Exception exception) when (exception is COMException or InvalidOperationException)
+        catch (Exception exception) when (exception is not OutOfMemoryException)
         {
             // Quedarse sin dispositivo por defecto tambien es un cambio.
-            return true;
+            return new AudioDeviceChange(true, true);
         }
     }
 
@@ -146,11 +154,12 @@ internal sealed class RecordingSession : IDisposable
     {
         System.IO.Directory.CreateDirectory(recordingsRoot);
         var directory = CreateSessionDirectory(recordingsRoot);
-        var devices = new MMDeviceEnumerator();
+        MMDeviceEnumerator? devices = null;
         MMDevice? microphone = null;
         MMDevice? speakers = null;
         try
         {
+            devices = new MMDeviceEnumerator();
             microphone = devices.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Multimedia);
             speakers = devices.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
             var session = new RecordingSession(directory, devices, microphone, speakers);
@@ -171,7 +180,7 @@ internal sealed class RecordingSession : IDisposable
         {
             microphone?.Dispose();
             speakers?.Dispose();
-            devices.Dispose();
+            devices?.Dispose();
             try
             {
                 System.IO.Directory.Delete(directory, recursive: true);
@@ -190,6 +199,11 @@ internal sealed class RecordingSession : IDisposable
     {
         if (_stopped)
         {
+            if (_pendingMetadata is not null)
+            {
+                WriteMetadata(_pendingMetadata);
+            }
+
             return;
         }
 
@@ -216,7 +230,19 @@ internal sealed class RecordingSession : IDisposable
                 stopError ??= exception;
             }
 
+            var microphoneStopped = _microphoneWriter.WaitForCaptureStopped(TimeSpan.FromSeconds(5));
+            var systemStopped = _systemAudioWriter.WaitForCaptureStopped(TimeSpan.FromSeconds(5));
+            if (!microphoneStopped || !systemStopped)
+            {
+                stopError ??= new TimeoutException("la captura de audio no termino a tiempo");
+            }
+
             _capturing = false;
+        }
+
+        lock (_captureStateLock)
+        {
+            stopError ??= _captureError ?? _microphoneWriter.CaptureError ?? _systemAudioWriter.CaptureError;
         }
 
         try
@@ -237,13 +263,13 @@ internal sealed class RecordingSession : IDisposable
             stopError ??= exception;
         }
 
-        if (stopError is not null)
-        {
-            throw stopError;
-        }
-
         if (!completedCapture)
         {
+            if (stopError is not null)
+            {
+                throw stopError;
+            }
+
             return;
         }
 
@@ -271,9 +297,30 @@ internal sealed class RecordingSession : IDisposable
             },
             Markers = MarkersSnapshot(),
         };
+        _pendingMetadata = metadata;
+        try
+        {
+            WriteMetadata(metadata);
+        }
+        catch (Exception exception)
+        {
+            stopError ??= exception;
+        }
+
+        if (stopError is not null)
+        {
+            throw stopError;
+        }
+    }
+
+    private void WriteMetadata(SessionMetadata metadata)
+    {
         AtomicFile.Write(
             Path.Combine(Directory, "meta.json"),
-            System.Text.Json.JsonSerializer.Serialize(metadata, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+            System.Text.Json.JsonSerializer.Serialize(
+                metadata,
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+        _pendingMetadata = null;
     }
 
     public void Dispose()
@@ -360,13 +407,35 @@ internal sealed class RecordingSession : IDisposable
     private static string CreateSessionDirectory(string root)
     {
         var baseName = DateTime.Now.ToString("yyyy.MM.dd-HHmm");
-        var candidate = Path.Combine(root, baseName);
-        for (var suffix = 2; System.IO.Directory.Exists(candidate); suffix++)
+        for (var suffix = 1; suffix < 10_000; suffix++)
         {
-            candidate = Path.Combine(root, $"{baseName}-{suffix}");
+            var candidate = Path.Combine(root, suffix == 1 ? baseName : $"{baseName}-{suffix}");
+            if (System.IO.Directory.Exists(candidate))
+            {
+                continue;
+            }
+
+            try
+            {
+                System.IO.Directory.CreateDirectory(candidate);
+                using (new FileStream(
+                           Path.Combine(candidate, ".quill-session"),
+                           FileMode.CreateNew,
+                           FileAccess.Write,
+                           FileShare.Read))
+                {
+                }
+
+                return new System.IO.DirectoryInfo(candidate).FullName;
+            }
+            catch (IOException)
+            {
+                // Another process may have claimed the same minute. Try the next
+                // suffix instead of sharing its WAV files.
+            }
         }
 
-        return System.IO.Directory.CreateDirectory(candidate).FullName;
+        throw new IOException("no se pudo reservar una carpeta de sesion unica");
     }
 
     private static void DisposeQuietly(IDisposable? disposable)
@@ -399,6 +468,11 @@ internal sealed class RecordingSession : IDisposable
         private float[] _conversionBuffer = Array.Empty<float>();
         private long _firstBufferTicks;
         private bool _disposed;
+        private readonly ManualResetEventSlim _captureStopped = new(false);
+        private readonly object _captureSignalLock = new();
+        private bool _disposeSignalRequested;
+        private bool _captureSignalDisposed;
+        private Exception? _captureError;
 
         public TrackWriter(IWaveIn capture, string outputPath, bool voiceQuality)
         {
@@ -414,7 +488,9 @@ internal sealed class RecordingSession : IDisposable
                 _pending = new BufferedWaveProvider(capture.WaveFormat)
                 {
                     BufferDuration = TimeSpan.FromSeconds(10),
-                    DiscardOnBufferOverflow = true,
+                    // Losing samples silently produces a transcript that looks valid
+                    // but is missing speech. Let NAudio surface the overflow instead.
+                    DiscardOnBufferOverflow = false,
                     // The default pads every read with silence. The converter is
                     // drained from the capture callback, so padding would stretch
                     // each small callback into a full buffer of mostly-zero audio.
@@ -434,7 +510,10 @@ internal sealed class RecordingSession : IDisposable
             }
 
             _capture.DataAvailable += Write;
+            _capture.RecordingStopped += OnRecordingStopped;
         }
+
+        public event Action<Exception?>? CaptureStopped;
 
         public DateTimeOffset? FirstBufferAt => _firstBufferTicks == 0
             ? null
@@ -452,11 +531,72 @@ internal sealed class RecordingSession : IDisposable
 
             _disposed = true;
             _capture.DataAvailable -= Write;
+            _capture.RecordingStopped -= OnRecordingStopped;
             lock (_writeLock)
             {
-                // Lo que quede en el puente todavia no esta en el archivo.
-                DrainConverted();
-                _writer.Dispose();
+                try
+                {
+                    // Lo que quede en el puente todavia no esta en el archivo.
+                    DrainConverted();
+                }
+                finally
+                {
+                    _writer.Dispose();
+                }
+            }
+
+            RequestSignalDispose(force: true);
+        }
+
+        public bool WaitForCaptureStopped(TimeSpan timeout) => _captureStopped.Wait(timeout);
+
+        public Exception? CaptureError => _captureError;
+
+        private void OnRecordingStopped(object? sender, StoppedEventArgs eventArgs)
+        {
+            var disposeSignal = false;
+            lock (_captureSignalLock)
+            {
+                _captureError ??= eventArgs.Exception;
+                try
+                {
+                    _captureStopped.Set();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Stop timed out and the signal was released; the late callback
+                    // still carries its error through CaptureStopped.
+                }
+                if (_disposeSignalRequested && !_captureSignalDisposed)
+                {
+                    _captureSignalDisposed = true;
+                    disposeSignal = true;
+                }
+            }
+
+            CaptureStopped?.Invoke(eventArgs.Exception);
+            if (disposeSignal)
+            {
+                _captureStopped.Dispose();
+            }
+        }
+
+        private void RequestSignalDispose(bool force)
+        {
+            var disposeSignal = false;
+            lock (_captureSignalLock)
+            {
+                _disposeSignalRequested = true;
+                if ((force || _captureStopped.IsSet) && !_captureSignalDisposed)
+                {
+                    _captureSignalDisposed = true;
+                    disposeSignal = true;
+                }
+            }
+
+            if (disposeSignal)
+            {
+                _captureStopped.Dispose();
             }
         }
 
@@ -467,22 +607,32 @@ internal sealed class RecordingSession : IDisposable
                 return;
             }
 
-            Interlocked.CompareExchange(ref _firstBufferTicks, DateTimeOffset.UtcNow.Ticks, 0);
             lock (_writeLock)
             {
-                if (_disposed)
+                if (_disposed || IsPaused)
                 {
                     return;
                 }
 
-                if (_pending is null)
-                {
-                    _writer.Write(eventArgs.Buffer, 0, eventArgs.BytesRecorded);
-                    return;
-                }
+                Interlocked.CompareExchange(ref _firstBufferTicks, DateTimeOffset.UtcNow.Ticks, 0);
 
-                _pending.AddSamples(eventArgs.Buffer, 0, eventArgs.BytesRecorded);
-                DrainConverted();
+                try
+                {
+                    if (_pending is null)
+                    {
+                        _writer.Write(eventArgs.Buffer, 0, eventArgs.BytesRecorded);
+                        return;
+                    }
+
+                    _pending.AddSamples(eventArgs.Buffer, 0, eventArgs.BytesRecorded);
+                    DrainConverted();
+                }
+                catch (Exception exception) when (
+                    exception is IOException or InvalidOperationException or ObjectDisposedException)
+                {
+                    _captureError ??= exception;
+                    throw;
+                }
             }
         }
 
@@ -513,4 +663,19 @@ internal sealed class RecordingSession : IDisposable
             }
         }
     }
+
+    private void OnCaptureStopped(Exception? exception)
+    {
+        lock (_captureStateLock)
+        {
+            _captureError ??= exception;
+        }
+
+        if (exception is not null)
+        {
+            CaptureFailed?.Invoke(exception);
+        }
+    }
 }
+
+internal sealed record AudioDeviceChange(bool Microphone, bool System);
