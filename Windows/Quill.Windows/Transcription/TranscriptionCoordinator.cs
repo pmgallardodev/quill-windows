@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using NAudio.Wave;
 using System.Threading.Channels;
 using Quill.Windows.Infrastructure;
 using Quill.Windows.Sessions;
@@ -11,6 +12,10 @@ internal sealed class TranscriptionCoordinator : IDisposable
     private readonly string _recordingsRoot;
     private readonly Channel<string> _queue = Channel.CreateUnbounded<string>();
     private readonly ConcurrentDictionary<string, byte> _pending = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, byte> _active = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, byte> _manualRetries = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, int> _lockAttempts = new(StringComparer.OrdinalIgnoreCase);
+    private readonly object _claimGate = new();
     private readonly CancellationTokenSource _shutdown = new();
     private readonly Task _worker;
     private WhisperTranscriber? _transcriber;
@@ -31,8 +36,15 @@ internal sealed class TranscriptionCoordinator : IDisposable
 
     public void ResumePending()
     {
-        if (!ConfigStore.Load().Transcription.Enabled || !Directory.Exists(_recordingsRoot))
+        var config = ConfigStore.Load();
+        if (!Directory.Exists(_recordingsRoot))
         {
+            return;
+        }
+
+        if (!config.Transcription.Enabled)
+        {
+            MarkDisabledSessions();
             return;
         }
 
@@ -40,11 +52,28 @@ internal sealed class TranscriptionCoordinator : IDisposable
         {
             foreach (var directory in Directory.EnumerateDirectories(_recordingsRoot).OrderBy(Path.GetFileName, StringComparer.Ordinal))
             {
-                var hasMetadata = File.Exists(Path.Combine(directory, "meta.json"));
-                var hasTranscript = File.Exists(Path.Combine(directory, "transcript.json"));
-                if (ResumePolicy.ShouldEnqueue(hasMetadata, hasTranscript, SessionStatus.TryRead(directory)))
+                try
                 {
-                    Enqueue(directory);
+                    if (!SessionCatalog.IsSafeSessionDirectory(_recordingsRoot, directory))
+                    {
+                        continue;
+                    }
+
+                    WhisperTranscriber.CleanupTemporaries(directory);
+                    var metadata = SessionMetadata.TryRead(directory);
+                    var transcript = TranscriptExport.Read(directory);
+                    var status = SessionStatus.TryRead(directory);
+                    if (metadata is not null && !SessionStatus.HasFailureMarker(directory) &&
+                        ResumePolicy.ShouldEnqueue(true, transcript.Status, status))
+                    {
+                        Enqueue(directory);
+                    }
+                }
+                catch (Exception exception) when (
+                    exception is IOException or UnauthorizedAccessException or ArgumentException or
+                        InvalidDataException or NotSupportedException)
+                {
+                    // A single locked or corrupt session must not block the rest.
                 }
             }
         }
@@ -54,45 +83,206 @@ internal sealed class TranscriptionCoordinator : IDisposable
         }
     }
 
-    public void Enqueue(string sessionDirectory)
+    private void MarkDisabledSessions()
     {
-        if (_disposed ||
-            !ConfigStore.Load().Transcription.Enabled ||
-            !_pending.TryAdd(sessionDirectory, 0))
+        try
         {
-            return;
+            foreach (var directory in Directory.EnumerateDirectories(_recordingsRoot))
+            {
+                try
+                {
+                    lock (_claimGate)
+                    {
+                        if (_active.ContainsKey(directory) ||
+                            !SessionCatalog.IsSafeSessionDirectory(_recordingsRoot, directory))
+                        {
+                            continue;
+                        }
+
+                        using var sessionLock = TryAcquireSessionLock(directory);
+                        if (sessionLock is null ||
+                            !SessionCatalog.IsSafeSessionDirectory(_recordingsRoot, directory))
+                        {
+                            continue;
+                        }
+
+                        var metadata = SessionMetadata.TryRead(directory);
+                        var transcript = TranscriptExport.Read(directory);
+                        var status = SessionStatus.TryRead(directory);
+                        if (metadata is not null &&
+                            (transcript.Status is TranscriptReadStatus.Missing or TranscriptReadStatus.Invalid) &&
+                            status?.State != SessionStatus.Failed &&
+                            status?.State != SessionStatus.Disabled)
+                        {
+                            WriteStatus(directory, SessionStatus.Disabled, null, null, CurrentModelName());
+                        }
+                    }
+                }
+                catch (Exception exception) when (
+                    exception is IOException or UnauthorizedAccessException or ArgumentException or
+                        InvalidDataException or NotSupportedException)
+                {
+                    // A single inaccessible session must not hide the rest.
+                }
+            }
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+        }
+    }
+
+    public bool Enqueue(string sessionDirectory) => EnqueueCore(sessionDirectory, allowFailed: false);
+
+    private bool EnqueueCore(string sessionDirectory, bool allowFailed)
+    {
+        if (_disposed || !SessionCatalog.IsSafeSessionDirectory(_recordingsRoot, sessionDirectory))
+        {
+            return false;
         }
 
-        WriteStatus(sessionDirectory, SessionStatus.Queued, null, null, CurrentModelName());
-        // Publish before writing to the channel. Otherwise the worker can dequeue
-        // immediately and publish Running before this method publishes Queued.
-        StateChanged?.Invoke(new TranscriptionUpdate(
-            sessionDirectory, SessionState.Queued, _pending.Count, Array.Empty<TrackProgress>(), null, TimeSpan.Zero));
-
-        if (!_queue.Writer.TryWrite(sessionDirectory))
+        var config = ConfigStore.Load();
+        if (!config.Transcription.Enabled)
         {
-            _pending.TryRemove(sessionDirectory, out _);
+            return MarkSessionDisabled(sessionDirectory);
+        }
+
+        lock (_claimGate)
+        {
+            if (_disposed ||
+                _active.ContainsKey(sessionDirectory) ||
+                !SessionCatalog.IsSafeSessionDirectory(_recordingsRoot, sessionDirectory))
+            {
+                return false;
+            }
+
+            var currentStatus = SessionStatus.TryRead(sessionDirectory);
+            if (currentStatus?.State == SessionStatus.Failed && !allowFailed)
+            {
+                return false;
+            }
+
+            if (SessionStatus.HasFailureMarker(sessionDirectory) && !allowFailed)
+            {
+                return false;
+            }
+
+            if (!_pending.TryAdd(sessionDirectory, 0))
+            {
+                return false;
+            }
+
+            if (allowFailed)
+            {
+                SessionStatus.ClearFailureMarker(sessionDirectory);
+                _manualRetries[sessionDirectory] = 0;
+            }
+
+            if (currentStatus?.State != SessionStatus.Running)
+            {
+                WriteStatus(sessionDirectory, SessionStatus.Queued, null, null, CurrentModelName());
+                StateChanged?.Invoke(new TranscriptionUpdate(
+                    sessionDirectory,
+                    SessionState.Queued,
+                    _pending.Count,
+                    Array.Empty<TrackProgress>(),
+                    null,
+                    TimeSpan.Zero,
+                    CurrentModelName()));
+            }
+
+            // The worker also takes _claimGate before claiming the item, so it
+            // cannot publish Running before this queued transition is durable.
+            if (!_queue.Writer.TryWrite(sessionDirectory))
+            {
+                _pending.TryRemove(sessionDirectory, out _);
+                return false;
+            }
+
+            return true;
         }
     }
 
     /// <summary>Vuelve a encolar una sesion que fallo. Es la unica forma de reintentar un "failed".</summary>
     public void Retry(string sessionDirectory)
     {
-        if (_disposed || !Directory.Exists(sessionDirectory))
+        if (_disposed || !SessionCatalog.IsSafeSessionDirectory(_recordingsRoot, sessionDirectory))
         {
             return;
         }
 
-        try
+        if (!ConfigStore.Load().Transcription.Enabled)
         {
-            File.Delete(SessionStatus.PathFor(sessionDirectory));
-        }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-        {
-            Log(sessionDirectory, $"could not clear status.json: {exception.Message}");
+            MarkSessionDisabled(sessionDirectory);
+            return;
         }
 
-        Enqueue(sessionDirectory);
+        EnqueueCore(sessionDirectory, allowFailed: true);
+    }
+
+    private bool MarkSessionDisabled(string sessionDirectory)
+    {
+        lock (_claimGate)
+        {
+            if (_disposed ||
+                _active.ContainsKey(sessionDirectory) ||
+                !SessionCatalog.IsSafeSessionDirectory(_recordingsRoot, sessionDirectory))
+            {
+                return false;
+            }
+
+            using var sessionLock = TryAcquireSessionLock(sessionDirectory);
+            if (sessionLock is null ||
+                !SessionCatalog.IsSafeSessionDirectory(_recordingsRoot, sessionDirectory))
+            {
+                return false;
+            }
+
+            if (SessionStatus.TryRead(sessionDirectory)?.State == SessionStatus.Failed)
+            {
+                _pending.TryRemove(sessionDirectory, out _);
+                return false;
+            }
+
+            // A queued item may still be waiting in the channel. Removing its
+            // claim makes that stale item a no-op after the disabled state lands.
+            _pending.TryRemove(sessionDirectory, out _);
+            _manualRetries.TryRemove(sessionDirectory, out _);
+            WriteStatus(sessionDirectory, SessionStatus.Disabled, null, null, CurrentModelName());
+            StateChanged?.Invoke(new TranscriptionUpdate(
+                sessionDirectory,
+                SessionState.Disabled,
+                _pending.Count,
+                Array.Empty<TrackProgress>(),
+                null,
+                TimeSpan.Zero,
+                CurrentModelName()));
+            return false;
+        }
+    }
+
+    public bool IsBusy(string sessionDirectory) =>
+        _pending.ContainsKey(sessionDirectory) || _active.ContainsKey(sessionDirectory);
+
+    public string? TryDeleteSession(string sessionDirectory)
+    {
+        lock (_claimGate)
+        {
+            if (_active.ContainsKey(sessionDirectory))
+            {
+                return "la sesion se esta transcribiendo";
+            }
+
+            var failure = SessionCatalog.TryDelete(_recordingsRoot, sessionDirectory);
+            if (failure is null)
+            {
+                // Leave the stale channel item behind. The worker will discard it
+                // because the pending claim is gone; failed deletes keep the claim
+                // and therefore keep their existing worker item.
+                _pending.TryRemove(sessionDirectory, out _);
+            }
+
+            return failure;
+        }
     }
 
     public void Dispose()
@@ -134,8 +324,18 @@ internal sealed class TranscriptionCoordinator : IDisposable
 
     private void DisposeResources()
     {
-        _transcriber?.Dispose();
-        _shutdown.Dispose();
+        try
+        {
+            _transcriber?.Dispose();
+        }
+        catch
+        {
+            // Native cleanup must not prevent the cancellation source from closing.
+        }
+        finally
+        {
+            _shutdown.Dispose();
+        }
     }
 
     private async Task DrainAsync()
@@ -144,27 +344,166 @@ internal sealed class TranscriptionCoordinator : IDisposable
         {
             await foreach (var sessionDirectory in _queue.Reader.ReadAllAsync(_shutdown.Token))
             {
-                _pending.TryRemove(sessionDirectory, out _);
-                var clock = Stopwatch.StartNew();
-                var tracks = new List<TrackProgress>();
+                lock (_claimGate)
+                {
+                    if (!_pending.TryRemove(sessionDirectory, out _) ||
+                        !SessionCatalog.IsSafeSessionDirectory(_recordingsRoot, sessionDirectory))
+                    {
+                        continue;
+                    }
 
-                WriteStatus(sessionDirectory, SessionStatus.Running, null, null, _options?.ModelName);
-                PublishState(sessionDirectory, SessionState.Running, tracks, null, clock.Elapsed);
+                    _active[sessionDirectory] = 0;
+                }
+
+                FileStream? sessionLock = null;
                 try
                 {
-                    var options = await TranscribeSessionAsync(sessionDirectory, tracks, clock, _shutdown.Token);
-                    WriteStatus(sessionDirectory, SessionStatus.Done, clock.Elapsed.TotalSeconds, null, options.ModelName);
-                    PublishState(sessionDirectory, SessionState.Done, tracks, null, clock.Elapsed);
+                    sessionLock = await AcquireSessionLockAsync(sessionDirectory);
+                    if (sessionLock is null ||
+                        !SessionCatalog.IsSafeSessionDirectory(_recordingsRoot, sessionDirectory))
+                    {
+                        var attempt = _lockAttempts.AddOrUpdate(
+                            sessionDirectory,
+                            1,
+                            static (_, previous) => previous + 1);
+                        if (attempt <= 6 && !_shutdown.IsCancellationRequested)
+                        {
+                            lock (_claimGate)
+                            {
+                                if (!_disposed && SessionCatalog.IsSafeSessionDirectory(_recordingsRoot, sessionDirectory))
+                                {
+                                    _pending[sessionDirectory] = 0;
+                                }
+                            }
+
+                            try
+                            {
+                                await Task.Delay(
+                                    TimeSpan.FromSeconds(Math.Min(30, 1 << (attempt - 1))),
+                                    _shutdown.Token);
+                                if (!_queue.Writer.TryWrite(sessionDirectory))
+                                {
+                                    _pending.TryRemove(sessionDirectory, out _);
+                                }
+                            }
+                            catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
+                            {
+                                _pending.TryRemove(sessionDirectory, out _);
+                            }
+                        }
+                        else
+                        {
+                            _lockAttempts.TryRemove(sessionDirectory, out _);
+                            Log(sessionDirectory, "could not acquire the transcription lock; retry on next launch");
+                        }
+
+                        continue;
+                    }
+
+                    _lockAttempts.TryRemove(sessionDirectory, out _);
+
+                    bool transcriptionEnabled;
+                    try
+                    {
+                        transcriptionEnabled = ConfigStore.Load().Transcription.Enabled;
+                    }
+                    catch (Exception exception) when (
+                        exception is InvalidOperationException or IOException or UnauthorizedAccessException or
+                            ArgumentException or NotSupportedException)
+                    {
+                        Log(sessionDirectory, $"could not read transcription config: {exception.Message}");
+                        continue;
+                    }
+
+                    if (!transcriptionEnabled)
+                    {
+                        WriteStatus(sessionDirectory, SessionStatus.Disabled, null, null, CurrentModelName());
+                        continue;
+                    }
+
+                    var clock = Stopwatch.StartNew();
+                    var tracks = new List<TrackProgress>();
+                    TranscriptionOptions? optionsUsed = null;
+
+                    var currentTranscript = TranscriptExport.Read(sessionDirectory);
+                    if (currentTranscript.Status is TranscriptReadStatus.Valid or TranscriptReadStatus.Empty)
+                    {
+                        continue;
+                    }
+
+                    var manualRetry = _manualRetries.TryRemove(sessionDirectory, out _);
+                    var currentStatus = SessionStatus.TryRead(sessionDirectory);
+                    if (!manualRetry &&
+                        (currentStatus?.State == SessionStatus.Failed ||
+                         SessionStatus.HasFailureMarker(sessionDirectory)))
+                    {
+                        continue;
+                    }
+
+                    WriteStatus(sessionDirectory, SessionStatus.Running, null, null, CurrentModelName());
+                    PublishState(sessionDirectory, SessionState.Running, tracks, null, clock.Elapsed, CurrentModelName());
+                    try
+                    {
+                        optionsUsed = await TranscribeSessionAsync(sessionDirectory, tracks, clock, _shutdown.Token);
+                        WriteStatus(sessionDirectory, SessionStatus.Done, clock.Elapsed.TotalSeconds, null, optionsUsed.ModelName);
+                        PublishState(sessionDirectory, SessionState.Done, tracks, null, clock.Elapsed, optionsUsed.ModelName);
+                    }
+                    catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
+                    {
+                        return;
+                    }
+                    catch (Exception exception)
+                    {
+                        Log(sessionDirectory, $"transcription failed: {exception}");
+                        var statusWritten = WriteStatus(
+                            sessionDirectory,
+                            SessionStatus.Failed,
+                            clock.Elapsed.TotalSeconds,
+                            exception.Message,
+                            optionsUsed?.ModelName ?? CurrentModelName());
+                        if (!statusWritten)
+                        {
+                            try
+                            {
+                                SessionStatus.WriteFailureMarker(sessionDirectory, exception.Message);
+                            }
+                            catch (Exception markerException) when (
+                                markerException is IOException or UnauthorizedAccessException or
+                                    ArgumentException or NotSupportedException)
+                            {
+                                Log(sessionDirectory, $"could not write failure marker: {markerException.Message}");
+                            }
+                        }
+                        PublishState(
+                            sessionDirectory,
+                            SessionState.Failed,
+                            tracks,
+                            exception.Message,
+                            clock.Elapsed,
+                            optionsUsed?.ModelName ?? CurrentModelName());
+                    }
                 }
                 catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
                 {
                     return;
                 }
-                catch (Exception exception)
+                finally
                 {
-                    Log(sessionDirectory, $"transcription failed: {exception}");
-                    WriteStatus(sessionDirectory, SessionStatus.Failed, clock.Elapsed.TotalSeconds, exception.Message, _options?.ModelName);
-                    PublishState(sessionDirectory, SessionState.Failed, tracks, exception.Message, clock.Elapsed);
+                    try
+                    {
+                        sessionLock?.Dispose();
+                    }
+                    catch (Exception exception) when (
+                        exception is IOException or UnauthorizedAccessException or ObjectDisposedException)
+                    {
+                    }
+
+                    lock (_claimGate)
+                    {
+                        // The FileStream must be closed before deletion is allowed
+                        // to observe the session as no longer active.
+                        _active.TryRemove(sessionDirectory, out _);
+                    }
                 }
             }
         }
@@ -180,13 +519,18 @@ internal sealed class TranscriptionCoordinator : IDisposable
         CancellationToken cancellationToken)
     {
         var metadata = SessionMetadata.Read(sessionDirectory);
-        var options = _options ?? TranscriptionOptions.FromConfig();
+        var options = TranscriptionOptions.FromConfig();
         var transcriber = _transcriber;
-        if (transcriber is null)
+        if (transcriber is null || _options != options)
         {
-            transcriber = new WhisperTranscriber(options);
+            var previous = transcriber;
+            _transcriber = null;
+            _options = null;
+            previous?.Dispose();
+            var replacement = new WhisperTranscriber(options);
             _options = options;
-            _transcriber = transcriber;
+            _transcriber = replacement;
+            transcriber = replacement;
         }
 
         var merged = new List<TranscriptSegment>();
@@ -201,7 +545,7 @@ internal sealed class TranscriptionCoordinator : IDisposable
                 continue;
             }
 
-            if (!TryResolveSessionFile(sessionDirectory, fileName, out var audioPath))
+            if (!TryResolveSessionFile(sessionDirectory, fileName, name, out var audioPath))
             {
                 allTracksSucceeded = false;
                 Log(sessionDirectory, $"invalid track path: {fileName}");
@@ -217,21 +561,34 @@ internal sealed class TranscriptionCoordinator : IDisposable
 
             // Las pistas se procesan en serie, asi que un solo hilo escribe en la lista.
             var index = tracks.Count;
-            tracks.Add(new TrackProgress(name, 0d, false));
+            tracks.Add(new TrackProgress(name, 0d, false, AudioDuration(audioPath)));
             var reporter = new TrackReporter(fraction =>
             {
-                tracks[index] = new TrackProgress(name, fraction, false);
+                tracks[index] = tracks[index] with { Fraction = fraction, Completed = false };
                 ProgressChanged?.Invoke(new TranscriptionUpdate(
-                    sessionDirectory, SessionState.Running, _pending.Count, tracks.ToArray(), null, clock.Elapsed));
+                    sessionDirectory,
+                    SessionState.Running,
+                    _pending.Count,
+                    tracks.ToArray(),
+                    null,
+                    clock.Elapsed,
+                    options.ModelName));
             });
 
             try
             {
                 Log(sessionDirectory, $"transcribing {fileName} with {options.ModelName} on {options.Threads} threads" +
                     (options.VadModelPath is null ? string.Empty : " (vad)"));
-                var offset = metadata.StartOffsetMs.GetValueOrDefault(name);
+                if (!metadata.StartOffsetMs.TryGetValue(name, out var offset) || offset < 0)
+                {
+                    allTracksSucceeded = false;
+                    Log(sessionDirectory, $"missing track offset: {name}");
+                    tracks[index] = tracks[index] with { Completed = true };
+                    continue;
+                }
+
                 merged.AddRange(await transcriber.TranscribeAsync(audioPath, speaker, offset, reporter, cancellationToken));
-                tracks[index] = new TrackProgress(name, 1d, true);
+                tracks[index] = tracks[index] with { Fraction = 1d, Completed = true };
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
@@ -239,6 +596,11 @@ internal sealed class TranscriptionCoordinator : IDisposable
                 Log(sessionDirectory, $"skipping {fileName}: {exception.Message}");
                 tracks[index] = tracks[index] with { Completed = true };
             }
+        }
+
+        if (!allTracksSucceeded)
+        {
+            throw new InvalidDataException("una o mas pistas no se pudieron transcribir");
         }
 
         merged.Sort(static (left, right) => left.StartMs.CompareTo(right.StartMs));
@@ -284,7 +646,7 @@ internal sealed class TranscriptionCoordinator : IDisposable
         foreach (var name in new[] { "mic", "system" })
         {
             if (!metadata.Files.TryGetValue(name, out var fileName) ||
-                !TryResolveSessionFile(sessionDirectory, fileName, out var audioPath))
+                !TryResolveSessionFile(sessionDirectory, fileName, name, out var audioPath))
             {
                 Log(sessionDirectory, $"could not delete invalid track path: {name}");
                 continue;
@@ -319,10 +681,14 @@ internal sealed class TranscriptionCoordinator : IDisposable
         }
     }
 
-    private static bool TryResolveSessionFile(string sessionDirectory, string? fileName, out string path)
+    private static bool TryResolveSessionFile(
+        string sessionDirectory,
+        string? fileName,
+        string trackName,
+        out string path)
     {
         path = string.Empty;
-        if (string.IsNullOrWhiteSpace(fileName))
+        if (!string.Equals(fileName, $"{trackName}.wav", StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
@@ -330,9 +696,11 @@ internal sealed class TranscriptionCoordinator : IDisposable
         try
         {
             var root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(sessionDirectory));
-            var candidate = Path.GetFullPath(Path.Combine(root, fileName));
+            var candidate = Path.GetFullPath(Path.Combine(root, fileName!));
             var rootPrefix = root + Path.DirectorySeparatorChar;
-            if (!candidate.StartsWith(rootPrefix, StringComparison.OrdinalIgnoreCase))
+            if (!candidate.StartsWith(rootPrefix, StringComparison.OrdinalIgnoreCase) ||
+                (File.GetAttributes(root) & FileAttributes.ReparsePoint) != 0 ||
+                (File.Exists(candidate) && (File.GetAttributes(candidate) & FileAttributes.ReparsePoint) != 0))
             {
                 return false;
             }
@@ -340,17 +708,77 @@ internal sealed class TranscriptionCoordinator : IDisposable
             path = candidate;
             return true;
         }
-        catch (Exception exception) when (exception is ArgumentException or IOException or NotSupportedException)
+        catch (Exception exception) when (
+            exception is ArgumentException or IOException or UnauthorizedAccessException or NotSupportedException)
         {
             return false;
         }
+    }
+
+    private static TimeSpan? AudioDuration(string path)
+    {
+        try
+        {
+            using var reader = new AudioFileReader(path);
+            return reader.TotalTime;
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException or InvalidDataException or
+                ArgumentException or NotSupportedException)
+        {
+            return null;
+        }
+    }
+
+    private static FileStream? TryAcquireSessionLock(string sessionDirectory)
+    {
+        try
+        {
+            return new FileStream(
+                Path.Combine(sessionDirectory, ".quill-transcription.lock"),
+                FileMode.OpenOrCreate,
+                FileAccess.ReadWrite,
+                FileShare.None);
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
+            return null;
+        }
+    }
+
+    private async Task<FileStream?> AcquireSessionLockAsync(string sessionDirectory)
+    {
+        const int maxAttempts = 3;
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            var sessionLock = TryAcquireSessionLock(sessionDirectory);
+            if (sessionLock is not null)
+            {
+                return sessionLock;
+            }
+
+            if (attempt + 1 < maxAttempts)
+            {
+                try
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(100 * (attempt + 1)), _shutdown.Token);
+                }
+                catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
+                {
+                    return null;
+                }
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
     /// Fallar al escribir el estado no puede interrumpir una transcripcion: el
     /// estado siempre es rederivable de que archivos existen.
     /// </summary>
-    private void WriteStatus(
+    private bool WriteStatus(
         string sessionDirectory,
         string state,
         double? elapsedSeconds,
@@ -367,10 +795,13 @@ internal sealed class TranscriptionCoordinator : IDisposable
                 ElapsedSeconds = elapsedSeconds,
                 Error = error,
             }.Write(sessionDirectory);
+            return true;
         }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
             Log(sessionDirectory, $"could not write status.json: {exception.Message}");
+            return false;
         }
     }
 
@@ -396,9 +827,10 @@ internal sealed class TranscriptionCoordinator : IDisposable
         SessionState state,
         List<TrackProgress> tracks,
         string? error,
-        TimeSpan elapsed) =>
+        TimeSpan elapsed,
+        string? model = null) =>
         StateChanged?.Invoke(new TranscriptionUpdate(
-            sessionDirectory, state, _pending.Count, tracks.ToArray(), error, elapsed));
+            sessionDirectory, state, _pending.Count, tracks.ToArray(), error, elapsed, model));
 
     private static void Log(string sessionDirectory, string message)
     {

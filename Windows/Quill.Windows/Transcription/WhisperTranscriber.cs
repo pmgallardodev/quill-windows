@@ -50,10 +50,13 @@ internal sealed class WhisperTranscriber : IDisposable
         IProgress<double>? progress,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+        CleanupTemporaries(Path.GetDirectoryName(audioPath)!);
         var normalizedPath = TemporaryPathFor(audioPath);
         try
         {
-            var total = NormalizeToWhisperWav(audioPath, normalizedPath);
+            var total = await NormalizeToWhisperWavAsync(audioPath, normalizedPath, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             if (total <= TimeSpan.Zero)
             {
                 progress?.Report(1d);
@@ -61,7 +64,7 @@ internal sealed class WhisperTranscriber : IDisposable
             }
 
             var segments = new List<TranscriptSegment>();
-            foreach (var block in DetectSpeechBlocks(normalizedPath, total))
+            foreach (var block in await DetectSpeechBlocksAsync(normalizedPath, total, cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 segments.AddRange(await TranscribeBlockAsync(
@@ -104,8 +107,43 @@ internal sealed class WhisperTranscriber : IDisposable
         return duration;
     }
 
+    private static async Task<TimeSpan> NormalizeToWhisperWavAsync(
+        string inputPath,
+        string outputPath,
+        CancellationToken cancellationToken)
+    {
+        using var reader = new AudioFileReader(inputPath);
+        var duration = reader.TotalTime;
+        ISampleProvider source = reader;
+        if (source.WaveFormat.Channels > 1)
+        {
+            source = new MonoDownmixSampleProvider(source);
+        }
+
+        var resampled = new WdlResamplingSampleProvider(source, 16_000);
+        using var writer = new WaveFileWriter(outputPath, new WaveFormat(16_000, 16, 1));
+        var buffer = new float[8_192];
+        int read;
+        while ((read = resampled.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            writer.WriteSamples(buffer, 0, read);
+            await Task.Yield();
+        }
+
+        return duration;
+    }
+
     /// <summary>Corta un rango a su propio WAV para poder transcribirlo por separado.</summary>
     internal static void ExtractRange(string inputPath, string outputPath, TimeSpan start, TimeSpan end)
+        => ExtractRange(inputPath, outputPath, start, end, CancellationToken.None);
+
+    private static void ExtractRange(
+        string inputPath,
+        string outputPath,
+        TimeSpan start,
+        TimeSpan end,
+        CancellationToken cancellationToken)
     {
         using var reader = new WaveFileReader(inputPath);
         var source = new OffsetSampleProvider(reader.ToSampleProvider())
@@ -113,14 +151,24 @@ internal sealed class WhisperTranscriber : IDisposable
             SkipOver = start,
             Take = end - start,
         };
-        WaveFileWriter.CreateWaveFile16(outputPath, source);
+        using var writer = new WaveFileWriter(outputPath, new WaveFormat(reader.WaveFormat.SampleRate, 16, reader.WaveFormat.Channels));
+        var buffer = new float[8_192];
+        int read;
+        while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            writer.WriteSamples(buffer, 0, read);
+        }
     }
 
     /// <summary>
     /// Sin VAD hay un unico bloque que cubre todo el audio, de modo que el camino
     /// normal y el optimizado comparten codigo y solo cambia como se trocea.
     /// </summary>
-    private IReadOnlyList<SpeechBlock> DetectSpeechBlocks(string normalizedPath, TimeSpan total)
+    private async Task<IReadOnlyList<SpeechBlock>> DetectSpeechBlocksAsync(
+        string normalizedPath,
+        TimeSpan total,
+        CancellationToken cancellationToken)
     {
         if (_vadFactory is null)
         {
@@ -135,12 +183,22 @@ internal sealed class WhisperTranscriber : IDisposable
             .Build();
 
         using var stream = File.OpenRead(normalizedPath);
-        return processor.DetectSpeech(stream)
-            .Select(segment => new SpeechBlock(
+        var blocks = new List<SpeechBlock>();
+        var detected = await processor.DetectSpeechAsync(stream, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        foreach (var segment in detected)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var block = new SpeechBlock(
                 segment.Start < TimeSpan.Zero ? TimeSpan.Zero : segment.Start,
-                segment.End > total ? total : segment.End))
-            .Where(block => block.End > block.Start)
-            .ToList();
+                segment.End > total ? total : segment.End);
+            if (block.End > block.Start)
+            {
+                blocks.Add(block);
+            }
+        }
+
+        return blocks;
     }
 
     private async Task<IReadOnlyList<TranscriptSegment>> TranscribeBlockAsync(
@@ -154,17 +212,23 @@ internal sealed class WhisperTranscriber : IDisposable
     {
         // Los tiempos que devuelve Whisper son relativos al bloque, asi que el inicio
         // del bloque entra en el offset. Sin eso, las pistas me/them se desalinean.
-        var blockOffsetMilliseconds = (long)block.Start.TotalMilliseconds + offsetMilliseconds;
+        var blockOffsetMilliseconds = checked((long)block.Start.TotalMilliseconds + offsetMilliseconds);
         var wholeFile = block.Start == TimeSpan.Zero && block.End >= total;
         var sourcePath = normalizedPath;
         if (!wholeFile)
         {
             sourcePath = TemporaryPathFor(normalizedPath);
-            ExtractRange(normalizedPath, sourcePath, block.Start, block.End);
         }
 
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!wholeFile)
+            {
+                ExtractRange(normalizedPath, sourcePath, block.Start, block.End, cancellationToken);
+            }
+            cancellationToken.ThrowIfCancellationRequested();
+
             var builder = _factory.CreateBuilder()
                 .WithLanguage(_options.Language)
                 .WithThreads(_options.Threads);
@@ -176,16 +240,22 @@ internal sealed class WhisperTranscriber : IDisposable
                 builder = builder.WithPrompt(prompt);
             }
 
-            using var processor = builder.Build();
+            await using var processor = builder.Build();
             await using var audio = File.OpenRead(sourcePath);
             var segments = new List<TranscriptSegment>();
             await foreach (var result in processor.ProcessAsync(audio).WithCancellation(cancellationToken))
             {
-                segments.Add(new TranscriptSegment(
-                    speaker,
-                    (long)result.Start.TotalMilliseconds + blockOffsetMilliseconds,
-                    (long)result.End.TotalMilliseconds + blockOffsetMilliseconds,
-                    result.Text.Trim()));
+                var text = result.Text?.Trim() ?? string.Empty;
+                if (text.Length > 0)
+                {
+                    var startMilliseconds = checked((long)result.Start.TotalMilliseconds + blockOffsetMilliseconds);
+                    var endMilliseconds = checked((long)result.End.TotalMilliseconds + blockOffsetMilliseconds);
+                    segments.Add(new TranscriptSegment(
+                        speaker,
+                        startMilliseconds,
+                        endMilliseconds,
+                        text));
+                }
 
                 progress?.Report(Math.Clamp((block.Start + result.End) / total, 0d, 1d));
             }
@@ -214,6 +284,33 @@ internal sealed class WhisperTranscriber : IDisposable
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             // Un temporal que sobrevive no justifica perder la transcripcion.
+        }
+    }
+
+    internal static void CleanupTemporaries(string directory)
+    {
+        try
+        {
+            var cutoff = DateTime.UtcNow - TimeSpan.FromHours(1);
+            foreach (var path in Directory.EnumerateFiles(directory, ".*.whisper.wav"))
+            {
+                try
+                {
+                    if (File.GetLastWriteTimeUtc(path) < cutoff)
+                    {
+                        Delete(path);
+                    }
+                }
+                catch (Exception exception) when (
+                    exception is IOException or UnauthorizedAccessException or ArgumentException)
+                {
+                    // A locked stale temporary can be retried on the next session.
+                }
+            }
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
         }
     }
 
