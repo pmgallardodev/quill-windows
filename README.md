@@ -483,11 +483,14 @@ quill-windows/
 |   |   `-- WhisperTranscriber.cs
 |   |-- UI/
 |   |   |-- GlobalHotkeys.cs
- |   |   |-- SessionRowViewModel.cs
- |   |   |-- SessionsViewModel.cs
- |   |   |-- SessionsWindow.xaml
+|   |   |-- InverseBooleanToVisibilityConverter.cs
+|   |   |-- SessionRowViewModel.cs
+|   |   |-- SessionsViewModel.cs
+|   |   |-- SessionsWindow.xaml
+|   |   |-- SessionsWindow.xaml.cs
 |   |   `-- TrayApplication.cs
- |   |-- Program.cs
+|   |-- GlobalUsings.cs
+|   |-- Program.cs
 |   `-- Quill.Windows.csproj
 |-- Windows/Quill.Windows.Tests/
 |-- models/
