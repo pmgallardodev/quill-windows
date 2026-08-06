@@ -1,4 +1,7 @@
 using System.Diagnostics;
+using System.ComponentModel;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows.Threading;
 using Quill.Windows.Audio;
 using Quill.Windows.Infrastructure;
@@ -13,12 +16,21 @@ internal static class TrayApplication
 {
     public static int Run(string recordingsRoot)
     {
+        var mutexName = $"Local\\Quill-{Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(recordingsRoot)))}";
+        using var instanceMutex = new Mutex(initiallyOwned: true, mutexName, out var createdNew);
+        if (!createdNew)
+        {
+            return 0;
+        }
+
         var application = new WpfApplication
         {
             ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown,
         };
         using var controller = new TrayController(application, recordingsRoot);
-        return application.Run();
+        var exitCode = application.Run();
+        controller.WaitForCleanup();
+        return exitCode;
     }
 }
 
@@ -34,6 +46,7 @@ internal sealed class TrayController : IDisposable
     private readonly System.Drawing.Icon? _recordingIcon;
     private readonly DispatcherTimer _ticker;
     private readonly TranscriptionCoordinator _transcription;
+    private readonly Action<TranscriptionUpdate> _transcriptionStateHandler;
     private readonly SessionsViewModel _sessionsViewModel;
     private SessionsWindow? _sessionsWindow;
     private RecordingSession? _session;
@@ -43,9 +56,17 @@ internal sealed class TrayController : IDisposable
     private readonly bool _startsMeetingsAutomatically;
     private int _deviceCheckTicks;
     private int _meetingCheckTicks;
+    private bool _meetingCheckRunning;
     private string? _meetingOffered;
     private bool _deviceChangeReported;
     private bool _disposed;
+    private bool _isStopping;
+    private Task? _stopTask;
+    private Task? _cleanupTask;
+    private bool _coreDisposed;
+    private int _recordingGeneration;
+    private bool _shutdownRequested;
+    private string? _stoppingSessionDirectory;
 
     public TrayController(WpfApplication application, string recordingsRoot)
     {
@@ -63,7 +84,7 @@ internal sealed class TrayController : IDisposable
         menu.Items.Add(new Forms.ToolStripMenuItem("Ver sesiones", null, (_, _) => ShowSessions()));
         menu.Items.Add(new Forms.ToolStripMenuItem("Abrir grabaciones", null, (_, _) => OpenRecordings()));
         menu.Items.Add(new Forms.ToolStripSeparator());
-        menu.Items.Add(new Forms.ToolStripMenuItem("Salir", null, (_, _) => _application.Shutdown()));
+        menu.Items.Add(new Forms.ToolStripMenuItem("Salir", null, (_, _) => _ = RequestShutdownAsync()));
 
         _idleIcon = LoadIcon();
         _recordingIcon = TryCreateRecordingIcon(_idleIcon);
@@ -83,7 +104,29 @@ internal sealed class TrayController : IDisposable
         _ticker.Tick += (_, _) => OnTick();
 
         _transcription = new TranscriptionCoordinator(recordingsRoot);
-        _transcription.StateChanged += update => _application.Dispatcher.BeginInvoke(() => ShowTranscriptionStatus(update));
+        _transcriptionStateHandler = update =>
+        {
+            if (_disposed || _coreDisposed)
+            {
+                return;
+            }
+
+            try
+            {
+                _ = _application.Dispatcher.BeginInvoke(() =>
+                {
+                    if (!_disposed && !_coreDisposed)
+                    {
+                        ShowTranscriptionStatus(update);
+                    }
+                });
+            }
+            catch (InvalidOperationException)
+            {
+                // The dispatcher may already be shutting down.
+            }
+        };
+        _transcription.StateChanged += _transcriptionStateHandler;
         _sessionsViewModel = new SessionsViewModel(recordingsRoot, _transcription, _application.Dispatcher);
         var recording = ConfigStore.Load().Recording;
         _detectsMeetings = recording.DetectsMeetings;
@@ -91,8 +134,8 @@ internal sealed class TrayController : IDisposable
         if (recording.GlobalHotkeys)
         {
             _hotkeys = GlobalHotkeys.TryCreate(
-                () => _application.Dispatcher.BeginInvoke(() => _ = ToggleAsync()),
-                () => _application.Dispatcher.BeginInvoke(AddMarker));
+                () => Post(() => _ = ToggleAsync()),
+                () => Post(AddMarker));
         }
 
         // El ticker tiene que correr tambien sin grabacion: detectar una reunion
@@ -115,20 +158,45 @@ internal sealed class TrayController : IDisposable
 
         _disposed = true;
         _ticker.Stop();
+        if (_stopTask is { } stopTask)
+        {
+            _cleanupTask = FinishDisposeAfterAsync(stopTask, _stoppingSessionDirectory);
+            return;
+        }
+
         var activeSession = _session;
         _session = null;
         if (activeSession is not null)
         {
-            try
-            {
-                activeSession.Dispose();
-            }
-            catch
-            {
-                // Shutdown must continue even if an audio device already failed.
-            }
+            _cleanupTask = FinishDisposeAfterAsync(Task.Run(activeSession.Dispose), activeSession.Directory);
+            return;
         }
 
+        DisposeCore();
+    }
+
+    public void WaitForCleanup()
+    {
+        try
+        {
+            _cleanupTask?.Wait(TimeSpan.FromSeconds(10));
+        }
+        catch
+        {
+            // Cleanup errors were already handled before the process exits.
+        }
+
+        DisposeCore();
+    }
+
+    private void DisposeCore()
+    {
+        if (_coreDisposed)
+        {
+            return;
+        }
+
+        _coreDisposed = true;
         if (_sessionsWindow is not null)
         {
             _sessionsWindow.AllowClose = true;
@@ -138,6 +206,7 @@ internal sealed class TrayController : IDisposable
 
         _hotkeys?.Dispose();
         _sessionsViewModel.Dispose();
+        _transcription.StateChanged -= _transcriptionStateHandler;
         _transcription.Dispose();
         _icon.Visible = false;
         _icon.Dispose();
@@ -145,25 +214,117 @@ internal sealed class TrayController : IDisposable
         _idleIcon.Dispose();
     }
 
+    private async Task FinishDisposeAfterAsync(Task cleanup, string? sessionDirectory = null)
+    {
+        try
+        {
+            await cleanup.ConfigureAwait(false);
+        }
+        catch
+        {
+            // Shutdown must continue even if an audio device already failed.
+        }
+
+        if (sessionDirectory is not null && File.Exists(Path.Combine(sessionDirectory, "meta.json")))
+        {
+            try
+            {
+                _transcription.Enqueue(sessionDirectory);
+            }
+            catch
+            {
+                // The next launch can recover a session with metadata even when
+                // shutdown happened while the coordinator was closing.
+            }
+        }
+
+        try
+        {
+            _ = _application.Dispatcher.BeginInvoke(DisposeCore);
+        }
+        catch (InvalidOperationException)
+        {
+            // The dispatcher is already stopped. WaitForCleanup performs the
+            // final cleanup on the application thread after Run returns.
+        }
+    }
+
     private async Task ToggleAsync()
     {
+        if (_isStopping)
+        {
+            return;
+        }
+
         if (_session is null)
         {
             StartRecording();
         }
         else
         {
-            StopRecording();
+            await StopAndTrackAsync();
+        }
+    }
+
+    private async Task StopAndTrackAsync()
+    {
+        var stopTask = StopRecordingAsync();
+        _stopTask = stopTask;
+        try
+        {
+            await stopTask;
+        }
+        finally
+        {
+            if (ReferenceEquals(_stopTask, stopTask))
+            {
+                _stopTask = null;
+            }
+        }
+    }
+
+    private async Task RequestShutdownAsync()
+    {
+        if (_disposed || _shutdownRequested)
+        {
+            return;
         }
 
-        await Task.CompletedTask;
+        _shutdownRequested = true;
+        try
+        {
+            if (_stopTask is { } stopTask)
+            {
+                await stopTask;
+            }
+            else if (_session is not null)
+            {
+                await StopAndTrackAsync();
+            }
+        }
+        catch
+        {
+            // StopRecordingAsync already surfaced the detailed error. Shutdown must continue.
+        }
+
+        if (!_disposed)
+        {
+            _application.Shutdown();
+        }
     }
 
     private void StartRecording()
     {
+        if (_isStopping || _disposed)
+        {
+            return;
+        }
+
+        _recordingGeneration++;
         try
         {
             _session = RecordingSession.Start(_recordingsRoot);
+            _session.CaptureFailed += OnCaptureFailed;
             _recordingStartedAt = DateTimeOffset.UtcNow;
             _toggle.Text = "Detener grabacion";
             _pause.Text = "Pausar grabacion";
@@ -174,7 +335,7 @@ internal sealed class TrayController : IDisposable
             ApplyIcon(recording: true);
             _icon.Text = "quill - GRABANDO 0:00";
             _ticker.Start();
-            _sessionsViewModel.SetActiveSession(_session.Directory);
+            _sessionsViewModel.SetActiveSession(_session.Directory, isPaused: false);
             _icon.ShowBalloonTip(3_000, "quill", "Grabacion activa: microfono y audio del sistema.", Forms.ToolTipIcon.Info);
         }
         catch (Exception exception)
@@ -182,7 +343,11 @@ internal sealed class TrayController : IDisposable
             var failedSession = _session;
             _session = null;
             _recordingStartedAt = null;
-            _ticker.Stop();
+            if (!_detectsMeetings)
+            {
+                _ticker.Stop();
+            }
+            _toggle.Text = "Iniciar grabacion";
             _pause.Visible = false;
             _marker.Visible = false;
             ApplyIcon(recording: false);
@@ -208,61 +373,111 @@ internal sealed class TrayController : IDisposable
         }
     }
 
-    private void StopRecording()
+    private async Task StopRecordingAsync()
     {
         var session = _session;
-        if (session is null)
+        if (session is null || _isStopping)
         {
             return;
         }
 
+        _isStopping = true;
+        _recordingGeneration++;
         _session = null;
+        _stoppingSessionDirectory = session.Directory;
         if (!_detectsMeetings)
         {
             _ticker.Stop();
         }
 
         _recordingStartedAt = null;
+        Exception? stopError = null;
+        var queued = false;
         try
         {
-            session.Stop();
-            _transcription.Enqueue(session.Directory);
-            _icon.Text = "quill - transcripcion en cola";
-            _icon.ShowBalloonTip(3_000, "quill", "Grabacion terminada. La transcripcion local inicio en segundo plano.", Forms.ToolTipIcon.Info);
+            // WASAPI may dispatch RecordingStopped through the WPF context. Waiting
+            // on the UI thread would deadlock that callback, so stop off-dispatcher.
+            await Task.Run(session.Stop);
         }
         catch (Exception exception)
         {
-            _icon.Text = "quill - error al guardar";
-            _icon.ShowBalloonTip(6_000, "quill - error", exception.Message, Forms.ToolTipIcon.Error);
+            stopError = exception;
+        }
+
+        try
+        {
+            await Task.Run(session.Dispose);
+        }
+        catch (Exception exception)
+        {
+            stopError ??= exception;
         }
         finally
         {
-            // Enqueue first so the freshly scanned row includes the model written
-            // to status.json instead of capturing a null model from the active state.
-            try
-            {
-                _sessionsViewModel.SetActiveSession(null);
-            }
-            catch
-            {
-                // A refresh failure must not leave the audio session undisposed.
-            }
+            session.CaptureFailed -= OnCaptureFailed;
+        }
 
+        // A capture error can be reported after metadata was written. Do not lose
+        // the valid session just because Stop surfaced that warning to the caller.
+        if (File.Exists(Path.Combine(session.Directory, "meta.json")))
+        {
             try
             {
-                session.Dispose();
+                queued = _transcription.Enqueue(session.Directory);
             }
             catch (Exception exception)
             {
-                _icon.Text = "quill - error al cerrar audio";
-                _icon.ShowBalloonTip(6_000, "quill - error", exception.Message, Forms.ToolTipIcon.Error);
+                stopError ??= exception;
             }
-
-            _toggle.Text = "Iniciar grabacion";
-            _pause.Visible = false;
-            _marker.Visible = false;
-            ApplyIcon(recording: false);
         }
+
+        try
+        {
+            _sessionsViewModel.SetActiveSession(null);
+        }
+        catch
+        {
+            // A refresh failure must not leave the audio session undisposed.
+        }
+
+        if (stopError is not null)
+        {
+            _icon.Text = queued ? "quill - transcripcion en cola" : "quill - error al guardar";
+            _icon.ShowBalloonTip(6_000, "quill - aviso", stopError.Message, Forms.ToolTipIcon.Warning);
+        }
+        else
+        {
+            _icon.Text = queued ? "quill - transcripcion en cola" : "quill - grabacion guardada";
+            _icon.ShowBalloonTip(
+                3_000,
+                "quill",
+                queued
+                    ? "Grabacion terminada. La transcripcion local inicio en segundo plano."
+                    : "Grabacion terminada. La transcripcion esta desactivada o no pudo encolarse.",
+                Forms.ToolTipIcon.Info);
+        }
+
+        _toggle.Text = "Iniciar grabacion";
+        _pause.Visible = false;
+        _marker.Visible = false;
+        ApplyIcon(recording: false);
+        _isStopping = false;
+        _stoppingSessionDirectory = null;
+    }
+
+    private void OnCaptureFailed(Exception exception)
+    {
+        Post(() =>
+        {
+            if (_session is not null)
+            {
+                _icon.ShowBalloonTip(
+                    6_000,
+                    "quill - aviso",
+                    $"La captura de audio encontro un problema: {exception.Message}",
+                    Forms.ToolTipIcon.Warning);
+            }
+        });
     }
 
     private void UpdateElapsedTime()
@@ -307,6 +522,19 @@ internal sealed class TrayController : IDisposable
                 }
                 _icon.ShowBalloonTip(6_000, "quill - error", $"{name}: {update.Error}", Forms.ToolTipIcon.Error);
                 break;
+
+            case SessionState.Disabled:
+                if (!isRecording)
+                {
+                    _icon.Text = "quill - transcripcion desactivada";
+                }
+
+                _icon.ShowBalloonTip(
+                    4_000,
+                    "quill",
+                    $"Grabacion guardada sin transcribir: {name}",
+                    Forms.ToolTipIcon.Info);
+                break;
         }
     }
 
@@ -328,6 +556,7 @@ internal sealed class TrayController : IDisposable
             _pause.Text = "Reanudar grabacion";
         }
 
+        _sessionsViewModel.SetActiveSession(session.Directory, session.IsPaused);
         ApplyIcon(recording: !session.IsPaused);
         UpdateElapsedTime();
     }
@@ -355,15 +584,35 @@ internal sealed class TrayController : IDisposable
     /// cada cinco segundos y solo se ofrece una vez por aplicacion, para no convertir
     /// una llamada larga en una fila de globos.
     /// </summary>
-    private void WatchForMeetings()
+    private async void WatchForMeetings()
     {
-        if (!_detectsMeetings || ++_meetingCheckTicks < 5)
+        if (!_detectsMeetings || _isStopping || _meetingCheckRunning || ++_meetingCheckTicks < 5)
         {
             return;
         }
 
         _meetingCheckTicks = 0;
-        var application = MeetingDetector.DetectActiveMeeting();
+        _meetingCheckRunning = true;
+        var observedGeneration = _recordingGeneration;
+        string? application;
+        try
+        {
+            application = await Task.Run(MeetingDetector.DetectActiveMeeting);
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            return;
+        }
+        finally
+        {
+            _meetingCheckRunning = false;
+        }
+
+        if (_disposed || observedGeneration != _recordingGeneration || _session is not null || _isStopping)
+        {
+            return;
+        }
+
         if (application is null)
         {
             // Al colgar se olvida, de modo que la siguiente reunion vuelve a avisar.
@@ -371,23 +620,24 @@ internal sealed class TrayController : IDisposable
             return;
         }
 
-        if (_session is not null || string.Equals(application, _meetingOffered, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(application, _meetingOffered, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
-        _meetingOffered = application;
         if (_startsMeetingsAutomatically)
         {
             StartRecording();
             if (_session is not null)
             {
+                _meetingOffered = application;
                 _icon.ShowBalloonTip(4_000, "quill", $"Grabacion iniciada: {application} esta usando el microfono.", Forms.ToolTipIcon.Info);
             }
 
             return;
         }
 
+        _meetingOffered = application;
         var shortcut = _hotkeys?.ToggleRegistered == true
             ? "Ctrl+Shift+R"
             : "el menu de la bandeja";
@@ -411,17 +661,23 @@ internal sealed class TrayController : IDisposable
         }
 
         _deviceCheckTicks = 0;
-        if (!session.DefaultDevicesChanged())
+        var changed = session.DefaultDevicesChanged();
+        if (!changed.Microphone && !changed.System)
         {
             return;
         }
 
         _deviceChangeReported = true;
+        var changedDevices = changed.Microphone && changed.System
+            ? "el microfono y el dispositivo de audio"
+            : changed.Microphone
+                ? "el microfono"
+                : "el dispositivo de audio";
         _icon.ShowBalloonTip(
             8_000,
             "quill - aviso",
-            "El dispositivo de audio predeterminado cambio. La grabacion sigue con el anterior, "
-                + "asi que puede que el audio del sistema ya no se este capturando.",
+            $"Cambio {changedDevices} predeterminado. La grabacion sigue con el anterior, "
+                + "asi que puede que una pista ya no se este capturando.",
             Forms.ToolTipIcon.Warning);
     }
 
@@ -433,8 +689,33 @@ internal sealed class TrayController : IDisposable
 
     private void OpenRecordings()
     {
-        Directory.CreateDirectory(_recordingsRoot);
-        Process.Start(new ProcessStartInfo(_recordingsRoot) { UseShellExecute = true });
+        try
+        {
+            Directory.CreateDirectory(_recordingsRoot);
+            Process.Start(new ProcessStartInfo(_recordingsRoot) { UseShellExecute = true });
+        }
+        catch (Exception exception) when (
+            exception is Win32Exception or InvalidOperationException or UnauthorizedAccessException or ArgumentException)
+        {
+            _icon.ShowBalloonTip(6_000, "quill - error", $"No se pudo abrir grabaciones: {exception.Message}", Forms.ToolTipIcon.Error);
+        }
+    }
+
+    private void Post(Action action)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        try
+        {
+            _application.Dispatcher.BeginInvoke(action);
+        }
+        catch (InvalidOperationException)
+        {
+            // A hotkey can arrive while WPF is shutting down.
+        }
     }
 
     /// <summary>

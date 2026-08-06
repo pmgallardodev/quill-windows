@@ -10,19 +10,23 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
     private SessionState _state;
     private double _micProgress;
     private double _systemProgress;
+    private TimeSpan? _microphoneDuration;
+    private TimeSpan? _systemDuration;
     private TimeSpan _elapsed;
     private string? _error;
+    private string? _model;
     private TimeSpan? _transcriptionElapsed;
     private string? _title;
     private string _titleDraft = string.Empty;
     private bool _isEditingTitle;
+    private bool _isPaused;
 
     public SessionRowViewModel(SessionSnapshot snapshot)
     {
         Directory = snapshot.Directory;
         Name = snapshot.Name;
         Duration = snapshot.Duration;
-        Model = snapshot.Model;
+        _model = snapshot.Model;
         _title = snapshot.Title;
         _state = snapshot.State;
         _error = snapshot.Error;
@@ -38,7 +42,7 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
 
     public TimeSpan Duration { get; }
 
-    public string? Model { get; }
+    public string? Model => _model;
 
     /// <summary>Lo que el usuario ve: su titulo si lo puso, y si no la carpeta.</summary>
     public string DisplayName => string.IsNullOrWhiteSpace(_title) ? Name : _title;
@@ -86,18 +90,24 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
 
     public bool IsRecording => _state == SessionState.Recording;
 
+    public bool IsPaused => IsRecording && _isPaused;
+
     public bool IsRunning => _state == SessionState.Running;
 
     public bool IsFailed => _state == SessionState.Failed;
 
     public bool IsDone => _state == SessionState.Done;
 
+    public bool IsDisabled => _state == SessionState.Disabled;
+
+    public bool CanRetry => IsFailed || IsDisabled;
+
     /// <summary>Grabando o transcribiendo: hay archivos abiertos, borrar destruiria trabajo en curso.</summary>
     public bool IsBusy => IsRecording || _state == SessionState.Queued || IsRunning;
 
     public bool CanDelete => !IsBusy;
 
-    public bool CanRename => !IsRecording;
+    public bool CanRename => !IsRecording && _state != SessionState.Abandoned;
 
     public bool HasError => IsFailed && !string.IsNullOrWhiteSpace(_error);
 
@@ -107,7 +117,7 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
 
     public double SystemProgress => _systemProgress * 100d;
 
-    public string StateGlyph => _state switch
+    public string StateGlyph => IsPaused ? "Ⅱ" : _state switch
     {
         SessionState.Recording => "●",
         SessionState.Abandoned => "⚠",
@@ -115,10 +125,11 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
         SessionState.Running => "⚙",
         SessionState.Done => "✓",
         SessionState.Failed => "✗",
+        SessionState.Disabled => "○",
         _ => "?",
     };
 
-    public string StateText => _state switch
+    public string StateText => IsPaused ? "PAUSADO" : _state switch
     {
         SessionState.Recording => "GRABANDO",
         SessionState.Abandoned => "incompleta",
@@ -126,6 +137,7 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
         SessionState.Running => "transcribiendo",
         SessionState.Done => "listo",
         SessionState.Failed => "error",
+        SessionState.Disabled => "transcripcion desactivada",
         _ => string.Empty,
     };
 
@@ -142,7 +154,14 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
     {
         get
         {
-            var fraction = (_micProgress + _systemProgress) / 2d;
+            var microphoneWeight = _microphoneDuration?.TotalSeconds > 0
+                ? _microphoneDuration.Value.TotalSeconds
+                : 1d;
+            var systemWeight = _systemDuration?.TotalSeconds > 0
+                ? _systemDuration.Value.TotalSeconds
+                : 1d;
+            var fraction = (_micProgress * microphoneWeight + _systemProgress * systemWeight) /
+                (microphoneWeight + systemWeight);
             if (!IsRunning || fraction < 0.05d || _elapsed <= TimeSpan.Zero)
             {
                 return string.Empty;
@@ -172,13 +191,13 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
             return true;
         }
 
-        IsEditingTitle = false;
         var candidate = string.IsNullOrWhiteSpace(TitleDraft) || TitleDraft.Trim() == Name
             ? null
             : TitleDraft.Trim();
 
         if (candidate == _title)
         {
+            IsEditingTitle = false;
             return true;
         }
 
@@ -187,6 +206,7 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
             return false;
         }
 
+        IsEditingTitle = false;
         _title = candidate;
         Raise(nameof(DisplayName));
         Raise(nameof(FolderText));
@@ -197,6 +217,14 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
     public void Apply(TranscriptionUpdate update)
     {
         _state = update.State;
+        if (!string.IsNullOrWhiteSpace(update.Model))
+        {
+            _model = update.Model;
+        }
+        if (_state != SessionState.Recording)
+        {
+            _isPaused = false;
+        }
         _error = update.Error;
         _elapsed = update.Elapsed;
 
@@ -206,6 +234,8 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
             // contaminate the ETA or the first progress frame.
             _micProgress = 0d;
             _systemProgress = 0d;
+            _microphoneDuration = null;
+            _systemDuration = null;
             _transcriptionElapsed = null;
         }
 
@@ -214,10 +244,12 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
             if (track.Track == "mic")
             {
                 _micProgress = track.Fraction;
+                _microphoneDuration = track.Duration ?? _microphoneDuration;
             }
             else if (track.Track == "system")
             {
                 _systemProgress = track.Fraction;
+                _systemDuration = track.Duration ?? _systemDuration;
             }
         }
 
@@ -236,13 +268,27 @@ internal sealed class SessionRowViewModel : INotifyPropertyChanged
         foreach (var property in new[]
                  {
                      nameof(StateText), nameof(StateGlyph), nameof(IsRecording), nameof(IsRunning),
-                      nameof(IsFailed), nameof(IsDone), nameof(IsBusy), nameof(CanDelete), nameof(CanRename),
-                     nameof(HasError), nameof(ErrorText), nameof(MicProgress),
-                     nameof(SystemProgress), nameof(EtaText), nameof(ElapsedText),
+                       nameof(IsPaused), nameof(IsFailed), nameof(IsDone), nameof(IsDisabled), nameof(CanRetry),
+                      nameof(IsBusy), nameof(CanDelete), nameof(CanRename),
+                      nameof(HasError), nameof(ErrorText), nameof(MicProgress),
+                      nameof(SystemProgress), nameof(EtaText), nameof(Model), nameof(ElapsedText),
                  })
         {
             Raise(property);
         }
+    }
+
+    public void SetPaused(bool paused)
+    {
+        if (_isPaused == paused)
+        {
+            return;
+        }
+
+        _isPaused = paused;
+        Raise(nameof(IsPaused));
+        Raise(nameof(StateGlyph));
+        Raise(nameof(StateText));
     }
 
     private void Raise([CallerMemberName] string? property = null) =>
@@ -321,4 +367,28 @@ internal sealed class SearchHitViewModel
     public string SpeakerText { get; }
 
     public string Text { get; }
+}
+
+internal sealed class TimelineSlotViewModel
+{
+    public TimelineSlotViewModel(TimelineSlot slot)
+    {
+        Microphone = slot.Microphone;
+        System = slot.System;
+        TimeText = TranscriptExport.Clock((long)slot.At.TotalMilliseconds);
+    }
+
+    public bool Microphone { get; }
+
+    public bool System { get; }
+
+    public string TimeText { get; }
+
+    public string Tooltip => Microphone && System
+        ? $"{TimeText}: ambos"
+        : Microphone
+            ? $"{TimeText}: me"
+            : System
+                ? $"{TimeText}: them"
+                : $"{TimeText}: silencio";
 }

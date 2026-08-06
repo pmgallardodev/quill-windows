@@ -115,10 +115,14 @@
                                                 IsEnabled="{Binding CanRename}"
                                                 Command="{Binding DataContext.RenameCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                 CommandParameter="{Binding}" />
-                                        <Button Content="Abrir carpeta" Style="{StaticResource RowButton}"
-                                                Command="{Binding DataContext.OpenFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                CommandParameter="{Binding Directory}" />
-                                         <Button Content="Copiar" Style="{StaticResource RowButton}"
+                                         <Button Content="Abrir carpeta" Style="{StaticResource RowButton}"
+                                                 Command="{Binding DataContext.OpenFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                 CommandParameter="{Binding Directory}" />
+                                         <Button Content="Abrir transcript" Style="{StaticResource RowButton}"
+                                                 Visibility="{Binding IsDone, Converter={StaticResource BoolToVisibility}}"
+                                                 Command="{Binding DataContext.OpenTranscriptCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                 CommandParameter="{Binding Directory}" />
+                                          <Button Content="Copiar" Style="{StaticResource RowButton}"
                                                  Visibility="{Binding IsDone, Converter={StaticResource BoolToVisibility}}"
                                                  Command="{Binding DataContext.CopyCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                  CommandParameter="{Binding}" />
@@ -130,8 +134,8 @@
                                                  Visibility="{Binding IsDone, Converter={StaticResource BoolToVisibility}}"
                                                  Command="{Binding DataContext.ExportVttCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                  CommandParameter="{Binding}" />
-                                        <Button Content="Reintentar" Style="{StaticResource RowButton}"
-                                                Visibility="{Binding IsFailed, Converter={StaticResource BoolToVisibility}}"
+                                         <Button Content="Reintentar" Style="{StaticResource RowButton}"
+                                                 Visibility="{Binding CanRetry, Converter={StaticResource BoolToVisibility}}"
                                                 Command="{Binding DataContext.RetryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                 CommandParameter="{Binding Directory}" />
                                         <Button Content="Log" Style="{StaticResource RowButton}"
@@ -204,11 +208,52 @@
                                      Foreground="#FF0F766E" Background="#FF7A5AF8"
                                      BorderThickness="0" />
                         <TextBlock Text="{Binding ParticipationText}" Style="{StaticResource Secondary}"
-                                   TextWrapping="Wrap" />
-                    </StackPanel>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding ReaderLines}">
+                                    TextWrapping="Wrap" />
+                        <ItemsControl ItemsSource="{Binding ParticipationTimeline}"
+                                      Margin="0,6,0,0"
+                                      Visibility="{Binding HasParticipationTimeline, Converter={StaticResource BoolToVisibility}}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Rectangle Width="4" Height="8" Margin="0,0,1,0"
+                                               ToolTip="{Binding Tooltip}">
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="Fill" Value="#FFE5E7EB" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Microphone}" Value="True">
+                                                        <Setter Property="Fill" Value="#FF0F766E" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding System}" Value="True">
+                                                        <Setter Property="Fill" Value="#FF7A5AF8" />
+                                                    </DataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Microphone}" Value="True" />
+                                                            <Condition Binding="{Binding System}" Value="True" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Fill" Value="#FFE8A317" />
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding ReaderLines}"
+                             BorderThickness="0"
+                             HorizontalContentAlignment="Stretch"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling">
+                            <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="0,0,0,6">
                                         <!-- Marca puesta durante la grabacion -->
@@ -243,9 +288,8 @@
                                         </DockPanel>
                                     </Grid>
                                 </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                            </ListBox.ItemTemplate>
+                    </ListBox>
                 </DockPanel>
             </Border>
         </Grid>

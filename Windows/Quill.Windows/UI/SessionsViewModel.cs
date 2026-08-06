@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text.Json;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Quill.Windows.Sessions;
@@ -25,11 +24,13 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
     private readonly ConcurrentDictionary<string, TranscriptionUpdate> _inFlight = new(StringComparer.OrdinalIgnoreCase);
 
     private string? _activeSessionDirectory;
+    private bool _activeSessionPaused;
     private string _participationText = string.Empty;
     private double _microphoneShare;
     private SessionRowViewModel? _selectedSession;
     private bool _restoringSelection;
     private string? _readerDirectory;
+    private string? _pendingSelectionDirectory;
     private int _readerGeneration;
     private string _readerTitle = string.Empty;
     private string _readerStatus = "Selecciona una sesion para leerla aqui.";
@@ -37,6 +38,10 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
     private string _searchStatus = string.Empty;
     private string _statusText = string.Empty;
     private CancellationTokenSource? _searchCancellation;
+    private CancellationTokenSource? _readerCancellation;
+    private CancellationTokenSource? _refreshCancellation;
+    private int _refreshGeneration;
+    private bool _disposed;
 
     public SessionsViewModel(string recordingsRoot, TranscriptionCoordinator transcription, Dispatcher dispatcher)
     {
@@ -84,6 +89,10 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
 
     public ObservableCollection<SearchHitViewModel> SearchResults { get; } = new();
 
+    public ObservableCollection<TimelineSlotViewModel> ParticipationTimeline { get; } = new();
+
+    public bool HasParticipationTimeline => ParticipationTimeline.Count > 0;
+
     public ICommand RetryCommand { get; }
 
     public ICommand OpenFolderCommand { get; }
@@ -116,7 +125,16 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
                 return;
             }
 
+            var previousSession = _selectedSession;
+            if (previousSession is not null)
+            {
+                previousSession.PropertyChanged -= OnSelectedSessionPropertyChanged;
+            }
             _selectedSession = value;
+            if (_selectedSession is not null)
+            {
+                _selectedSession.PropertyChanged += OnSelectedSessionPropertyChanged;
+            }
             Raise();
 
             if (!_restoringSelection)
@@ -243,40 +261,122 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
         }
     }
 
-    public void Start() => _pump.Start();
+    public void Start()
+    {
+        _pump.Start();
+        if (IsSearching)
+        {
+            _searchDebounce.Stop();
+            _searchDebounce.Start();
+        }
+    }
 
-    public void Stop() => _pump.Stop();
+    public void Stop()
+    {
+        _pump.Stop();
+        _searchDebounce.Stop();
+        CancelSearch();
+        _readerGeneration++;
+        _readerCancellation?.Cancel();
+        _readerCancellation = null;
+        _refreshGeneration++;
+        _refreshCancellation?.Cancel();
+        _refreshCancellation = null;
+    }
 
-    public void SetActiveSession(string? sessionDirectory)
+    public void SetActiveSession(string? sessionDirectory, bool isPaused = false)
     {
         _activeSessionDirectory = sessionDirectory;
+        _activeSessionPaused = isPaused;
         Refresh();
     }
 
     /// <summary>Reconstruye la lista leyendo el disco. Solo al abrir la ventana o al pulsar refrescar.</summary>
     public void Refresh()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
         if (!_dispatcher.CheckAccess())
         {
-            _dispatcher.BeginInvoke(Refresh);
+            try
+            {
+                _dispatcher.BeginInvoke(Refresh);
+            }
+            catch (InvalidOperationException)
+            {
+                // The window can disappear while a recording is stopping.
+            }
+
             return;
         }
 
         var previous = SelectedSession?.Directory;
+        var activeSession = _activeSessionDirectory;
+        var generation = ++_refreshGeneration;
+        var cancellation = new CancellationTokenSource();
+        _refreshCancellation?.Cancel();
+        _refreshCancellation = cancellation;
+        _ = RefreshAsync(previous, activeSession, generation, cancellation);
+    }
+
+    private async Task RefreshAsync(
+        string? previous,
+        string? activeSession,
+        int generation,
+        CancellationTokenSource cancellation)
+    {
+        try
+        {
+            IReadOnlyList<SessionSnapshot> snapshots;
+            try
+            {
+                snapshots = await Task.Run(
+                    () => SessionCatalog.Scan(_recordingsRoot, activeSession, cancellation.Token),
+                    cancellation.Token).ConfigureAwait(true);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception exception) when (exception is not OutOfMemoryException)
+            {
+                if (generation == _refreshGeneration)
+                {
+                    StatusText = $"No se pudieron leer las sesiones: {exception.Message}";
+                }
+
+                return;
+            }
+
+            if (_disposed || generation != _refreshGeneration || cancellation.IsCancellationRequested)
+            {
+                return;
+            }
 
         // Rehacer la lista pasa por SelectedItem = null. Sin esta bandera, el panel
         // de lectura se vaciaria y se recargaria en cada refresco.
         _restoringSelection = true;
         try
         {
+            var selectionToRestore = _pendingSelectionDirectory ?? SelectedSession?.Directory ?? previous;
+            _pendingSelectionDirectory = null;
             Sessions.Clear();
-            foreach (var snapshot in SessionCatalog.Scan(_recordingsRoot, _activeSessionDirectory))
+            foreach (var snapshot in snapshots)
             {
-                Sessions.Add(new SessionRowViewModel(snapshot));
+                var row = new SessionRowViewModel(snapshot);
+                if (string.Equals(row.Directory, _activeSessionDirectory, StringComparison.OrdinalIgnoreCase))
+                {
+                    row.SetPaused(_activeSessionPaused);
+                }
+
+                Sessions.Add(row);
             }
 
             SelectedSession = Sessions.FirstOrDefault(row =>
-                string.Equals(row.Directory, previous, StringComparison.OrdinalIgnoreCase));
+                string.Equals(row.Directory, selectionToRestore, StringComparison.OrdinalIgnoreCase));
         }
         finally
         {
@@ -285,15 +385,38 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
 
         LoadReader(SelectedSession, force: true);
         Drain();
+
+        }
+        finally
+        {
+            if (ReferenceEquals(_refreshCancellation, cancellation))
+            {
+                _refreshCancellation = null;
+            }
+
+            cancellation.Dispose();
+        }
     }
 
     public void Dispose()
     {
+        _disposed = true;
         _transcription.StateChanged -= OnUpdate;
         _transcription.ProgressChanged -= OnUpdate;
         _pump.Stop();
         _searchDebounce.Stop();
         CancelSearch();
+        _readerCancellation?.Cancel();
+        _readerCancellation?.Dispose();
+        _readerCancellation = null;
+        _refreshCancellation?.Cancel();
+        _refreshCancellation = null;
+        var selectedSession = _selectedSession;
+        if (selectedSession is not null)
+        {
+            selectedSession.PropertyChanged -= OnSelectedSessionPropertyChanged;
+        }
+        _inFlight.Clear();
     }
 
     private void OnUpdate(TranscriptionUpdate update) =>
@@ -322,6 +445,11 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
             {
                 LoadReader(row, force: true);
             }
+
+            if (update.State is SessionState.Done or SessionState.Failed or SessionState.Disabled)
+            {
+                _inFlight.TryRemove(row.Directory, out _);
+            }
         }
     }
 
@@ -340,67 +468,104 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
 
         _readerDirectory = directory;
         var generation = ++_readerGeneration;
-        ReaderLines.Clear();
-
-        if (row is null)
-        {
-            ReaderTitle = string.Empty;
-            ReaderStatus = "Selecciona una sesion para leerla aqui.";
-            ParticipationText = string.Empty;
-            return;
-        }
-
-        ReaderTitle = row.DisplayName;
-
-        if (!row.IsDone)
-        {
-            ReaderStatus = "Esta sesion todavia no tiene transcript.";
-            ParticipationText = string.Empty;
-            return;
-        }
-
-        ReaderStatus = "Cargando...";
-        var path = row.Directory;
-        IReadOnlyList<TranscriptLineViewModel> lines;
+        _readerCancellation?.Cancel();
+        _readerCancellation?.Dispose();
+        var cancellation = new CancellationTokenSource();
+        _readerCancellation = cancellation;
         try
         {
-            lines = await Task.Run(() => BuildLines(path)).ConfigureAwait(true);
-        }
-        catch (Exception exception) when (
-            exception is IOException or UnauthorizedAccessException or JsonException or InvalidDataException)
-        {
-            if (generation == _readerGeneration)
+            ReaderLines.Clear();
+            ParticipationText = string.Empty;
+            MicrophoneShare = 0d;
+            ParticipationTimeline.Clear();
+            Raise(nameof(HasParticipationTimeline));
+
+            if (row is null)
             {
-                ReaderStatus = "No se pudo leer el transcript de esta sesion.";
+                ReaderTitle = string.Empty;
+                ReaderStatus = "Selecciona una sesion para leerla aqui.";
+                return;
             }
 
-            return;
-        }
+            ReaderTitle = row.DisplayName;
 
-        // Otra seleccion gano la carrera mientras se leia el disco.
-        if (generation != _readerGeneration)
+            if (!row.IsDone &&
+                !(row.IsFailed && File.Exists(Path.Combine(row.Directory, "transcript.json"))))
+            {
+                ReaderStatus = "Esta sesion todavia no tiene transcript.";
+                return;
+            }
+
+            ReaderStatus = "Cargando...";
+            var path = row.Directory;
+            ReaderLoad load;
+            try
+            {
+                load = await Task.Run(
+                    () => BuildReader(path, row.Duration, cancellation.Token),
+                    cancellation.Token).ConfigureAwait(true);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception exception) when (exception is not OutOfMemoryException)
+            {
+                if (!_disposed && generation == _readerGeneration)
+                {
+                    ReaderStatus = "No se pudo leer el transcript de esta sesion.";
+                }
+
+                return;
+            }
+
+            // Otra seleccion gano la carrera mientras se leia el disco.
+            if (_disposed || cancellation.IsCancellationRequested || generation != _readerGeneration)
+            {
+                return;
+            }
+
+            foreach (var line in load.Lines)
+            {
+                ReaderLines.Add(line);
+            }
+
+            foreach (var slot in load.Timeline)
+            {
+                ParticipationTimeline.Add(new TimelineSlotViewModel(slot));
+            }
+
+            Raise(nameof(HasParticipationTimeline));
+
+            ReaderStatus = load.Transcript.Status switch
+            {
+                TranscriptReadStatus.Missing => "No hay transcript para esta sesion.",
+                TranscriptReadStatus.Invalid => "No se pudo leer el transcript de esta sesion.",
+                TranscriptReadStatus.Empty => "Transcript valido, sin segmentos.",
+                _ when ReaderLines.Count == 0 => "Transcript sin lineas visibles.",
+                _ => string.Empty,
+            };
+
+            UpdateParticipation(load.Transcript.Segments, load.Summary);
+        }
+        finally
         {
-            return;
+            if (ReferenceEquals(_readerCancellation, cancellation))
+            {
+                _readerCancellation = null;
+            }
+
+            cancellation.Dispose();
         }
-
-        foreach (var line in lines)
-        {
-            ReaderLines.Add(line);
-        }
-
-        ReaderStatus = ReaderLines.Count == 0
-            ? "No se pudo leer el transcript de esta sesion."
-            : string.Empty;
-
-        UpdateParticipation(path);
     }
 
-    private void UpdateParticipation(string sessionDirectory)
+    private void UpdateParticipation(
+        IReadOnlyList<TranscriptSegment> segments,
+        ParticipationSummary summary)
     {
-        var segments = TranscriptExport.TryReadSegments(sessionDirectory);
-        var summary = SessionInsights.Summarize(segments);
         if (!summary.HasSpeech)
         {
+            MicrophoneShare = 0d;
             ParticipationText = string.Empty;
             return;
         }
@@ -422,22 +587,45 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
             warning;
     }
 
-    private static IReadOnlyList<TranscriptLineViewModel> BuildLines(string sessionDirectory)
+    private static ReaderLoad BuildReader(
+        string sessionDirectory,
+        TimeSpan sessionDuration,
+        CancellationToken cancellationToken)
     {
-        var lines = TranscriptExport.TryReadSegments(sessionDirectory)
-            .Select(TranscriptLineViewModel.Segment)
+        var transcript = TranscriptExport.Read(sessionDirectory);
+        if (transcript.Status is TranscriptReadStatus.Missing or TranscriptReadStatus.Invalid)
+        {
+            return new ReaderLoad(
+                transcript,
+                Array.Empty<TranscriptLineViewModel>(),
+                new ParticipationSummary(TimeSpan.Zero, TimeSpan.Zero),
+                Array.Empty<TimelineSlot>());
+        }
+
+        var lines = transcript.Segments
+            .Select(segment =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                return TranscriptLineViewModel.Segment(segment);
+            })
+            .Where(line => line.Text.Length > 0)
             .ToList();
 
         var markers = SessionMetadata.TryRead(sessionDirectory)?.Markers ?? new List<long>();
         var number = 0;
         foreach (var marker in markers.Where(value => value >= 0).OrderBy(value => value))
         {
+            cancellationToken.ThrowIfCancellationRequested();
             lines.Add(TranscriptLineViewModel.Marker(marker, ++number));
         }
 
         // OrderBy es estable: una marca que cae justo en el inicio de un segmento
         // queda detras de el, que es donde se lee mejor.
-        return lines.OrderBy(line => line.StartMs).ToList();
+        return new ReaderLoad(
+            transcript,
+            lines.OrderBy(line => line.StartMs).ToList(),
+            SessionInsights.Summarize(transcript.Segments),
+            SessionInsights.Timeline(transcript.Segments, slots: 48, sessionDuration));
     }
 
     private void RunSearch()
@@ -460,8 +648,8 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
         _ = Task.Run(
             () =>
             {
-                var sessions = SessionCatalog.Scan(root, active);
-                return TranscriptSearch.Search(sessions, query, token).Take(MaxSearchResults).ToList();
+                var sessions = SessionCatalog.Scan(root, active, token);
+                return TranscriptSearch.Search(sessions, query, token).Take(MaxSearchResults + 1).ToList();
             },
             token).ContinueWith(
             task =>
@@ -479,7 +667,8 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
                     return;
                 }
 
-                foreach (var hit in task.Result)
+                var hasMore = task.Result.Count > MaxSearchResults;
+                foreach (var hit in task.Result.Take(MaxSearchResults))
                 {
                     SearchResults.Add(new SearchHitViewModel(hit));
                 }
@@ -488,7 +677,7 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
                 {
                     0 => "sin resultados",
                     1 => "1 resultado",
-                    MaxSearchResults => $"mas de {MaxSearchResults} resultados",
+                    _ when hasMore => $"mas de {MaxSearchResults} resultados",
                     var count => $"{count} resultados",
                 };
             },
@@ -519,7 +708,11 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
         if (target is not null)
         {
             SelectedSession = target;
+            return;
         }
+
+        _pendingSelectionDirectory = hit.Directory;
+        Refresh();
     }
 
     /// <summary>
@@ -528,7 +721,9 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
     /// </summary>
     private void Delete(SessionRowViewModel row)
     {
-        if (row.IsBusy)
+        if (row.IsBusy ||
+            _transcription.IsBusy(row.Directory) ||
+            string.Equals(row.Directory, _activeSessionDirectory, StringComparison.OrdinalIgnoreCase))
         {
             StatusText = "No se puede borrar una sesion en curso.";
             return;
@@ -546,20 +741,36 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
             return;
         }
 
-        var failure = SessionCatalog.TryDelete(row.Directory);
-        if (failure is not null)
-        {
-            StatusText = $"No se pudo borrar: {failure}";
-            return;
-        }
+        var directory = row.Directory;
+        var displayName = row.DisplayName;
+        _ = Task.Run(() => _transcription.TryDeleteSession(directory)).ContinueWith(
+            task =>
+            {
+                if (task.Status != TaskStatus.RanToCompletion)
+                {
+                    StatusText = "No se pudo borrar la sesion.";
+                    return;
+                }
 
-        StatusText = $"{row.DisplayName} borrada.";
-        if (ReferenceEquals(row, _selectedSession))
-        {
-            SelectedSession = null;
-        }
+                var failure = task.Result;
+                if (failure is not null)
+                {
+                    StatusText = $"No se pudo borrar: {failure}";
+                    return;
+                }
 
-        Refresh();
+                StatusText = $"{displayName} borrada.";
+                _inFlight.TryRemove(directory, out _);
+                if (string.Equals(_selectedSession?.Directory, directory, StringComparison.OrdinalIgnoreCase))
+                {
+                    SelectedSession = null;
+                }
+
+                Refresh();
+            },
+            CancellationToken.None,
+            TaskContinuationOptions.None,
+            TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     private void Copy(SessionRowViewModel row)
@@ -628,14 +839,43 @@ internal sealed class SessionsViewModel : INotifyPropertyChanged, IDisposable
     private void Raise([CallerMemberName] string? property = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
 
-    private static void Open(string path)
+    private void OnSelectedSessionPropertyChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (ReferenceEquals(sender, _selectedSession) && args.PropertyName == nameof(SessionRowViewModel.DisplayName))
+        {
+            ReaderTitle = _selectedSession?.DisplayName ?? string.Empty;
+        }
+    }
+
+    private sealed record ReaderLoad(
+        TranscriptReadResult Transcript,
+        IReadOnlyList<TranscriptLineViewModel> Lines,
+        ParticipationSummary Summary,
+        IReadOnlyList<TimelineSlot> Timeline);
+
+    private void Open(string path)
     {
         if (!File.Exists(path) && !Directory.Exists(path))
         {
+            StatusText = "La ruta ya no existe.";
             return;
         }
 
-        Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+        try
+        {
+            if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+            {
+                StatusText = "No se puede abrir una ruta enlazada.";
+                return;
+            }
+
+            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+        }
+        catch (Exception exception) when (
+            exception is Win32Exception or InvalidOperationException or UnauthorizedAccessException or ArgumentException)
+        {
+            StatusText = $"No se pudo abrir: {exception.Message}";
+        }
     }
 
     private sealed class RelayCommand(Action<object?> execute) : ICommand
