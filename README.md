@@ -67,6 +67,7 @@ The Windows application lives in `Windows/Quill.Windows`.
 | Meeting detection | Implemented | WASAPI capture sessions |
 | Global hotkeys | Implemented | `Ctrl+Shift+R` and `Ctrl+Shift+M` |
 | Sessions window | Implemented | WPF window with live per-track progress |
+| Transcription toggle | Implemented | `transcription.enabled`; `doctor` reports `desactivada` when off |
 | Start at login | Implemented | `HKCU\...\Run` value |
 | Portable package | Implemented | Self-contained `win-x64` ZIP |
 | Windows 11 hardware smoke test | Pending | Requires a Windows device with audio hardware |
@@ -84,6 +85,8 @@ The Windows application lives in `Windows/Quill.Windows`.
 - Recordings are stored at the resolution Whisper uses, not the device's.
 - Pause without ending the session, and mark moments while they happen.
 - Rename, read, search, export, and delete sessions from one window.
+- Inline transcript reader with speaker labels, recording markers, participation share,
+  and warnings when one track contains no speech.
 - Shows how much each side spoke, and warns when a track captured nothing.
 - Notices when a meeting app opens the microphone, so a recording is not forgotten.
 - Self-contained Windows package: end users do not install .NET or download a model.
@@ -96,11 +99,11 @@ The Windows application lives in `Windows/Quill.Windows`.
 | Component | Location | Role |
 | --- | --- | --- |
 | Application and CLI | `Windows/Quill.Windows/Program.cs` | `run`, `doctor`, and start-at-login commands |
-| Tray UI | `Windows/Quill.Windows/UI/` | Tray state and controls, plus the sessions window |
-| Capture | `Windows/Quill.Windows/Audio/` | WASAPI microphone and output loopback capture |
-| Sessions | `Windows/Quill.Windows/Sessions/` | Metadata, status, transcripts, and atomic file output |
+| Tray UI | `Windows/Quill.Windows/UI/` | Tray state, controls, global hotkeys, and the sessions window |
+| Capture | `Windows/Quill.Windows/Audio/` | WASAPI microphone/output loopback, pause, markers, and meeting detection |
+| Sessions | `Windows/Quill.Windows/Sessions/` | Metadata, status, transcripts, exports, insights, and atomic file output |
 | Transcription | `Windows/Quill.Windows/Transcription/` | Serial queue, 16 kHz conversion, and Whisper |
-| Tests | `Windows/Quill.Windows.Tests/` | State derivation, resume policy, and audio normalization |
+| Tests | `Windows/Quill.Windows.Tests/` | State recovery, transcription options, exports, insights, and audio normalization |
 | Model | `models/` | `large-v3-turbo` Q5_0 included at publish time |
 | Packaging | `tools/` | Controlled model download and portable ZIP build |
 
@@ -238,7 +241,7 @@ Double-click the tray icon, or select `Ver sesiones` from its menu, to see every
 |                                          |
 |  2026.08.01-1600        + listo          |
 |    transcrito en 4:05 - large-v3-turbo   |
-|              [Abrir carpeta] [Ver texto] |
+|              [Abrir carpeta] [Abrir transcript] |
 |                                          |
 |  2026.07.31-1130        x error          |
 |    no se encontro el modelo Whisper      |
@@ -253,13 +256,18 @@ Double-click the tray icon, or select `Ver sesiones` from its menu, to see every
 | `transcribiendo` | Live per-track progress and an estimate that corrects itself as it goes. |
 | `listo` | Transcript written, with the time it took and the model that produced it. |
 | `error` | Transcription failed. The reason is kept, and `Reintentar` queues it again. |
+| `transcripcion desactivada` | Transcription was disabled; the recording remains available and can be recovered after enabling it. |
 | `incompleta` | Session folder with no `meta.json`: the process was killed before it could close the recording. Not queued. |
 
-Each session can be renamed, so the list shows `Reunion con Contoso` instead of `2026.08.03-1420`. The right-hand pane reads the transcript inline, with `me` and `them` in different colours and any markers shown in place. The box at the top searches across every session at once, ignoring case and accents.
+When `transcription.enabled` is `false`, completed recordings are kept with the
+explicit `transcripcion desactivada` state. They can be opened or deleted, and are
+eligible for recovery if transcription is enabled again later.
+
+Each session can be renamed, so the list shows `Reunion con Contoso` instead of `2026.08.03-1420`. The right-hand pane reads the transcript inline, with `me` and `them` in different colours and any markers shown in place. Its activity bar shows where each side spoke, including overlaps and silence. The box at the top searches across every session at once, ignoring case and accents.
 
 Above the transcript, a bar shows how the talking was split between `me` and `them`, measured over speech rather than over the session length, since the silences belong to neither. If one track produced no speech at all — a muted microphone, or loopback on the wrong device — it says so there, which is the only place that failure ever becomes visible.
 
-Buttons per session: `Renombrar`, `Abrir carpeta`, `Copiar` (to the clipboard), `SRT` and `VTT` (write `transcript.srt` / `transcript.vtt` next to the recording), `Reintentar` and `Log` for failures, and `Borrar`, which asks for confirmation and is refused while a session is recording or transcribing.
+Buttons per session: `Renombrar`, `Abrir carpeta`, `Copiar` (to the clipboard), `SRT` and `VTT` (write `transcript.srt` / `transcript.vtt` next to the recording), `Reintentar` and `Log` for failures, and `Borrar`, which asks for confirmation and is refused while a session is recording, queued, or transcribing.
 
 Closing the window hides it; the tray icon keeps running. Progress updates come from the running transcription, so the window costs nothing while it is closed.
 
@@ -404,11 +412,12 @@ Example:
 | `recording.delete_audio_after_transcription` | `false` | Removes the WAV tracks once a transcript exists. Never runs on a failed or empty transcription. |
 | `recording.meeting_detection` | `ask` | `ask`, `auto` or `off`. What to do when a meeting application opens the microphone. |
 | `recording.global_hotkeys` | `true` | Registers `Ctrl+Shift+R` and `Ctrl+Shift+M` system-wide. |
-| `model` | `ggml-large-v3-turbo-q5_0.bin` | File name inside `models\`, or an absolute path. |
-| `threads` | half the logical cores | Inference threads. whisper.cpp otherwise caps at four. |
-| `vad` | `false` | Skip silence before transcribing. Needs `vad_model` present. |
-| `vad_model` | `ggml-silero-v5.1.2.bin` | Silero model, bundled by `Publish-Portable.ps1 -IncludeVad`. |
-| `prompt` | `null` | Optional vocabulary and names passed to Whisper as an initial prompt. |
+| `transcription.enabled` | `true` | Enables the transcription queue and recovery. When `false`, sessions are marked `disabled` and can be retried after re-enabling it. |
+| `transcription.model` | `ggml-large-v3-turbo-q5_0.bin` | File name inside `models\`, or an absolute path. |
+| `transcription.threads` | half the logical cores | Inference threads. whisper.cpp otherwise caps at four. |
+| `transcription.vad` | `false` | Skip silence before transcribing. Needs `transcription.vad_model` present. |
+| `transcription.vad_model` | `ggml-silero-v5.1.2.bin` | Silero model, bundled by `Publish-Portable.ps1 -IncludeVad`. |
+| `transcription.prompt` | `null` | Optional vocabulary and names passed to Whisper as an initial prompt. |
 
 ### Recording size
 
@@ -454,6 +463,8 @@ quill-windows/
 |   |   |-- quill.ico
 |   |   `-- quill-icon.svg
 |   |-- Audio/
+|   |   |-- MeetingDetector.cs
+|   |   |-- MonoDownmixSampleProvider.cs
 |   |   `-- RecordingSession.cs
 |   |-- Infrastructure/
 |   |   |-- AutoStart.cs
@@ -462,6 +473,7 @@ quill-windows/
 |   |-- Sessions/
 |   |   |-- SessionCatalog.cs
 |   |   |-- SessionDocuments.cs
+|   |   |-- SessionInsights.cs
 |   |   `-- SessionStatus.cs
 |   |-- Transcription/
 |   |   |-- ResumePolicy.cs
@@ -470,11 +482,12 @@ quill-windows/
 |   |   |-- TranscriptionUpdate.cs
 |   |   `-- WhisperTranscriber.cs
 |   |-- UI/
-|   |   |-- SessionRowViewModel.cs
-|   |   |-- SessionsViewModel.cs
-|   |   |-- SessionsWindow.xaml
+|   |   |-- GlobalHotkeys.cs
+ |   |   |-- SessionRowViewModel.cs
+ |   |   |-- SessionsViewModel.cs
+ |   |   |-- SessionsWindow.xaml
 |   |   `-- TrayApplication.cs
-|   |-- Program.cs
+ |   |-- Program.cs
 |   `-- Quill.Windows.csproj
 |-- Windows/Quill.Windows.Tests/
 |-- models/
@@ -519,7 +532,7 @@ The output must confirm:
 - A default microphone.
 - A default output device for loopback.
 - Access to the sessions folder.
-- The configured model.
+- The configured model when transcription is enabled, or `desactivada` when it is not.
 
 Required manual smoke test before distribution:
 
@@ -532,8 +545,11 @@ Required manual smoke test before distribution:
 7. Pause and resume, and confirm the tray reads `PAUSADO` and the timer stops.
 8. Mark a moment and confirm it appears in the reader at the right position.
 9. Rename a session and confirm the new name survives restarting Quill.
-10. Export SRT and confirm the timestamps line up when played against the audio.
-11. Confirm a failed session shows `error` after a restart and can be retried from the window.
+10. Confirm the participation insight shows the `me`/`them` split and warns about a silent track when applicable.
+11. Export SRT and VTT and confirm the timestamps line up when played against the audio.
+12. Press `Ctrl+Shift+R` and `Ctrl+Shift+M` while another application has focus and confirm both shortcuts work.
+13. Set `recording.meeting_detection` to `ask`, start a supported meeting application, and confirm the reminder appears without starting a recording.
+14. Confirm a failed session shows `error` after a restart and can be retried from the window.
 
 ## Troubleshooting
 
