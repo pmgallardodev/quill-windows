@@ -90,4 +90,14 @@ public class SessionStatusTests
 
         Assert.Equal(new[] { "status.json" }, Directory.GetFiles(session).Select(Path.GetFileName).Order());
     }
+
+    [Fact]
+    public void TryRead_ReturnsNull_WhenElapsedIsNotFinite()
+    {
+        using var temp = new TempDirectory();
+        var session = temp.Session("2026.08.01-1600");
+        temp.Write(session, "status.json", "{ \"state\": \"running\", \"elapsed_seconds\": 1e999 }");
+
+        Assert.Null(SessionStatus.TryRead(session));
+    }
 }

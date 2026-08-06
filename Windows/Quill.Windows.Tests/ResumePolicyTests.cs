@@ -60,4 +60,27 @@ public class ResumePolicyTests
     {
         Assert.True(ResumePolicy.ShouldEnqueue(true, false, With("algo-del-futuro")));
     }
+
+    [Fact]
+    public void Enqueues_WhenTranscriptionWasDisabledAndIsEnabledAgain()
+    {
+        Assert.True(ResumePolicy.ShouldEnqueue(true, false, With(SessionStatus.Disabled)));
+    }
+
+    [Theory]
+    [InlineData(SessionStatus.Queued)]
+    [InlineData(SessionStatus.Running)]
+    [InlineData(SessionStatus.Disabled)]
+    public void Enqueues_WhenTranscriptIsInvalidButStateIsRecoverable(string state)
+    {
+        Assert.True(ResumePolicy.ShouldEnqueue(true, TranscriptReadStatus.Invalid, With(state)));
+    }
+
+    [Fact]
+    public void DoesNotEnqueue_WhenTranscriptIsInvalidWithoutRecoverableState()
+    {
+        Assert.False(ResumePolicy.ShouldEnqueue(true, TranscriptReadStatus.Invalid, null));
+        Assert.False(ResumePolicy.ShouldEnqueue(true, TranscriptReadStatus.Invalid, With(SessionStatus.Failed)));
+        Assert.False(ResumePolicy.ShouldEnqueue(true, TranscriptReadStatus.Invalid, With(SessionStatus.Done)));
+    }
 }

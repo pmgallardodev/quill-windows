@@ -15,6 +15,15 @@ public class SessionCatalogTests
         }
         """;
 
+    private const string EmptyTranscript = """
+        {
+          "engine": "whisper.cpp",
+          "model": "test",
+          "created_at": "2026-08-01T16:42:00+00:00",
+          "segments": []
+        }
+        """;
+
     [Fact]
     public void Scan_ReturnsEmpty_WhenRootDoesNotExist()
     {
@@ -38,7 +47,8 @@ public class SessionCatalogTests
         // RecordingSession solo escribe meta.json en Stop(). Un cierre brusco deja
         // la carpeta sin metadatos para siempre: no es una grabacion en curso.
         using var temp = new TempDirectory();
-        temp.Session("2026.07.31-1130");
+        var session = temp.Session("2026.07.31-1130");
+        temp.Write(session, ".quill-session", string.Empty);
 
         var snapshot = Assert.Single(SessionCatalog.Scan(temp.Path, activeSessionDirectory: null));
 
@@ -51,7 +61,7 @@ public class SessionCatalogTests
         using var temp = new TempDirectory();
         var session = temp.Session("2026.08.01-1600");
         temp.Write(session, "meta.json", Meta);
-        temp.Write(session, "transcript.json", "{}");
+        temp.Write(session, "transcript.json", EmptyTranscript);
 
         var snapshot = Assert.Single(SessionCatalog.Scan(temp.Path, null));
 
@@ -65,7 +75,7 @@ public class SessionCatalogTests
         using var temp = new TempDirectory();
         var session = temp.Session("2026.08.01-1600");
         temp.Write(session, "meta.json", Meta);
-        temp.Write(session, "transcript.json", "{}");
+        temp.Write(session, "transcript.json", EmptyTranscript);
         temp.Write(session, "status.json", """{ "state": "failed", "error": "obsoleto" }""");
 
         var snapshot = Assert.Single(SessionCatalog.Scan(temp.Path, null));
@@ -137,20 +147,141 @@ public class SessionCatalogTests
         using var temp = new TempDirectory();
         var session = temp.Session("2026.08.02-0930");
         temp.Write(session, "meta.json", "{ roto");
+        temp.Write(session, "mic.wav", string.Empty);
 
         Assert.Equal(SessionState.Abandoned, Assert.Single(SessionCatalog.Scan(temp.Path, null)).State);
+    }
+
+    [Fact]
+    public void Scan_IgnoresForeignArtifactsWithoutSessionIdentity()
+    {
+        using var temp = new TempDirectory();
+        var directory = temp.Session("not-a-session");
+        temp.Write(directory, "status.json", "{ \"state\": \"failed\" }");
+        temp.Write(directory, "transcribe.log", "log");
+        temp.Write(directory, "transcript.md", "markdown");
+        temp.Write(directory, "recording.wav", "wav");
+
+        Assert.Empty(SessionCatalog.Scan(temp.Path, null));
+    }
+
+    [Fact]
+    public void Scan_RecognizesAudioOnlyDirectoryAsAbandoned()
+    {
+        using var temp = new TempDirectory();
+        var directory = temp.Session("2026.08.02-0930");
+        temp.Write(directory, "mic.wav", string.Empty);
+        temp.Write(directory, "system.wav", string.Empty);
+
+        Assert.Equal(SessionState.Abandoned, Assert.Single(SessionCatalog.Scan(temp.Path, null)).State);
+        Assert.False(SessionCatalog.IsSafeSessionDirectory(temp.Path, directory));
+    }
+
+    [Theory]
+    [InlineData(SessionStatus.Queued, "Queued")]
+    [InlineData(SessionStatus.Running, "Running")]
+    [InlineData(SessionStatus.Disabled, "Disabled")]
+    public void Scan_PreservesRecoverableStatusWithInvalidTranscript(string status, string expectedState)
+    {
+        using var temp = new TempDirectory();
+        var session = temp.Session("2026.08.02-0930");
+        temp.Write(session, "meta.json", Meta);
+        temp.Write(session, "transcript.json", "{ roto");
+        temp.Write(session, "status.json", $"{{ \"state\": \"{status}\" }}");
+
+        Assert.Equal(
+            Enum.Parse<SessionState>(expectedState),
+            Assert.Single(SessionCatalog.Scan(temp.Path, null)).State);
+    }
+
+    [Fact]
+    public void Scan_MarksCorruptTranscriptAsFailed_InsteadOfDone()
+    {
+        using var temp = new TempDirectory();
+        var session = temp.Session("2026.08.02-0930");
+        temp.Write(session, "meta.json", Meta);
+        temp.Write(session, "transcript.json", "{ roto");
+
+        var snapshot = Assert.Single(SessionCatalog.Scan(temp.Path, null));
+
+        Assert.Equal(SessionState.Failed, snapshot.State);
+        Assert.Equal("transcript.json invalido", snapshot.Error);
+    }
+
+    [Fact]
+    public void Scan_MarksDisabledSessionAsDisabled()
+    {
+        using var temp = new TempDirectory();
+        var session = temp.Session("2026.08.02-0930");
+        temp.Write(session, "meta.json", Meta);
+        temp.Write(session, "status.json", "{ \"state\": \"disabled\" }");
+
+        Assert.Equal(SessionState.Disabled, Assert.Single(SessionCatalog.Scan(temp.Path, null)).State);
     }
 
     [Fact]
     public void Scan_OrdersNewestFirst()
     {
         using var temp = new TempDirectory();
-        temp.Session("2026.07.31-1130");
-        temp.Session("2026.08.03-1420");
-        temp.Session("2026.08.01-1600");
+        foreach (var name in new[] { "2026.07.31-1130", "2026.08.03-1420", "2026.08.01-1600" })
+        {
+            var session = temp.Session(name);
+            temp.Write(session, ".quill-session", string.Empty);
+        }
 
         var names = SessionCatalog.Scan(temp.Path, null).Select(snapshot => snapshot.Name).ToArray();
 
         Assert.Equal(new[] { "2026.08.03-1420", "2026.08.01-1600", "2026.07.31-1130" }, names);
+    }
+
+    [Fact]
+    public void TryDelete_RejectsAnUnknownDirectory()
+    {
+        using var temp = new TempDirectory();
+        var directory = temp.Session("not-a-session");
+        temp.Write(directory, "status.json", "{ \"state\": \"failed\" }");
+        temp.Write(directory, "transcribe.log", "log");
+        temp.Write(directory, "transcript.md", "markdown");
+        temp.Write(directory, "recording.wav", "wav");
+        temp.Write(directory, "important.txt", "keep me");
+
+        var failure = SessionCatalog.TryDelete(temp.Path, directory);
+
+        Assert.NotNull(failure);
+        Assert.True(File.Exists(Path.Combine(directory, "important.txt")));
+    }
+
+    [Fact]
+    public void TryDelete_RejectsAudioOnlyDirectory()
+    {
+        using var temp = new TempDirectory();
+        var directory = temp.Session("abandoned");
+        temp.Write(directory, "mic.wav", string.Empty);
+
+        var failure = SessionCatalog.TryDelete(temp.Path, directory);
+
+        Assert.NotNull(failure);
+        Assert.True(File.Exists(Path.Combine(directory, "mic.wav")));
+    }
+
+    [Fact]
+    public void TryDelete_RejectsADirectoryOutsideTheRoot()
+    {
+        using var temp = new TempDirectory();
+        var outside = Path.Combine(Path.GetTempPath(), $"quill-outside-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(outside);
+        try
+        {
+            File.WriteAllText(Path.Combine(outside, "important.txt"), "keep me");
+
+            var failure = SessionCatalog.TryDelete(temp.Path, outside);
+
+            Assert.NotNull(failure);
+            Assert.True(File.Exists(Path.Combine(outside, "important.txt")));
+        }
+        finally
+        {
+            Directory.Delete(outside, recursive: true);
+        }
     }
 }

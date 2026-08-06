@@ -175,4 +175,19 @@ public class SessionInsightsTests
 
         Assert.Empty(SessionInsights.Timeline(segments, slots: 0));
     }
+
+    [Fact]
+    public void Timeline_UsesSessionDurationToKeepTrailingSilenceOnTheScale()
+    {
+        var segments = new[] { new TranscriptSegment("me", 0, 1_000, "principio") };
+
+        var timeline = SessionInsights.Timeline(
+            segments,
+            slots: 10,
+            sessionDuration: TimeSpan.FromSeconds(10));
+
+        Assert.Equal(10, timeline.Count);
+        Assert.True(timeline[0].Microphone);
+        Assert.False(timeline[9].Microphone);
+    }
 }

@@ -93,4 +93,19 @@ public class TranscriptExportTests
 
         Assert.Contains("01:02:03,000", TranscriptExport.ToSrt(segments));
     }
+
+    [Fact]
+    public void Read_DistinguishesValidEmptyFromInvalidTranscript()
+    {
+        using var temp = new TempDirectory();
+        var empty = temp.Session("empty");
+        var invalid = temp.Session("invalid");
+        temp.Write(empty, "transcript.json", """
+            { "engine": "whisper.cpp", "model": "test", "created_at": "2026-08-01T00:00:00Z", "segments": [] }
+            """);
+        temp.Write(invalid, "transcript.json", "{ roto");
+
+        Assert.Equal(TranscriptReadStatus.Empty, TranscriptExport.Read(empty).Status);
+        Assert.Equal(TranscriptReadStatus.Invalid, TranscriptExport.Read(invalid).Status);
+    }
 }

@@ -93,6 +93,19 @@ public class TranscriptionOptionsTests
     }
 
     [Fact]
+    public void FromConfig_RejectsAnUnknownEngine()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            TranscriptionOptions.FromConfig(new TranscriptionConfig { Engine = "other" }));
+    }
+
+    [Fact]
+    public void ResolveModelPath_RejectsRelativePathTraversal()
+    {
+        Assert.Throws<InvalidOperationException>(() => ConfigStore.ResolveModelPath("..\\outside.bin"));
+    }
+
+    [Fact]
     public void TranscriptionConfig_DefaultsToNoPrompt()
     {
         Assert.Null(new TranscriptionConfig().Prompt);
