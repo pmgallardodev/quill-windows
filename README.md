@@ -14,6 +14,7 @@
   <img src="https://img.shields.io/badge/Whisper-large--v3--turbo-412991?style=flat-square" alt="Whisper large-v3-turbo" />
   <img src="https://img.shields.io/badge/Audio-WASAPI-0078D4?style=flat-square" alt="WASAPI" />
   <img src="https://img.shields.io/badge/Transcription-local-0F766E?style=flat-square" alt="Local transcription" />
+  <img src="https://img.shields.io/github/downloads/pmgallardodev/quill-windows/total?style=flat-square" alt="GitHub downloads" />
 </p>
 
 Quill captures microphone and Windows output as independent tracks. When a session stops, it runs Spanish Whisper `large-v3-turbo` locally and produces a timestamped transcript with deterministic speaker labels: `me` for the microphone and `them` for system audio.
