@@ -35,7 +35,10 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       validator, session format v2 (additive), solution file. Route D.
 - [ ] F0 Spike + benchmark harness: LLamaSharp/Vulkan, sherpa-onnx .NET, Whisper small live
       latency; 5 synthetic Spanish transcripts with answer keys; scoring tool. Route D.
-- [ ] F2 Design system with WPF-UI: tokens, typography, light/dark, Mica, string resources. Route D.
+- [x] F2 Design system with WPF-UI: tokens, typography, light/dark, Mica, string resources. Route D.
+      Evidence: 609ddc2, 38e6185, merge 8d0a84e, alias fix 148166c (WPF-UI root namespace `Wpf`
+      collided with `using Wpf = System.Windows`). Build win-x64: 0 errors / 0 warnings.
+      Pending: Windows runtime check (theme switch, Mica, high contrast). API: UI/Theme/README.md.
 
 ### Wave A (parallel, after F1)
 - [ ] F3 Live transcription pipeline (ring buffer → VAD → Whisper small chunks). Route D.
