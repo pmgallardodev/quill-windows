@@ -213,7 +213,7 @@ System audio uses global loopback. It captures everything Windows plays through 
 - A default microphone and default audio-output device.
 - Microsoft Visual C++ 2022 Redistributable when it is not already installed.
 
-The published ZIP is self-contained: it does not require the .NET SDK or runtime and never downloads a model on first launch.
+The published ZIP is self-contained: it does not require the .NET SDK or runtime and never downloads a model on first launch. Quill never connects to the internet on its own: the AI pack is downloaded from Hugging Face only when you press **Download AI pack** in Settings → AI, and you can instead extract the AI-pack ZIPs next to Quill to stay fully offline.
 
 ### To develop or publish
 

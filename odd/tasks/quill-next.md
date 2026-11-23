@@ -149,7 +149,7 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       Evidence: 3fe8acd + 5db2bba, merged. Per-meeting switch in Interlocutores panel; owner =
       saved voice → loudest (≥25% talk time) → most talk. Owner voice learned from first 5 online
       meetings. Gap: switch not in import dialog (settable after import).
-- [ ] P1 Packaging: app ZIP + AI-pack ZIP, AI-pack detection, README update. Route D.
+- [x] P1 Packaging: app ZIP + AI-pack ZIP, AI-pack detection, README update. Route D.
       Done: 8cfc387, 62d0237, d722434, merged; build 0/0; native runtimes verified in publish.
       Scripts unexecuted (no pwsh on Mac). OPEN owner decision: Qwen3-4B Q4_K_M is 2.33 GiB >
       2 GiB GitHub asset cap → agent defaulted to UD-Q3_K_XL (1.98 GiB, unscored) in a separate
@@ -162,7 +162,7 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       (IAiPackLocator) in SummariesModule + notice fix. Byte-split (no upstream shards), 2 parts of
       1,248,640,560 B, joined on first use with per-part + full SHA-256. Core 656/656, Windows 0/0.
       Release = 4 assets (app, pack, llm-part1, llm-part2). Scripts unexecuted (no pwsh).
-- [ ] P2 Hybrid AI-pack install (owner decision 2026-11-23, revises Q1): in-app "Descargar pack
+- [x] P2 Hybrid AI-pack install (owner decision 2026-11-23, revises Q1): in-app "Descargar pack
       de IA" button (user-initiated only, never automatic) downloading pinned Hugging Face
       revisions with size cap + SHA-256 verification, resumable, progress, cancel, free-space
       check; manual ZIPs (P1b) keep working offline. README "never downloads" wording updated to
@@ -189,4 +189,11 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
   Core committed (d7b3a81, 93bd447; 157 tests green), sherpa adapter + SpeakersModule pending.
 
 ## Next step
-Merge F3/F4/F6 when they return, resume F5, then Wave B.
+All code tasks merged: 706 Core tests green on net10.0, Windows projects build with 0 errors and
+0 warnings. P2 evidence: 9a8adec, 119bcb4, 1337f7a, merged; README offline/download sentence added.
+Remaining, on the owner's Windows PC:
+1. `dotnet test Windows/Quill.Windows.Tests` (Windows-only suites, never run).
+2. Smoke checklist from the F3/F5/F6/F7/F8/F14/I1/I2/P2 notes.
+3. F0 full benchmark (tools/bench/windows-latency.ps1 + run-llm-bench) → confirm default model.
+4. First `tools/release.ps1` run (PowerShell scripts never executed: no pwsh on the Mac).
+F0 stays open until step 3. Then review and push/PR (owner decision).
