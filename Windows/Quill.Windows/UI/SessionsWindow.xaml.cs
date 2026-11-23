@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Windows;
 // UseWindowsForms inyecta un using implicito de System.Windows.Forms, que trae sus
 // propios TextBox, MessageBox y KeyEventArgs. Los alias evitan la ambiguedad.
-using Wpf = System.Windows;
+using WpfCore = System.Windows;
 using WpfControls = System.Windows.Controls;
 using WpfInput = System.Windows.Input;
 
@@ -86,11 +86,11 @@ internal sealed partial class SessionsWindow : Window
     {
         if (!row.CommitRename())
         {
-            Wpf.MessageBox.Show(
+            WpfCore.MessageBox.Show(
                 "No se pudo guardar el nombre. Comprueba que la carpeta de la sesion sigue accesible.",
                 "quill",
-                Wpf.MessageBoxButton.OK,
-                Wpf.MessageBoxImage.Warning);
+                WpfCore.MessageBoxButton.OK,
+                WpfCore.MessageBoxImage.Warning);
         }
     }
 }
