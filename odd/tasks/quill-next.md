@@ -126,7 +126,10 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       TemplateCatalog, live cadence/GPU gate, auto-export, model/GPU overrides) → I1.
 
 ### Wave C (parallel)
-- [ ] F10 Ask (per meeting + across meetings) + local semantic search. Route D.
+- [x] F10 Ask (per meeting + across meetings) + local semantic search. Route D.
+      Evidence: 9986749, e22dc0d, c27f04d, 5abba69, merged clean. Post-merge: Core 573/573,
+      Windows 0/0, resx valid. Hybrid BM25 + vector (RRF), file index `.quill-index/`.
+      Embedding model: BGE-M3 GGUF Q8_0 (~0.6 GB). Wiring (AskModule, IApiSearch) → I2.
 - [ ] F11 Optional speaker-naming memory (local voice embeddings, "Sounds like Juan?"). Route D.
 - [x] F12 Local API (127.0.0.1 + token), loopback-only webhooks, MCP endpoint. Route D.
       Evidence: 8bd3df5, e912231, 094721d, fabaa71, c593bcf, 1ea0ade, merged clean. Post-merge:
