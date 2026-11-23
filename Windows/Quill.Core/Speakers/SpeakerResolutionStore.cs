@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Quill.Core.Domain;
 using Quill.Core.Ports;
+using Quill.Core.Speakers.VoiceMemory;
 using Quill.Windows.Sessions;
 
 namespace Quill.Core.Speakers;
@@ -14,6 +15,15 @@ public sealed record SpeakerVoice(string Id, int ColorSlot, float[]? Embedding);
 public sealed record SpeakerResolutionState(IReadOnlyList<SpeakerVoice> Voices, IReadOnlyList<SpeakerEdit> Edits)
 {
     public static SpeakerResolutionState Empty { get; } = new([], []);
+
+    /// <summary>"Reunión presencial" (F13): the mic track is diarized on the next resolution.</summary>
+    public bool InPerson { get; init; }
+
+    /// <summary>Pending "¿Es Juan?" proposals for unnamed speakers (F11).</summary>
+    public IReadOnlyList<VoiceSuggestion> Suggestions { get; init; } = [];
+
+    /// <summary>"No es" answers, never proposed again in this meeting.</summary>
+    public IReadOnlyList<VoiceRejection> Rejections { get; init; } = [];
 }
 
 /// <summary>Persists <see cref="SpeakerResolutionState"/> per session.</summary>
@@ -28,7 +38,9 @@ public interface ISpeakerResolutionStore
 /// <summary>
 /// speakers.resolution.json in the session folder (additive v2 file; older versions ignore it):
 /// <c>{ "version": 1, "voices": [{ "id", "colorSlot", "embedding"? }],
-/// "edits": [{ "op": "merge", "from", "into" } | { "op": "reassign", "track", "startMs", "speakerId" }] }</c>.
+/// "edits": [{ "op": "merge", "from", "into" } | { "op": "reassign", "track", "startMs", "speakerId" }],
+/// "inPerson"?: true, "suggestions"?: [{ "speakerId", "voiceId", "name", "similarity" }],
+/// "rejections"?: [{ "speakerId", "voiceId" }] }</c> (the last three are F11/F13 additions).
 /// </summary>
 public sealed class FileSpeakerResolutionStore(ISessionStore sessions) : ISpeakerResolutionStore
 {
@@ -62,7 +74,21 @@ public sealed class FileSpeakerResolutionStore(ISessionStore sessions) : ISpeake
                 .Select(row => new SpeakerVoice(row!.Id!, row.ColorSlot, row.Embedding))
                 .ToList();
             var edits = (file.Edits ?? []).Select(ToEdit).OfType<SpeakerEdit>().ToList();
-            return new SpeakerResolutionState(voices, edits);
+            return new SpeakerResolutionState(voices, edits)
+            {
+                InPerson = file.InPerson == true,
+                Suggestions = (file.Suggestions ?? [])
+                    .OfType<SuggestionRow>()
+                    .Where(row => SpeakerProfile.IsAssignable(row.SpeakerId) && !string.IsNullOrWhiteSpace(row.VoiceId) && !string.IsNullOrWhiteSpace(row.Name))
+                    .Select(row => new VoiceSuggestion(row.SpeakerId!, row.VoiceId!, row.Name!.Trim(), row.Similarity ?? 0))
+                    .ToList(),
+                Rejections = (file.Rejections ?? [])
+                    .OfType<SuggestionRow>()
+                    .Where(row => !string.IsNullOrWhiteSpace(row.SpeakerId) && !string.IsNullOrWhiteSpace(row.VoiceId))
+                    .Select(row => new VoiceRejection(row.SpeakerId!, row.VoiceId!))
+                    .Distinct()
+                    .ToList(),
+            };
         }
         catch (Exception exception) when (exception is JsonException or IOException or UnauthorizedAccessException)
         {
@@ -85,6 +111,23 @@ public sealed class FileSpeakerResolutionStore(ISessionStore sessions) : ISpeake
                 Embedding = voice.Embedding,
             }).ToList(),
             Edits = state.Edits.Select(FromEdit).ToList(),
+            InPerson = state.InPerson ? true : null,
+            Suggestions = state.Suggestions.Count == 0
+                ? null
+                : state.Suggestions.Select(suggestion => (SuggestionRow?)new SuggestionRow
+                {
+                    SpeakerId = suggestion.SpeakerId,
+                    VoiceId = suggestion.VoiceId,
+                    Name = suggestion.Name,
+                    Similarity = suggestion.Similarity,
+                }).ToList(),
+            Rejections = state.Rejections.Count == 0
+                ? null
+                : state.Rejections.Select(rejection => (SuggestionRow?)new SuggestionRow
+                {
+                    SpeakerId = rejection.SpeakerId,
+                    VoiceId = rejection.VoiceId,
+                }).ToList(),
         };
         AtomicFile.Write(path, JsonSerializer.Serialize(file, WriteOptions));
     }
@@ -128,6 +171,30 @@ public sealed class FileSpeakerResolutionStore(ISessionStore sessions) : ISpeake
 
         [JsonPropertyName("edits")]
         public List<EditRow?>? Edits { get; init; }
+
+        [JsonPropertyName("inPerson")]
+        public bool? InPerson { get; init; }
+
+        [JsonPropertyName("suggestions")]
+        public List<SuggestionRow?>? Suggestions { get; init; }
+
+        [JsonPropertyName("rejections")]
+        public List<SuggestionRow?>? Rejections { get; init; }
+    }
+
+    private sealed class SuggestionRow
+    {
+        [JsonPropertyName("speakerId")]
+        public string? SpeakerId { get; init; }
+
+        [JsonPropertyName("voiceId")]
+        public string? VoiceId { get; init; }
+
+        [JsonPropertyName("name")]
+        public string? Name { get; init; }
+
+        [JsonPropertyName("similarity")]
+        public double? Similarity { get; init; }
     }
 
     private sealed class VoiceRow

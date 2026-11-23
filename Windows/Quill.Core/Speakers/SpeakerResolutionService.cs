@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Quill.Core.Domain;
 using Quill.Core.Ports;
+using Quill.Core.Speakers.VoiceMemory;
 
 namespace Quill.Core.Speakers;
 
@@ -30,6 +31,9 @@ public sealed record SpeakerResolutionOutcome(
 /// speakers.resolution.json. Also the manual operations (rename, merge, reassign),
 /// which are persisted and idempotent. Heavy work runs at
 /// <see cref="InferencePriority.Background"/> through the inference scheduler.
+/// With <see cref="VoiceMemoryService"/> (F11/F13): names given to speakers are learned,
+/// unnamed speakers get "¿Es Juan?" suggestions, the owner's voice is learned from the mic
+/// of the first online meetings, and a meeting marked in person diarizes the mic track.
 /// </summary>
 public sealed class SpeakerResolutionService(
     ISessionStore sessions,
@@ -38,7 +42,8 @@ public sealed class SpeakerResolutionService(
     IDiarizer diarizer,
     IInferenceScheduler scheduler,
     IEnergyEnvelopeReader? energyReader = null,
-    SpeakerResolutionOptions? options = null)
+    SpeakerResolutionOptions? options = null,
+    VoiceMemoryService? voices = null)
 {
     private static readonly TranscriptInfo UnknownInfo = new("unknown", "unknown");
 
@@ -96,6 +101,53 @@ public sealed class SpeakerResolutionService(
             var renamed = profiles.Select(profile => profile.Id == speakerId ? profile with { DisplayName = name } : profile).ToList();
             await sessions.SaveSpeakersAsync(sessionId, renamed.Select(profile => profile.ToSpeaker()).ToList(), cancellationToken)
                 .ConfigureAwait(false);
+            await AfterRenameAsync(sessionId, target, name, cancellationToken).ConfigureAwait(false);
+            return true;
+        }, cancellationToken);
+
+    /// <summary>Current speakers.resolution.json (in-person flag, voice suggestions, edits).</summary>
+    public Task<SpeakerResolutionState> LoadStateAsync(string sessionId, CancellationToken cancellationToken) =>
+        state.LoadAsync(sessionId, cancellationToken);
+
+    /// <summary>Marks the meeting in person (or not). Takes effect on the next <see cref="ResolveAsync"/>.</summary>
+    public Task SetInPersonAsync(string sessionId, bool inPerson, CancellationToken cancellationToken) =>
+        Locked(async () =>
+        {
+            var current = await state.LoadAsync(sessionId, cancellationToken).ConfigureAwait(false);
+            if (current.InPerson != inPerson)
+            {
+                await state.SaveAsync(sessionId, current with { InPerson = inPerson }, cancellationToken).ConfigureAwait(false);
+            }
+
+            return true;
+        }, cancellationToken);
+
+    /// <summary>"Confirmar": names the speaker as suggested (which also reinforces the saved voice). No-op without a suggestion.</summary>
+    public async Task ConfirmSuggestionAsync(string sessionId, string speakerId, CancellationToken cancellationToken)
+    {
+        var suggestion = (await state.LoadAsync(sessionId, cancellationToken).ConfigureAwait(false))
+            .Suggestions.FirstOrDefault(candidate => candidate.SpeakerId == speakerId);
+        if (suggestion is not null)
+        {
+            await RenameAsync(sessionId, speakerId, suggestion.Name, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>"No es": drops the suggestion and never proposes that voice for this speaker in this meeting again.</summary>
+    public Task RejectSuggestionAsync(string sessionId, string speakerId, CancellationToken cancellationToken) =>
+        Locked(async () =>
+        {
+            var current = await state.LoadAsync(sessionId, cancellationToken).ConfigureAwait(false);
+            var suggestion = current.Suggestions.FirstOrDefault(candidate => candidate.SpeakerId == speakerId);
+            if (suggestion is not null)
+            {
+                await state.SaveAsync(sessionId, current with
+                {
+                    Suggestions = current.Suggestions.Where(candidate => candidate != suggestion).ToList(),
+                    Rejections = current.Rejections.Append(new VoiceRejection(speakerId, suggestion.VoiceId)).Distinct().ToList(),
+                }, cancellationToken).ConfigureAwait(false);
+            }
+
             return true;
         }, cancellationToken);
 
@@ -167,7 +219,7 @@ public sealed class SpeakerResolutionService(
 
         var (segments, speakers) = SpeakerEdits.Apply(transcript, profiles, [edit]);
         var edits = previousEdits(current.Edits).Append(edit).ToList();
-        await SaveAsync(session, segments, speakers, edits, cancellationToken).ConfigureAwait(false);
+        await SaveAsync(session, segments, speakers, current with { Edits = edits }, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<SpeakerResolutionOutcome> ResolveCoreAsync(string sessionId, IProgress<double>? progress, CancellationToken cancellationToken)
@@ -200,7 +252,20 @@ public sealed class SpeakerResolutionService(
             new EchoClassificationRequest(micSegments, systemSegments, micEnergy, systemEnergy),
             cancellationToken).ConfigureAwait(false);
 
-        var diarizeMic = _options.DiarizeMicrophone && micTrack is not null && micSegments.Count > 0;
+        var current = await state.LoadAsync(sessionId, cancellationToken).ConfigureAwait(false);
+        var library = voices is null ? null : await voices.LoadAsync(cancellationToken).ConfigureAwait(false);
+        var inPerson = _options.DiarizeMicrophone || current.InPerson;
+        var hasMic = micTrack is not null && micSegments.Count > 0;
+
+        // Online meeting: genuine mic speech is the owner, so the first few meetings also
+        // diarize the mic (background priority) to learn the owner's voice for in-person mode.
+        var learnOwner = !inPerson && hasMic && library is not null && library.NeedsOwnerSamples(voices!.Options) &&
+            GenuineSpeech(micSegments, verdicts) >= OwnerVoiceLearner.MinSpeech;
+        var diarizeMic = (inPerson || learnOwner) && hasMic;
+        if (inPerson && diarizeMic && micEnergy is null && energyReader is not null)
+        {
+            micEnergy = await energyReader.ReadAsync(micTrack!.Value.Path, micTrack.Value.Offset, cancellationToken).ConfigureAwait(false);
+        }
         var systemDiarization = systemTrack is not null && systemSegments.Count > 0
             ? await diarizer.DiarizeAsync(
                 new DiarizationRequest(systemTrack.Value.Path, Track.System, systemTrack.Value.Offset),
@@ -215,10 +280,21 @@ public sealed class SpeakerResolutionService(
             : null;
 
         var resolved = SpeakerResolver.Resolve(
-            new SpeakerResolutionInput(transcript, verdicts, systemDiarization, micDiarization),
-            _options);
+            new SpeakerResolutionInput(
+                transcript,
+                verdicts,
+                systemDiarization,
+                inPerson ? micDiarization : null,
+                inPerson ? library?.Owner?.Embedding : null,
+                inPerson ? micEnergy : null),
+            _options with { DiarizeMicrophone = inPerson });
 
-        var current = await state.LoadAsync(sessionId, cancellationToken).ConfigureAwait(false);
+        if (learnOwner && micDiarization is not null &&
+            OwnerVoiceLearner.FromOnlineMeeting(micDiarization, micSegments, verdicts) is { } ownerVoice)
+        {
+            await voices!.LearnOwnerAsync(sessionId, ownerVoice, cancellationToken).ConfigureAwait(false);
+        }
+
         var (segments, speakers) = SpeakerEdits.Apply(resolved.Segments, resolved.Speakers, current.Edits);
 
         // Names survive re-resolution: ids are stable for the same audio.
@@ -227,7 +303,13 @@ public sealed class SpeakerResolutionService(
             .ToDictionary(speaker => speaker.Id, speaker => speaker.DisplayName, StringComparer.Ordinal);
         speakers = speakers.Select(profile => profile with { DisplayName = names.GetValueOrDefault(profile.Id) }).ToList();
 
-        await SaveAsync(session, segments, speakers, current.Edits, cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<VoiceSuggestion> suggestions = [];
+        if (voices is not null)
+        {
+            (speakers, suggestions) = await SuggestNamesAsync(sessionId, speakers, current.Rejections, cancellationToken).ConfigureAwait(false);
+        }
+
+        await SaveAsync(session, segments, speakers, current with { Suggestions = suggestions }, cancellationToken).ConfigureAwait(false);
         progress?.Report(1);
         return new SpeakerResolutionOutcome(
             SpeakerResolutionStatus.Resolved,
@@ -236,19 +318,83 @@ public sealed class SpeakerResolutionService(
             resolved.EchoSegmentsReattributed);
     }
 
+    /// <summary>
+    /// Suggestions for unnamed remote speakers. With auto-apply on, confident matches are named
+    /// directly (and reinforce the voice); everything else stays a suggestion.
+    /// </summary>
+    private async Task<(IReadOnlyList<SpeakerProfile> Speakers, IReadOnlyList<VoiceSuggestion> Suggestions)> SuggestNamesAsync(
+        string sessionId,
+        IReadOnlyList<SpeakerProfile> speakers,
+        IReadOnlyList<VoiceRejection> rejections,
+        CancellationToken cancellationToken)
+    {
+        var library = await voices!.LoadAsync(cancellationToken).ConfigureAwait(false);
+        var unnamed = speakers
+            .Where(profile => profile.Id != SpeakerIds.Me && profile.DisplayName is null)
+            .Select(profile => new UnnamedSpeaker(profile.Id, profile.Embedding))
+            .ToList();
+        var inUse = speakers.Where(profile => profile.DisplayName is not null).Select(profile => profile.DisplayName!).ToList();
+        var suggestions = library.Suggest(unnamed, rejections.ToList(), inUse, voices.Options);
+        if (!library.AutoApply)
+        {
+            return (speakers, suggestions);
+        }
+
+        var applied = suggestions.Where(suggestion => suggestion.Similarity >= voices.Options.AutoApplySimilarity).ToList();
+        foreach (var suggestion in applied)
+        {
+            var embedding = speakers.First(profile => profile.Id == suggestion.SpeakerId).Embedding;
+            await voices.LearnAsync(sessionId, suggestion.SpeakerId, suggestion.Name, embedding, cancellationToken).ConfigureAwait(false);
+        }
+
+        var named = speakers
+            .Select(profile => applied.FirstOrDefault(suggestion => suggestion.SpeakerId == profile.Id) is { } match
+                ? profile with { DisplayName = match.Name }
+                : profile)
+            .ToList();
+        return (named, suggestions.Except(applied).ToList());
+    }
+
+    /// <summary>Learns (or un-learns) the voice and drops suggestions the new name made moot.</summary>
+    private async Task AfterRenameAsync(string sessionId, SpeakerProfile target, string? name, CancellationToken cancellationToken)
+    {
+        if (voices is not null)
+        {
+            await voices.LearnAsync(sessionId, target.Id, name, target.Embedding, cancellationToken).ConfigureAwait(false);
+        }
+
+        var current = await state.LoadAsync(sessionId, cancellationToken).ConfigureAwait(false);
+        var remaining = current.Suggestions
+            .Where(suggestion => suggestion.SpeakerId != target.Id &&
+                (name is null || !string.Equals(suggestion.Name, name, StringComparison.CurrentCultureIgnoreCase)))
+            .ToList();
+        if (remaining.Count != current.Suggestions.Count)
+        {
+            await state.SaveAsync(sessionId, current with { Suggestions = remaining }, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    private static TimeSpan GenuineSpeech(IReadOnlyList<TranscriptSegment> micSegments, IReadOnlyList<EchoVerdict> verdicts)
+    {
+        var echo = verdicts.Where(verdict => verdict.IsEcho).Select(verdict => verdict.MicrophoneSegmentIndex).ToHashSet();
+        return TimeSpan.FromTicks(micSegments
+            .Where((_, index) => !echo.Contains(index))
+            .Sum(segment => Math.Max(0, (segment.End - segment.Start).Ticks)));
+    }
+
     private async Task SaveAsync(
         Session session,
         IReadOnlyList<TranscriptSegment> segments,
         IReadOnlyList<SpeakerProfile> speakers,
-        IReadOnlyList<SpeakerEdit> edits,
+        SpeakerResolutionState baseState,
         CancellationToken cancellationToken)
     {
         await sessions.SaveTranscriptAsync(session.Id, TranscriptPass.Final, ReadTranscriptInfo(session.Folder), segments, cancellationToken)
             .ConfigureAwait(false);
         await sessions.SaveSpeakersAsync(session.Id, speakers.Select(profile => profile.ToSpeaker()).ToList(), cancellationToken)
             .ConfigureAwait(false);
-        var voices = speakers.Select(profile => new SpeakerVoice(profile.Id, profile.ColorSlot, profile.Embedding)).ToList();
-        await state.SaveAsync(session.Id, new SpeakerResolutionState(voices, edits), cancellationToken).ConfigureAwait(false);
+        var profiles = speakers.Select(profile => new SpeakerVoice(profile.Id, profile.ColorSlot, profile.Embedding)).ToList();
+        await state.SaveAsync(session.Id, baseState with { Voices = profiles }, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<T> Locked<T>(Func<Task<T>> action, CancellationToken cancellationToken)
