@@ -350,6 +350,8 @@ The sessions window records which model produced each transcript and how long it
 
 The package includes both the CPU and the Vulkan runtimes. Whisper.net probes them in order and falls back to the next one when a driver is missing, so a machine without a usable GPU keeps working on CPU with no configuration. `transcribe.log` records the thread count used for each track.
 
+The local language model used for summaries (LLamaSharp / llama.cpp) follows the same rule: it loads the Vulkan build when it can and falls back to the CPU build otherwise. `ai.gpu` in `config.json` accepts `auto` (default), `vulkan` or `cpu`; `ai.gpu_device` picks the Vulkan device index, and `ai.llm_model` points at a GGUF file that replaces the AI pack's model.
+
 ## Local data
 
 By default, each session is saved at:

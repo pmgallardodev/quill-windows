@@ -1,5 +1,6 @@
 using Quill.Core.Domain;
 using Quill.Core.Ports;
+using Quill.Core.Settings;
 using Quill.Core.Summaries;
 using Quill.Windows.Summaries;
 using Xunit;
@@ -42,6 +43,65 @@ public class LlamaSharpLanguageModelTests
 
         Assert.Equal("qwen3-4b-instruct-2507-q4_k_m", model.ModelName);
         Assert.Equal(8192, model.ContextTokens);
+    }
+
+    [Fact]
+    public async Task ModelPathOverride_ReplacesTheAiPackAndAMissingFileIsUnavailable()
+    {
+        var packCalls = 0;
+        var overridePath = Path.Combine(Path.GetTempPath(), "quill-missing-override.gguf");
+        using var model = new LlamaSharpLanguageModel(
+            () =>
+            {
+                packCalls++;
+                return @"C:\ai-pack\llm\pack-model.gguf";
+            },
+            new LlamaSharpOptions { ModelPath = overridePath });
+
+        var error = await Assert.ThrowsAsync<LanguageModelUnavailableException>(() => model.GenerateTextAsync(Request, CancellationToken.None));
+
+        Assert.Contains(overridePath, error.Message);
+        Assert.Equal("quill-missing-override", model.ModelName);
+        Assert.Equal(0, packCalls);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void BlankModelPathOverride_UsesTheAiPack(string? overridePath)
+    {
+        var packPath = Path.Combine(Path.GetTempPath(), "Pack-Model.gguf");
+        using var model = new LlamaSharpLanguageModel(() => packPath, new LlamaSharpOptions { ModelPath = overridePath });
+
+        Assert.Equal("pack-model", model.ModelName);
+    }
+
+    [Theory]
+    [InlineData(GpuPreference.Auto)]
+    [InlineData(GpuPreference.Vulkan)]
+    public void BackendPlan_GpuPreferences_UseVulkanWithCpuFallback(GpuPreference gpu)
+    {
+        var plan = LlamaBackendPlan.For(new LlamaSharpOptions { Gpu = gpu, GpuDevice = 1 });
+
+        Assert.Equal(new LlamaBackendPlan(UseVulkan: true, AutoFallback: true, GpuLayers: 999, MainGpu: 1), plan);
+    }
+
+    [Fact]
+    public void BackendPlan_Cpu_NeverOffloadsAndIgnoresTheDevice()
+    {
+        var plan = LlamaBackendPlan.For(new LlamaSharpOptions { Gpu = GpuPreference.Cpu, GpuDevice = 1 });
+
+        Assert.Equal(new LlamaBackendPlan(UseVulkan: false, AutoFallback: true, GpuLayers: 0, MainGpu: null), plan);
+    }
+
+    [Fact]
+    public void BackendPlan_DefaultsToAutoWithLlamaCppDeviceChoice()
+    {
+        var plan = LlamaBackendPlan.For(new LlamaSharpOptions());
+
+        Assert.True(plan.UseVulkan);
+        Assert.Null(plan.MainGpu);
     }
 
     [Fact]
