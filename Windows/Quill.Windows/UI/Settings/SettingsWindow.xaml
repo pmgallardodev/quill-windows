@@ -1,0 +1,269 @@
+<ui:FluentWindow x:Class="Quill.Windows.UI.Settings.SettingsWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:qc="clr-namespace:Quill.Windows.UI.Theme.Controls"
+                 xmlns:loc="clr-namespace:Quill.Windows.Resources"
+                 x:ClassModifier="internal"
+                 Title="{loc:Str Settings_Title}"
+                 Width="920" Height="680" MinWidth="720" MinHeight="480"
+                 WindowStartupLocation="CenterScreen"
+                 ExtendsContentIntoTitleBar="True"
+                 Background="{DynamicResource ApplicationBackgroundBrush}">
+    <ui:FluentWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource Quill.Text.BodyStrong}">
+            <Setter Property="Margin" Value="0,12,0,4" />
+        </Style>
+        <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource Quill.Text.Caption}">
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,4,0,0" />
+        </Style>
+        <Style x:Key="PageTitle" TargetType="TextBlock" BasedOn="{StaticResource Quill.Text.Subtitle}">
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+        <Style x:Key="Page" TargetType="StackPanel">
+            <Setter Property="Margin" Value="{StaticResource Quill.Padding.Window}" />
+            <Setter Property="MaxWidth" Value="720" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+    </ui:FluentWindow.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Title="{loc:Str Settings_Title}" ShowMaximize="False" />
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ListBox x:Name="Navigation" Grid.Column="0" Margin="8,8,0,8" SelectedIndex="0"
+                     SelectionChanged="OnNavigationChanged" Background="Transparent" BorderThickness="0">
+                <ListBoxItem Content="{loc:Str Settings_Nav_General}" />
+                <ListBoxItem Content="{loc:Str Settings_Nav_Ai}" />
+                <ListBoxItem Content="{loc:Str Settings_Nav_Summaries}" />
+                <ListBoxItem Content="{loc:Str Settings_Nav_Templates}" />
+                <ListBoxItem Content="{loc:Str Settings_Nav_Export}" />
+            </ListBox>
+
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <!-- General -->
+                    <StackPanel x:Name="GeneralPage" Style="{StaticResource Page}">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Str Settings_Nav_General}" />
+                        <qc:Card>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource FieldLabel}" Margin="0,0,0,4" Text="{loc:Str Settings_General_ConfigFile}" />
+                                <TextBox IsReadOnly="True" Text="{Binding ConfigPath, Mode=OneWay}" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_General_RecordingsFolder}" />
+                                <TextBox IsReadOnly="True" Text="{Binding RecordingsFolder, Mode=OneWay}" />
+                                <ui:Button Margin="0,12,0,0" Content="{loc:Str Settings_General_OpenConfigFolder}" Click="OnOpenConfigFolder" />
+                                <TextBlock Style="{StaticResource Hint}" Margin="0,12,0,0" Text="{loc:Str Settings_General_RestartNote}" />
+                            </StackPanel>
+                        </qc:Card>
+                    </StackPanel>
+
+                    <!-- IA -->
+                    <StackPanel x:Name="AiPage" Style="{StaticResource Page}" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Str Settings_Nav_Ai}" />
+                        <qc:Card>
+                            <StackPanel>
+                                <qc:SectionHeader Title="{loc:Str Settings_Ai_PackHeader}" />
+                                <TextBlock Style="{StaticResource Quill.Text.Body}" TextWrapping="Wrap" Margin="0,8,0,0" Text="{Binding PackStatusText}" />
+                                <Border Margin="0,12,0,0" Padding="{StaticResource Quill.Padding.CardCompact}"
+                                        CornerRadius="{StaticResource Quill.Radius.Medium}"
+                                        Background="{DynamicResource Quill.Brush.WarningSubtle}"
+                                        Visibility="{Binding ShowInstallGuidance, Converter={StaticResource BoolToVisibility}}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource Quill.Text.BodyStrong}" Text="{loc:Str Settings_Ai_InstallTitle}" />
+                                        <TextBlock Style="{StaticResource Quill.Text.Body}" TextWrapping="Wrap" Margin="0,4,0,0" Text="{loc:Str Settings_Ai_InstallGuidance}" />
+                                    </StackPanel>
+                                </Border>
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Ai_PackPath}" />
+                                <DockPanel>
+                                    <ui:Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="{loc:Str Settings_Browse}" Click="OnBrowsePackPath" />
+                                    <TextBox Text="{Binding PackPath, UpdateSourceTrigger=PropertyChanged}" />
+                                </DockPanel>
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Settings_Ai_PackPathHint}" />
+                                <ui:Button Margin="0,12,0,0" Content="{loc:Str Settings_Ai_CheckAgain}" Click="OnCheckPack" />
+                            </StackPanel>
+                        </qc:Card>
+
+                        <qc:Card Margin="0,12,0,0">
+                            <StackPanel>
+                                <qc:SectionHeader Title="{loc:Str Settings_Ai_ModelsHeader}" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Ai_LlmModel}" />
+                                <DockPanel>
+                                    <ui:Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="{loc:Str Settings_Browse}" Click="OnBrowseLlmModel" />
+                                    <TextBox Text="{Binding LanguageModelPath, UpdateSourceTrigger=PropertyChanged}" />
+                                </DockPanel>
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Ai_LiveWhisperModel}" />
+                                <DockPanel>
+                                    <ui:Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="{loc:Str Settings_Browse}" Click="OnBrowseLiveWhisperModel" />
+                                    <TextBox Text="{Binding LiveWhisperModelPath, UpdateSourceTrigger=PropertyChanged}" />
+                                </DockPanel>
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Settings_Ai_ModelHint}" />
+                            </StackPanel>
+                        </qc:Card>
+
+                        <qc:Card Margin="0,12,0,0">
+                            <StackPanel>
+                                <qc:SectionHeader Title="{loc:Str Settings_Ai_GpuHeader}" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Ai_Gpu}" />
+                                <ComboBox ItemsSource="{Binding GpuChoices}" DisplayMemberPath="Label" SelectedValuePath="Value"
+                                          SelectedValue="{Binding Gpu}" HorizontalAlignment="Left" MinWidth="280" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Ai_GpuDevice}" />
+                                <TextBox Text="{Binding GpuDeviceText, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Width="120" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Settings_Ai_GpuDeviceHint}" />
+                            </StackPanel>
+                        </qc:Card>
+                    </StackPanel>
+
+                    <!-- Resúmenes -->
+                    <StackPanel x:Name="SummariesPage" Style="{StaticResource Page}" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Str Settings_Nav_Summaries}" />
+                        <qc:Card>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource FieldLabel}" Margin="0,0,0,4" Text="{loc:Str Settings_Summaries_Language}" />
+                                <ComboBox ItemsSource="{Binding LanguageChoices}" DisplayMemberPath="Label" SelectedValuePath="Value"
+                                          SelectedValue="{Binding Language}" HorizontalAlignment="Left" MinWidth="240" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Settings_Summaries_LanguageHint}" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Summaries_Level}" />
+                                <ComboBox ItemsSource="{Binding LevelChoices}" DisplayMemberPath="Label" SelectedValuePath="Value"
+                                          SelectedValue="{Binding Level}" HorizontalAlignment="Left" MinWidth="240" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Summaries_Template}" />
+                                <ComboBox ItemsSource="{Binding TemplateNames}" SelectedItem="{Binding DefaultTemplate}"
+                                          HorizontalAlignment="Left" MinWidth="240" />
+                            </StackPanel>
+                        </qc:Card>
+                        <qc:Card Margin="0,12,0,0">
+                            <StackPanel>
+                                <qc:SectionHeader Title="{loc:Str Settings_Summaries_LiveHeader}" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Summaries_Live}" />
+                                <ComboBox ItemsSource="{Binding LiveChoices}" SelectedIndex="{Binding LiveMode}"
+                                          HorizontalAlignment="Left" MinWidth="280" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Summaries_Cadence}" />
+                                <TextBox Text="{Binding CadenceText, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Width="120" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Summaries_CatchUp}" />
+                                <TextBox Text="{Binding CatchUpText, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Width="120" />
+                            </StackPanel>
+                        </qc:Card>
+                    </StackPanel>
+
+                    <!-- Plantillas -->
+                    <StackPanel x:Name="TemplatesPage" Style="{StaticResource Page}" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Str Settings_Nav_Templates}" />
+                        <qc:Card>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource FieldLabel}" Margin="0,0,0,4" Text="{loc:Str Settings_Templates_Folder}" />
+                                <DockPanel>
+                                    <ui:Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="{loc:Str Settings_Templates_OpenFolder}" Click="OnOpenTemplatesFolder" />
+                                    <ui:Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="{loc:Str Settings_Browse}" Click="OnBrowseTemplatesFolder" />
+                                    <TextBox Text="{Binding TemplatesFolder, UpdateSourceTrigger=PropertyChanged}" />
+                                </DockPanel>
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Settings_Templates_FolderHint}" />
+                                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                    <ui:Button Content="{loc:Str Settings_Templates_Reload}" Click="OnReloadTemplates" />
+                                    <ui:Button Margin="8,0,0,0" Content="{loc:Str Settings_Templates_Customize}" Click="OnCustomizeTemplate"
+                                               IsEnabled="{Binding HasSelectedTemplate}" />
+                                </StackPanel>
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Settings_Templates_CustomizeHint}" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{Binding TemplatesMessage}" />
+                            </StackPanel>
+                        </qc:Card>
+
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ListBox Grid.Column="0" ItemsSource="{Binding Templates}" SelectedItem="{Binding SelectedTemplate}" MaxHeight="360">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,2">
+                                            <TextBlock Style="{StaticResource Quill.Text.BodyStrong}" Text="{Binding Name}" />
+                                            <TextBlock Style="{StaticResource Quill.Text.Caption}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding SourceLabel}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <qc:Card Grid.Column="1" Margin="12,0,0,0" DataContext="{Binding SelectedTemplate}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource Quill.Text.Subtitle}" Text="{Binding Name}" />
+                                    <TextBlock Style="{StaticResource Quill.Text.Secondary}" TextWrapping="Wrap" Text="{Binding Description}" />
+                                    <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Templates_Sections}" />
+                                    <TextBlock Style="{StaticResource Quill.Text.Body}" TextWrapping="Wrap" Text="{Binding SectionsLabel}" />
+                                    <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Templates_Level}" />
+                                    <TextBlock Style="{StaticResource Quill.Text.Body}" Text="{Binding LevelLabel}" />
+                                    <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Templates_Language}" />
+                                    <TextBlock Style="{StaticResource Quill.Text.Body}" Text="{Binding LanguageLabel}" />
+                                    <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Templates_File}" />
+                                    <TextBlock Style="{StaticResource Quill.Text.Caption}" TextWrapping="Wrap" Text="{Binding FilePath}" />
+                                    <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Settings_Templates_Body}" />
+                                    <TextBlock Style="{StaticResource Quill.Text.Mono}" TextWrapping="Wrap" Text="{Binding Body}" />
+                                </StackPanel>
+                            </qc:Card>
+                        </Grid>
+
+                        <qc:Card Margin="0,12,0,0">
+                            <StackPanel>
+                                <qc:SectionHeader Title="{loc:Str Settings_Templates_ProblemsHeader}" Count="{Binding TemplateProblems.Count}" />
+                                <ItemsControl ItemsSource="{Binding TemplateProblems}" Margin="0,8,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Style="{StaticResource Quill.Text.Body}" TextWrapping="Wrap" Margin="0,2"
+                                                       Foreground="{DynamicResource Quill.Brush.Warning}" Text="{Binding}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </qc:Card>
+                    </StackPanel>
+
+                    <!-- Exportación -->
+                    <StackPanel x:Name="ExportPage" Style="{StaticResource Page}" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Str Settings_Nav_Export}" />
+                        <qc:Card>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource FieldLabel}" Margin="0,0,0,4" Text="{loc:Str Export_Folder}" />
+                                <DockPanel>
+                                    <ui:Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="{loc:Str Settings_Browse}" Click="OnBrowseExportFolder" />
+                                    <TextBox Text="{Binding ExportFolder, UpdateSourceTrigger=PropertyChanged}" />
+                                </DockPanel>
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Export_FolderHint}" />
+                                <CheckBox Margin="0,12,0,0" Content="{loc:Str Export_Auto}" IsChecked="{Binding AutoExport}" />
+                                <CheckBox Margin="0,8,0,0" Content="{loc:Str Export_OverwriteEdited}" IsChecked="{Binding OverwriteEdited}" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Export_OverwriteEditedHint}" />
+                                <ui:Button Margin="0,16,0,0" Content="{loc:Str Export_ExportAll}" Click="OnExportAll"
+                                           IsEnabled="{Binding CanExportAll}" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{Binding ExportMessage}" />
+                            </StackPanel>
+                        </qc:Card>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </Grid>
+
+        <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
+                Padding="{StaticResource Quill.Padding.Card}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <ui:Button Content="{loc:Str Action_Cancel}" Click="OnCancel" IsCancel="True" />
+                    <ui:Button Margin="8,0,0,0" Appearance="Primary" Content="{loc:Str Action_Save}" Click="OnSave" IsDefault="True" />
+                </StackPanel>
+                <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Style="{StaticResource Quill.Text.Body}"
+                           Foreground="{DynamicResource Quill.Brush.Recording}" Text="{Binding Error}"
+                           Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</ui:FluentWindow>

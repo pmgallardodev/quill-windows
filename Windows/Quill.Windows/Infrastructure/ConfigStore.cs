@@ -1,5 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Quill.Core.AiPack;
+using Quill.Core.Ports;
+using Quill.Core.Settings;
 
 namespace Quill.Windows.Infrastructure;
 
@@ -91,6 +94,49 @@ internal static class ConfigStore
     }
 
     public static string ModelPath => ResolveModelPath(Load().Transcription.Model);
+
+    /// <summary>%APPDATA% (roaming): parent of the default user templates folder "Quill\templates".</summary>
+    public static string RoamingAppData => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+    /// <summary>
+    /// Quill Next settings ("ai", "summaries", "templates", "export" sections of config.json).
+    /// Lenient: a missing file, a broken file or a bad value yields the defaults, so the app
+    /// always starts. The v1 keys keep being read by <see cref="Load"/>.
+    /// </summary>
+    public static QuillSettings LoadSettings()
+    {
+        try
+        {
+            return SettingsDocument.Parse(File.Exists(ConfigPath) ? File.ReadAllText(ConfigPath) : null);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            return new QuillSettings();
+        }
+    }
+
+    /// <summary>
+    /// Writes the settings sections into config.json, keeping every other key. Refuses
+    /// (<see cref="FormatException"/>) to replace a config.json that is not valid JSON.
+    /// </summary>
+    public static void SaveSettings(QuillSettings settings)
+    {
+        var existing = File.Exists(ConfigPath) ? File.ReadAllText(ConfigPath) : null;
+        var merged = SettingsDocument.Merge(existing, settings);
+        Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath)!);
+        var temporary = ConfigPath + ".tmp";
+        File.WriteAllText(temporary, merged);
+        File.Move(temporary, ConfigPath, overwrite: true);
+    }
+
+    public static string TemplatesFolder(QuillSettings settings) =>
+        Path.GetFullPath(Environment.ExpandEnvironmentVariables(settings.Templates.ResolveFolder(RoamingAppData)));
+
+    /// <summary>AI pack locator honoring the "ai.pack_path" override (empty: "ai-pack" next to the app).</summary>
+    public static IAiPackLocator CreateAiPackLocator(QuillSettings settings) =>
+        new ManifestAiPackLocator(
+            AppContext.BaseDirectory,
+            string.IsNullOrWhiteSpace(settings.Ai.PackPath) ? null : Environment.ExpandEnvironmentVariables(settings.Ai.PackPath));
 }
 
 internal sealed class QuillConfig
