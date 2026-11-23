@@ -106,14 +106,16 @@ internal sealed class MeetingDetailViewModel : ObservableObject
         ISessionActions actions,
         IUiShell shell,
         MeetingCommands commands,
-        Func<TimeSpan, CancellationToken, Task>? delay = null)
+        Func<TimeSpan, CancellationToken, Task>? delay = null,
+        PlayerViewModel? player = null)
     {
         Row = row;
         _store = store;
         _actions = actions;
         Commands = commands;
         Summary = new SummaryViewModel(store, actions, shell);
-        Transcript = new TranscriptViewModel(actions);
+        player?.SetSession(row.SessionId);
+        Transcript = new TranscriptViewModel(actions, player);
         Notes = new NotesViewModel(store, delay);
         DateText = row.Started == default ? string.Empty : UiFormat.Date(row.Started, "Format_MeetingDate");
         IdentifySpeakersCommand = new RelayCommand(
@@ -255,6 +257,7 @@ internal sealed class MeetingDetailViewModel : ObservableObject
     public async Task CloseAsync()
     {
         Row.PropertyChanged -= OnRowPropertyChanged;
+        Transcript.Detach();
         _lifetime.Cancel();
         await Notes.FlushAsync().ConfigureAwait(true);
     }

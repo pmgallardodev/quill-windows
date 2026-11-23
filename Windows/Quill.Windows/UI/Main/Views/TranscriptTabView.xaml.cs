@@ -5,7 +5,10 @@ using WpfInput = System.Windows.Input;
 
 namespace Quill.Windows.UI;
 
-/// <summary>Transcript tab. Scrolls to the current search match; Enter / Shift+Enter move between matches.</summary>
+/// <summary>
+/// Transcript tab. Scrolls to the current search match (Enter / Shift+Enter move between
+/// matches) and, while following playback, to the segment being heard.
+/// </summary>
 internal sealed partial class TranscriptTabView : WpfControls.UserControl
 {
     private TranscriptViewModel? _viewModel;
@@ -36,6 +39,11 @@ internal sealed partial class TranscriptTabView : WpfControls.UserControl
         if (e.PropertyName == nameof(TranscriptViewModel.CurrentMatch))
         {
             ScrollToMatch();
+        }
+        else if (e.PropertyName == nameof(TranscriptViewModel.PlayingEntry) &&
+                 _viewModel is { FollowPlayback: true, PlayingEntry: { } playing, Player.IsPlaying: true })
+        {
+            Lines.ScrollIntoView(playing);
         }
     }
 

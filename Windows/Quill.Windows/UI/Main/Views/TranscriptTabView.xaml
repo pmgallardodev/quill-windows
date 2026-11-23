@@ -12,6 +12,51 @@
     </UserControl.Resources>
 
     <DockPanel Margin="0,8,0,0">
+        <!-- Player bar: audio of this meeting on the session clock -->
+        <Border DockPanel.Dock="Bottom" Margin="0,8,0,0" Padding="8,4"
+                CornerRadius="{StaticResource Quill.Radius.Medium}"
+                Background="{DynamicResource Quill.Brush.NeutralSubtle}"
+                DataContext="{Binding Player}"
+                Visibility="{Binding DataContext.HasPlayer, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisibility}}">
+            <DockPanel>
+                <ui:Button DockPanel.Dock="Left" Appearance="Transparent"
+                           ToolTip="{loc:Str Player_Play}" AutomationProperties.Name="{loc:Str Player_Play}"
+                           Command="{Binding PlayPauseCommand}"
+                           Visibility="{Binding IsPlaying, Converter={StaticResource NotToVisibility}}">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="Play24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+                <ui:Button DockPanel.Dock="Left" Appearance="Transparent"
+                           ToolTip="{loc:Str Player_Pause}" AutomationProperties.Name="{loc:Str Player_Pause}"
+                           Command="{Binding PlayPauseCommand}"
+                           Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVisibility}}">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="Pause24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+                <CheckBox DockPanel.Dock="Right" Margin="8,0,0,0" VerticalAlignment="Center"
+                          Content="{loc:Str Player_Follow}"
+                          IsChecked="{Binding DataContext.FollowPlayback, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}" />
+                <ComboBox DockPanel.Dock="Right" Margin="8,0,0,0" MinWidth="72" VerticalAlignment="Center"
+                          ItemsSource="{Binding Speeds}" SelectedItem="{Binding SelectedSpeed, Mode=TwoWay}"
+                          DisplayMemberPath="Label"
+                          ToolTip="{loc:Str Player_Speed}" AutomationProperties.Name="{loc:Str Player_Speed}" />
+                <TextBlock DockPanel.Dock="Right" Margin="8,0,0,0" VerticalAlignment="Center"
+                           Text="{Binding TimeText}" Style="{StaticResource Quill.Text.Mono}" />
+                <Grid VerticalAlignment="Center" Margin="4,0,0,0">
+                    <Slider Minimum="0" Maximum="{Binding DurationSeconds}"
+                            Value="{Binding PositionSeconds, Mode=TwoWay}"
+                            IsMoveToPointEnabled="True"
+                            AutomationProperties.Name="{loc:Str Player_Position}"
+                            Visibility="{Binding HasStatus, Converter={StaticResource NotToVisibility}}" />
+                    <TextBlock Text="{Binding Status}" TextTrimming="CharacterEllipsis"
+                               Style="{StaticResource Quill.Text.Caption}"
+                               Visibility="{Binding HasStatus, Converter={StaticResource BoolToVisibility}}" />
+                </Grid>
+            </DockPanel>
+        </Border>
+
         <!-- Search inside this meeting -->
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="8,0,0,0">
@@ -71,6 +116,9 @@
                     <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource Quill.Brush.MeSubtle}" />
+                            </DataTrigger>
                             <DataTrigger Binding="{Binding IsCurrentMatch}" Value="True">
                                 <Setter Property="Background" Value="{DynamicResource Quill.Brush.InfoSubtle}" />
                             </DataTrigger>

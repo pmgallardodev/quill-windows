@@ -7,6 +7,7 @@ using System.Windows.Threading;
 using Quill.Core.Ports;
 using Quill.Core.Storage;
 using Quill.Windows.Import;
+using Quill.Windows.Playback;
 using Quill.Windows.Resources;
 using Quill.Windows.Sessions;
 using Quill.Windows.Transcription;
@@ -98,7 +99,9 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
         _transcription = transcription;
         _dispatcher = dispatcher;
         _store = store ?? new FileSessionStore(recordingsRoot);
-        _actions = actions ?? AiPackMissingSessionActions.Instance;
+        // One player for the window; every timestamp link (transcript and summary) plays through it.
+        Player = new PlayerViewModel(new SessionAudioSource(_store), dispatcher);
+        _actions = new PlaybackSessionActions(actions ?? AiPackMissingSessionActions.Instance, Player);
         _shell = shell ?? WpfUiShell.Instance;
         _clock = clock ?? SystemClock.Instance;
 
@@ -153,6 +156,9 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
     public MeetingCommands Commands { get; }
 
     public MyTasksViewModel MyTasks { get; }
+
+    /// <summary>Audio of the open meeting (player bar of the Transcript tab).</summary>
+    public PlayerViewModel Player { get; }
 
     public ICommand OpenHitCommand { get; }
 
@@ -282,6 +288,11 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
     /// <summary>Window hidden: stop timers and pending reads, save the notes being edited.</summary>
     public void Stop()
     {
+        if (Player.IsPlaying)
+        {
+            _ = Player.PlayPauseAsync();
+        }
+
         _pump.Stop();
         _searchDebounce.Stop();
         CancelSearch();
@@ -334,6 +345,7 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
     public void Dispose()
     {
         _disposed = true;
+        Player.Dispose();
         _transcription.StateChanged -= OnUpdate;
         _transcription.ProgressChanged -= OnUpdate;
         _pump.Stop();
@@ -492,7 +504,7 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var detail = new MeetingDetailViewModel(row, _store, _actions, _shell, Commands)
+        var detail = new MeetingDetailViewModel(row, _store, _actions, _shell, Commands, player: Player)
         {
             // Keep the tab the user was reading when moving between meetings.
             SelectedTab = previous?.SelectedTab ?? MeetingDetailViewModel.SummaryTab,

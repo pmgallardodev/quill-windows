@@ -14,10 +14,18 @@ internal sealed class TranscriptEntryViewModel : ObservableObject
 {
     private IReadOnlyList<HighlightRun> _runs;
     private bool _isCurrentMatch;
+    private bool _isPlaying;
 
-    public TranscriptEntryViewModel(TimeSpan at, string speakerId, string speakerLabel, string text, bool isMarker)
+    public TranscriptEntryViewModel(
+        TimeSpan at,
+        string speakerId,
+        string speakerLabel,
+        string text,
+        bool isMarker,
+        TimeSpan? end = null)
     {
         At = at;
+        End = end is { } value && value >= at ? value : at;
         SpeakerId = speakerId;
         SpeakerLabel = speakerLabel;
         Text = text;
@@ -27,6 +35,9 @@ internal sealed class TranscriptEntryViewModel : ObservableObject
     }
 
     public TimeSpan At { get; }
+
+    /// <summary>End of the segment on the session clock (= <see cref="At"/> for markers).</summary>
+    public TimeSpan End { get; }
 
     public string TimeText => TranscriptExport.Clock((long)At.TotalMilliseconds);
 
@@ -55,6 +66,13 @@ internal sealed class TranscriptEntryViewModel : ObservableObject
         set => Set(ref _isCurrentMatch, value);
     }
 
+    /// <summary>The audio player is inside this segment.</summary>
+    public bool IsPlaying
+    {
+        get => _isPlaying;
+        set => Set(ref _isPlaying, value);
+    }
+
     public bool Matches(string query) => TextHighlight.Contains(Text, query);
 
     public void Highlight(string? query) => Runs = TextHighlight.Split(Text, query);
@@ -66,16 +84,27 @@ internal sealed class TranscriptEntryViewModel : ObservableObject
 /// </summary>
 internal sealed class TranscriptViewModel : ObservableObject
 {
+    /// <summary>A pause shorter than this keeps the previous segment highlighted.</summary>
+    private static readonly TimeSpan PlayingGap = TimeSpan.FromSeconds(1.5);
+
     private readonly ISessionActions _actions;
     private readonly List<TranscriptEntryViewModel> _matches = new();
+    private TranscriptEntryViewModel? _playingEntry;
+    private bool _followPlayback = true;
     private string _sessionId = string.Empty;
     private string _query = string.Empty;
     private int _currentMatch = -1;
     private string _status = string.Empty;
 
-    public TranscriptViewModel(ISessionActions actions)
+    public TranscriptViewModel(ISessionActions actions, PlayerViewModel? player = null)
     {
         _actions = actions;
+        Player = player;
+        if (player is not null)
+        {
+            player.PositionChanged += OnPlayerPositionChanged;
+        }
+
         NextMatchCommand = new RelayCommand(_ => MoveMatch(+1), _ => _matches.Count > 0);
         PreviousMatchCommand = new RelayCommand(_ => MoveMatch(-1), _ => _matches.Count > 0);
         ClearSearchCommand = new RelayCommand(_ => Query = string.Empty);
@@ -83,6 +112,43 @@ internal sealed class TranscriptViewModel : ObservableObject
     }
 
     public ObservableCollection<TranscriptEntryViewModel> Entries { get; } = new();
+
+    /// <summary>The window's player (null in tests that do not need it).</summary>
+    public PlayerViewModel? Player { get; }
+
+    public bool HasPlayer => Player is not null;
+
+    /// <summary>The segment being heard. The view scrolls to it while <see cref="FollowPlayback"/> is on.</summary>
+    public TranscriptEntryViewModel? PlayingEntry
+    {
+        get => _playingEntry;
+        private set
+        {
+            if (ReferenceEquals(_playingEntry, value))
+            {
+                return;
+            }
+
+            if (_playingEntry is not null)
+            {
+                _playingEntry.IsPlaying = false;
+            }
+
+            _playingEntry = value;
+            if (value is not null)
+            {
+                value.IsPlaying = true;
+            }
+
+            Raise(nameof(PlayingEntry));
+        }
+    }
+
+    public bool FollowPlayback
+    {
+        get => _followPlayback;
+        set => Set(ref _followPlayback, value);
+    }
 
     public ICommand NextMatchCommand { get; }
 
@@ -156,6 +222,50 @@ internal sealed class TranscriptViewModel : ObservableObject
 
         Status = Entries.Count == 0 ? emptyStatus : string.Empty;
         Search();
+        _playingEntry = null;
+        UpdatePlaying();
+    }
+
+    /// <summary>The detail closed: stop following the shared player.</summary>
+    public void Detach()
+    {
+        if (Player is not null)
+        {
+            Player.PositionChanged -= OnPlayerPositionChanged;
+        }
+    }
+
+    /// <summary>
+    /// The segment that contains <paramref name="position"/>, or the one just before it when
+    /// the gap is short (pauses between sentences). Markers are skipped. Entries are sorted.
+    /// </summary>
+    public static TranscriptEntryViewModel? SegmentAt(IReadOnlyList<TranscriptEntryViewModel> entries, TimeSpan position)
+    {
+        int low = 0, high = entries.Count - 1, found = -1;
+        while (low <= high)
+        {
+            var middle = (low + high) / 2;
+            if (entries[middle].At <= position)
+            {
+                found = middle;
+                low = middle + 1;
+            }
+            else
+            {
+                high = middle - 1;
+            }
+        }
+
+        for (var index = found; index >= 0; index--)
+        {
+            var entry = entries[index];
+            if (entry.IsSegment)
+            {
+                return position <= entry.End + PlayingGap ? entry : null;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -184,7 +294,8 @@ internal sealed class TranscriptViewModel : ObservableObject
                 speaker,
                 labels.Label(speaker),
                 text,
-                isMarker: false));
+                isMarker: false,
+                end: TimeSpan.FromMilliseconds(segment.EndMs)));
         }
 
         var number = 0;
@@ -255,6 +366,20 @@ internal sealed class TranscriptViewModel : ObservableObject
         {
             _actions.PlayAt(_sessionId, time2);
         }
+    }
+
+    private void OnPlayerPositionChanged(object? sender, EventArgs e) => UpdatePlaying();
+
+    private void UpdatePlaying()
+    {
+        if (Player is null || _sessionId.Length == 0 ||
+            !string.Equals(Player.SessionId, _sessionId, StringComparison.Ordinal))
+        {
+            PlayingEntry = null;
+            return;
+        }
+
+        PlayingEntry = Player.Position <= TimeSpan.Zero && !Player.IsPlaying ? null : SegmentAt(Entries, Player.Position);
     }
 
     private void RaiseSearch() =>
