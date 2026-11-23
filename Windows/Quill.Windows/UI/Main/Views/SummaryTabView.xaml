@@ -1,0 +1,142 @@
+<UserControl x:Class="Quill.Windows.UI.SummaryTabView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:qc="clr-namespace:Quill.Windows.UI.Theme.Controls"
+             xmlns:loc="clr-namespace:Quill.Windows.Resources"
+             xmlns:local="clr-namespace:Quill.Windows.UI"
+             x:ClassModifier="internal">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <local:InverseBooleanToVisibilityConverter x:Key="NotToVisibility" />
+        <local:SummaryLevelLabelConverter x:Key="LevelLabel" />
+    </UserControl.Resources>
+
+    <DockPanel Margin="0,8,0,0">
+        <!-- Generation bar: template, level, (re)generate. Only with the AI pack. -->
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8"
+                   Visibility="{Binding ShowGenerateBar, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Margin="0,0,6,0" VerticalAlignment="Center" Text="{loc:Str Summary_Template}" />
+            <ComboBox Margin="0,0,12,0" MinWidth="140"
+                      AutomationProperties.Name="{loc:Str Summary_Template}"
+                      ItemsSource="{Binding Templates}" SelectedItem="{Binding SelectedTemplate, Mode=TwoWay}" />
+            <TextBlock Margin="0,0,6,0" VerticalAlignment="Center" Text="{loc:Str Summary_Level}" />
+            <ComboBox Margin="0,0,12,0" MinWidth="120"
+                      AutomationProperties.Name="{loc:Str Summary_Level}"
+                      ItemsSource="{Binding Levels}" SelectedItem="{Binding SelectedLevel, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource LevelLabel}}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ui:Button Appearance="Primary" Content="{loc:Str Action_GenerateSummary}" Command="{Binding GenerateCommand}">
+                <ui:Button.Icon>
+                    <ui:SymbolIcon Symbol="Sparkle24" />
+                </ui:Button.Icon>
+            </ui:Button>
+        </WrapPanel>
+
+        <!-- Copy actions and last result -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8"
+                   Visibility="{Binding HasSummary, Converter={StaticResource BoolToVisibility}}">
+            <ui:Button DockPanel.Dock="Left" Margin="0,0,6,0" Content="{loc:Str Action_CopyMarkdown}" Command="{Binding CopyMarkdownCommand}">
+                <ui:Button.Icon>
+                    <ui:SymbolIcon Symbol="Copy24" />
+                </ui:Button.Icon>
+            </ui:Button>
+            <ui:Button DockPanel.Dock="Left" Margin="0,0,12,0" Content="{loc:Str Action_CopyEmail}" Command="{Binding CopyEmailCommand}">
+                <ui:Button.Icon>
+                    <ui:SymbolIcon Symbol="Mail24" />
+                </ui:Button.Icon>
+            </ui:Button>
+            <TextBlock VerticalAlignment="Center" Text="{Binding StatusText}" Style="{StaticResource Quill.Text.Caption}"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </DockPanel>
+
+        <Grid>
+            <!-- Loading / generating -->
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
+                <ui:ProgressRing IsIndeterminate="True" />
+                <TextBlock Margin="0,8,0,0" HorizontalAlignment="Center" Text="{loc:Str Common_Loading}" />
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Visibility="{Binding IsGenerating, Converter={StaticResource BoolToVisibility}}">
+                <ui:ProgressRing IsIndeterminate="True" />
+                <TextBlock Margin="0,8,0,8" HorizontalAlignment="Center" Text="{loc:Str Summary_Generating}" />
+                <ui:Button HorizontalAlignment="Center" Content="{loc:Str Action_Cancel}" Command="{Binding CancelGenerationCommand}" />
+            </StackPanel>
+
+            <!-- Nothing to show yet -->
+            <qc:EmptyState VerticalAlignment="Center" Text="{loc:Str Summary_None}" Description="{loc:Str Summary_NoneDescription}"
+                           Visibility="{Binding IsNoSummary, Converter={StaticResource BoolToVisibility}}" />
+            <qc:EmptyState VerticalAlignment="Center" Text="{loc:Str Summary_None}" Description="{loc:Str Summary_AiPackMissingDescription}"
+                           Visibility="{Binding IsAiPackMissing, Converter={StaticResource BoolToVisibility}}" />
+            <Border VerticalAlignment="Top" Padding="{StaticResource Quill.Padding.Card}"
+                    CornerRadius="{StaticResource Quill.Radius.Medium}"
+                    Background="{DynamicResource Quill.Brush.RecordingSubtle}"
+                    Visibility="{Binding IsFailed, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
+            </Border>
+
+            <!-- The summary -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          Visibility="{Binding HasSummary, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <Border Margin="0,0,0,8" Padding="{StaticResource Quill.Padding.CardCompact}"
+                            CornerRadius="{StaticResource Quill.Radius.Medium}"
+                            Background="{DynamicResource Quill.Brush.AiSubtle}"
+                            Visibility="{Binding IsLive, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{loc:Str Summary_LiveBanner}" TextWrapping="Wrap" />
+                    </Border>
+
+                    <qc:Card Margin="{StaticResource Quill.Margin.Section}">
+                        <StackPanel>
+                            <qc:SectionHeader Title="{loc:Str Summary_ExecutiveSummary}" />
+                            <TextBlock Text="{Binding ExecutiveSummary}" TextWrapping="Wrap" Style="{StaticResource Quill.Text.Body}"
+                                       Visibility="{Binding HasExecutiveSummary, Converter={StaticResource BoolToVisibility}}" />
+                            <qc:EmptyState Visibility="{Binding HasExecutiveSummary, Converter={StaticResource NotToVisibility}}" />
+                        </StackPanel>
+                    </qc:Card>
+
+                    <ItemsControl ItemsSource="{Binding Sections}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:SummarySectionViewModel}">
+                                <qc:Card Margin="{StaticResource Quill.Margin.Section}">
+                                    <StackPanel>
+                                        <qc:SectionHeader Title="{Binding Title}" Count="{Binding Count}" />
+                                        <ItemsControl ItemsSource="{Binding Items}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type local:SummaryItemViewModel}">
+                                                    <DockPanel Margin="0,4">
+                                                        <CheckBox DockPanel.Dock="Left" Margin="0,0,4,0" VerticalAlignment="Top" MinWidth="0"
+                                                                  IsChecked="{Binding IsDone, Mode=TwoWay}"
+                                                                  AutomationProperties.Name="{Binding Text}"
+                                                                  Visibility="{Binding IsCheckable, Converter={StaticResource BoolToVisibility}}" />
+                                                        <qc:TimestampLink DockPanel.Dock="Right" Margin="8,0,0,0" VerticalAlignment="Top"
+                                                                          Time="{Binding AtValue}"
+                                                                          Command="{Binding DataContext.PlayAtCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                          CommandParameter="{Binding AtValue}"
+                                                                          Visibility="{Binding HasAt, Converter={StaticResource BoolToVisibility}}" />
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Style="{StaticResource Quill.Text.Body}" />
+                                                            <TextBlock Text="{Binding Detail}" Style="{StaticResource Quill.Text.Caption}"
+                                                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                                                       Visibility="{Binding HasDetail, Converter={StaticResource BoolToVisibility}}" />
+                                                        </StackPanel>
+                                                    </DockPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <qc:EmptyState Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}" />
+                                    </StackPanel>
+                                </qc:Card>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</UserControl>

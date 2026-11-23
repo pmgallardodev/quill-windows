@@ -1,0 +1,241 @@
+<ui:FluentWindow x:Class="Quill.Windows.UI.MainWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:qc="clr-namespace:Quill.Windows.UI.Theme.Controls"
+                 xmlns:loc="clr-namespace:Quill.Windows.Resources"
+                 xmlns:local="clr-namespace:Quill.Windows.UI"
+                 x:ClassModifier="internal"
+                 Title="Quill"
+                 Height="760" Width="1180"
+                 MinHeight="480" MinWidth="820"
+                 WindowStartupLocation="CenterScreen"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica">
+    <ui:FluentWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <local:InverseBooleanToVisibilityConverter x:Key="NotToVisibility" />
+    </ui:FluentWindow.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Title="Quill" />
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="340" MinWidth="260" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: navigation, search and meetings grouped by day -->
+            <DockPanel Grid.Column="0" Margin="{StaticResource Quill.Padding.Window}">
+                <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:Button Grid.Column="0" HorizontalAlignment="Stretch" Margin="0,0,4,0"
+                               Content="{loc:Str Nav_Meetings}"
+                               Command="{Binding ShowMeetingsCommand}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="CalendarLtr24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                    <ui:Button Grid.Column="1" HorizontalAlignment="Stretch" Margin="4,0,4,0"
+                               Content="{loc:Str Summary_MyTasks}"
+                               Command="{Binding ShowMyTasksCommand}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="TaskListLtr24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                    <ui:Button Grid.Column="2" Appearance="Transparent"
+                               ToolTip="{loc:Str Action_Refresh}"
+                               AutomationProperties.Name="{loc:Str Action_Refresh}"
+                               Command="{Binding RefreshCommand}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="ArrowClockwise24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                </Grid>
+
+                <ui:TextBox DockPanel.Dock="Top" Margin="0,0,0,8"
+                            PlaceholderText="{loc:Str Search_Placeholder}"
+                            AutomationProperties.Name="{loc:Str Search_Placeholder}"
+                            Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}">
+                    <ui:TextBox.Icon>
+                        <ui:SymbolIcon Symbol="Search24" />
+                    </ui:TextBox.Icon>
+                </ui:TextBox>
+
+                <TextBlock DockPanel.Dock="Bottom" Margin="2,8,0,0" TextWrapping="Wrap"
+                           Style="{StaticResource Quill.Text.Caption}"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           Text="{Binding StatusText}" />
+
+                <Grid>
+                    <!-- Meetings, grouped by day; the default view gets its grouping in code-behind -->
+                    <ListBox x:Name="MeetingsList"
+                             ItemsSource="{Binding Meetings}"
+                             SelectedItem="{Binding SelectedMeeting, Mode=TwoWay}"
+                             Visibility="{Binding IsSearching, Converter={StaticResource NotToVisibility}}"
+                             Background="Transparent" BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
+                             VirtualizingPanel.ScrollUnit="Pixel"
+                             AutomationProperties.Name="{loc:Str Nav_Meetings}">
+                        <ListBox.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Margin="4,12,0,4" Text="{Binding Name}"
+                                                   Style="{StaticResource Quill.Text.BodyStrong}"
+                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                            </GroupStyle>
+                        </ListBox.GroupStyle>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="ContextMenu">
+                                    <Setter.Value>
+                                        <ContextMenu>
+                                            <MenuItem Header="{loc:Str Action_Rename}" Command="{Binding Commands.Rename}" CommandParameter="{Binding}" />
+                                            <MenuItem Header="{loc:Str Action_CopyTranscript}" Command="{Binding Commands.Copy}" CommandParameter="{Binding}" />
+                                            <MenuItem Header="{loc:Str Action_ExportSrt}" Command="{Binding Commands.ExportSrt}" CommandParameter="{Binding}" />
+                                            <MenuItem Header="{loc:Str Action_ExportVtt}" Command="{Binding Commands.ExportVtt}" CommandParameter="{Binding}" />
+                                            <MenuItem Header="{loc:Str Action_OpenFolder}" Command="{Binding Commands.OpenFolder}" CommandParameter="{Binding}" />
+                                            <MenuItem Header="{loc:Str Action_Retry}" Command="{Binding Commands.Retry}" CommandParameter="{Binding}" />
+                                            <Separator />
+                                            <MenuItem Header="{loc:Str Action_Delete}" Command="{Binding Commands.Delete}" CommandParameter="{Binding}" />
+                                        </ContextMenu>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:MeetingRowViewModel}">
+                                <StackPanel Margin="0,4">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Right" Margin="8,0,0,0" Text="{Binding StartTimeText}"
+                                                   Style="{StaticResource Quill.Text.Caption}"
+                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis"
+                                                   Style="{StaticResource Quill.Text.BodyStrong}" />
+                                    </DockPanel>
+                                    <WrapPanel Margin="0,4,0,0">
+                                        <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Text="{Binding DurationText}"
+                                                   Style="{StaticResource Quill.Text.Caption}"
+                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        <ItemsControl ItemsSource="{Binding SpeakerChips}" VerticalAlignment="Center">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <qc:SpeakerChip Margin="0,0,4,0" SpeakerId="{Binding SpeakerId}" Label="{Binding Label}" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding MoreSpeakersText}"
+                                                   Visibility="{Binding HasMoreSpeakers, Converter={StaticResource BoolToVisibility}}"
+                                                   Style="{StaticResource Quill.Text.Caption}" />
+                                    </WrapPanel>
+                                    <WrapPanel Margin="0,4,0,0">
+                                        <qc:StatusPill Margin="0,0,6,0"
+                                                       Status="{Binding StatusPillValue}" Text="{Binding StatusPillText}"
+                                                       Visibility="{Binding HasStatusPill, Converter={StaticResource BoolToVisibility}}" />
+                                        <Border Margin="0,0,6,0" Padding="{StaticResource Quill.Padding.Pill}"
+                                                CornerRadius="{StaticResource Quill.Radius.Pill}"
+                                                Background="{DynamicResource Quill.Brush.RecordingSubtle}"
+                                                Visibility="{Binding HasIssue, Converter={StaticResource BoolToVisibility}}">
+                                            <TextBlock Text="{Binding IssueText}" Style="{StaticResource Quill.Text.Caption}"
+                                                       Foreground="{DynamicResource Quill.Brush.Recording}" />
+                                        </Border>
+                                        <ui:SymbolIcon Symbol="Sparkle24" FontSize="14" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Quill.Brush.Ai}"
+                                                       ToolTip="{loc:Str Meeting_HasSummary}"
+                                                       Visibility="{Binding HasSummary, Converter={StaticResource BoolToVisibility}}" />
+                                    </WrapPanel>
+                                    <ProgressBar Margin="0,6,0,0" Height="3" Maximum="1" Value="{Binding Progress, Mode=OneWay}"
+                                                 Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibility}}" />
+                                    <TextBlock Text="{Binding EtaText}" Style="{StaticResource Quill.Text.Caption}"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                               Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibility}}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <qc:EmptyState Text="{loc:Str Meetings_Empty}" Description="{loc:Str Meetings_EmptyDescription}"
+                                   VerticalAlignment="Top" Margin="0,24,0,0"
+                                   Visibility="{Binding HasMeetings, Converter={StaticResource NotToVisibility}}" />
+
+                    <!-- Cross-meeting search results replace the list while searching -->
+                    <DockPanel Visibility="{Binding IsSearching, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock DockPanel.Dock="Top" Margin="2,0,0,6" Text="{Binding SearchStatus}"
+                                   Style="{StaticResource Quill.Text.Caption}"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <ListBox ItemsSource="{Binding SearchResults}"
+                                 Background="Transparent" BorderThickness="0"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 VirtualizingPanel.IsVirtualizing="True"
+                                 VirtualizingPanel.VirtualizationMode="Recycling">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Padding" Value="0" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:MeetingSearchHitViewModel}">
+                                    <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                            Background="Transparent" BorderThickness="0" Padding="8,6"
+                                            Command="{Binding DataContext.OpenHitCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource Quill.Text.Caption}"
+                                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                                <Run Text="{Binding SessionLabel, Mode=OneWay}" />
+                                                <Run Text=" · " />
+                                                <Run Text="{Binding TimeText, Mode=OneWay}" />
+                                                <Run Text=" · " />
+                                                <Run Text="{Binding SpeakerText, Mode=OneWay}" />
+                                            </TextBlock>
+                                            <TextBlock TextWrapping="Wrap" local:HighlightedText.Runs="{Binding Runs}" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </Grid>
+            </DockPanel>
+
+            <GridSplitter Grid.Column="1" Width="1" HorizontalAlignment="Stretch"
+                          Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+
+            <!-- Right: the open meeting, or My tasks -->
+            <Grid Grid.Column="2">
+                <Grid Visibility="{Binding IsMeetingsVisible, Converter={StaticResource BoolToVisibility}}">
+                    <local:MeetingDetailView DataContext="{Binding Detail}"
+                                             Visibility="{Binding DataContext.HasDetail, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}" />
+                    <qc:EmptyState Text="{loc:Str Detail_Empty}" VerticalAlignment="Center"
+                                   Visibility="{Binding HasDetail, Converter={StaticResource NotToVisibility}}" />
+                </Grid>
+                <local:MyTasksView DataContext="{Binding MyTasks}"
+                                   Visibility="{Binding DataContext.IsMyTasksVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}" />
+            </Grid>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>
