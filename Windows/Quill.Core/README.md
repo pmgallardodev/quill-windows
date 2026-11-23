@@ -18,10 +18,10 @@ on these ports, and are wired in the app composition root.
 |---|---|
 | `Quill.Core.Domain` | `Session`, `SessionTrack`, `TranscriptSegment`, `Track`, `TrackNames`, `SpeakerIds`, `Speaker`, `Note`, `Marker`, `Template`, `MeetingSummary` (+ `Decision`, `ActionItem`, `OpenQuestion`, `Topic`, `Risk`, `KeyFact`, `SummaryMeta`), `SummaryKind`, `SummaryLevel`, `SummarySections`, `TranscriptPass` |
 | `Quill.Core.Ports` | Interfaces below + their request/result records, `SystemClock` |
-| `Quill.Core.Summaries` | `MeetingSummaryJson`, `MeetingSummarySchema`, `CitationValidator`, `TimestampJsonConverter` |
+| `Quill.Core.Summaries` | `MeetingSummaryJson`, `MeetingSummarySchema`, `CitationValidator`, `TimestampJsonConverter`, `JsonSchemaGbnf`; use cases `FinalSummaryBuilder`, `LiveSummaryLoop`, `CatchUpSummarizer` with `SummaryOptions` / `SummaryOutcome` |
 | `Quill.Core.Transcripts` | `TranscriptWindow` (catch-up), `TranscriptChunker` (prompt lines + map-reduce chunks) |
 | `Quill.Core.Storage` | `FileSessionStore` (session format v2), `NotesDocument` (notes.md) |
-| `Quill.Core.Templates` | `TemplateParser` (frontmatter + markdown) |
+| `Quill.Core.Templates` | `TemplateParser` (frontmatter + markdown), `DefaultTemplates` (six built-ins embedded from `Templates/Defaults/*.md`) |
 | `Quill.Core.AiPack` | `ManifestAiPackLocator` |
 | `Quill.Windows.Sessions`, `Quill.Windows.Transcription` (folder `Legacy/`) | v1 session code moved here unchanged (`SessionCatalog`, `SessionMetadata`, `TranscriptDocument`, `SessionStatus`, `SessionInsights`, `TranscriptExport`, `ResumePolicy`). Namespaces kept so existing Windows code compiles untouched. Internal; visible to `quill`, `Quill.Windows.Tests`, `Quill.Core.Tests`. |
 
@@ -125,6 +125,14 @@ Paths are relative and must stay inside the root.
    `ISessionStore.SaveSummaryAsync`.
 
 "What did I miss?": `TranscriptWindow.Last(segments, TimeSpan.FromMinutes(n), now)`.
+
+The use cases wrap these steps. They run model calls through `IInferenceScheduler` and do
+not throw for an unusable model: `LanguageModelUnavailableException` from the adapter becomes
+`SummaryStatus.AiPackMissing`, and output that is still unparseable after one retry becomes
+`Failed`. LLamaSharp has no schema-to-grammar converter, so adapters turn the schema into GBNF
+with `JsonSchemaGbnf.Convert(schema)` (root rule `root`); it throws `NotSupportedException` for
+schema features outside the subset `MeetingSummarySchema` uses. Windows wiring:
+`Quill.Windows.Summaries.SummariesModule` (adapter `LlamaSharpLanguageModel`).
 
 ## Session folder format
 

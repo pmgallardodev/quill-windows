@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LLamaSharp" Version="0.30.0" />
+    <PackageReference Include="LLamaSharp.Backend.Cpu" Version="0.30.0" />
+    <PackageReference Include="LLamaSharp.Backend.Vulkan" Version="0.30.0" />
+    <PackageReference Include="org.k2fsa.sherpa.onnx" Version="2.0.3" />
+    <PackageReference Include="Whisper.net" Version="1.9.1" />
+    <PackageReference Include="Whisper.net.Runtime" Version="1.9.1" />
+    <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.1" />
+  </ItemGroup>
+
+  <!--
+    LLamaSharp.Backend.Cpu 0.30.0 ships osx-arm64 dylibs named libggml*.dylib whose install names and
+    load commands reference @rpath/libggml*.0.dylib, so libllama fails to load on macOS. Copy each
+    dylib to its versioned name after build. Windows DLLs use plain names and are unaffected.
+  -->
+  <Target Name="FixLlamaSharpMacDylibNames" AfterTargets="Build" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <ItemGroup>
+      <_LlamaMacDylib Include="$(OutDir)runtimes/osx-arm64/native/lib*.dylib" Exclude="$(OutDir)runtimes/osx-arm64/native/lib*.0.dylib;$(OutDir)runtimes/osx-arm64/native/libonnxruntime*.dylib;$(OutDir)runtimes/osx-arm64/native/libsherpa*.dylib" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_LlamaMacDylib)" DestinationFiles="@(_LlamaMacDylib->'%(RootDir)%(Directory)%(Filename).0%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
