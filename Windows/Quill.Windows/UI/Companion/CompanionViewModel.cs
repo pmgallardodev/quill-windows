@@ -58,6 +58,7 @@ internal sealed class CompanionViewModel : INotifyPropertyChanged
     private bool _notesLoadFailed;
     private NotesSaveState _notesSaveState = NotesSaveState.Saved;
     private bool _notesTouched;
+    private bool _shuttingDown;
     private string _quickNoteText = string.Empty;
     private string? _toast;
 
@@ -309,7 +310,7 @@ internal sealed class CompanionViewModel : INotifyPropertyChanged
         }
     }
 
-    public bool IsNotesEditable => _notesLoaded && !_notesLoadFailed && !_closed;
+    public bool IsNotesEditable => _notesLoaded && !_notesLoadFailed && !_closed && !_shuttingDown;
 
     public string QuickNoteText
     {
@@ -418,9 +419,13 @@ internal sealed class CompanionViewModel : INotifyPropertyChanged
             return true;
         }
 
+        _shuttingDown = true;
+        OnPropertyChanged(nameof(IsNotesEditable));
         await _notes.FlushAsync().ConfigureAwait(false);
-        if (_notes.State == NotesSaveState.Failed)
+        if (_notes.State != NotesSaveState.Saved)
         {
+            _shuttingDown = false;
+            OnPropertyChanged(nameof(IsNotesEditable));
             OnNotesChanged();
             return false;
         }

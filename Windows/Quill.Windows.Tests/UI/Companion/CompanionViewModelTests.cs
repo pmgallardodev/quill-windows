@@ -122,6 +122,29 @@ public class CompanionViewModelTests
     }
 
     [Fact]
+    public async Task ShutdownAdmissionRejectsEditsWhileFinalSaveIsInFlight()
+    {
+        var harness = new Harness();
+        harness.Store.Notes = "baseline";
+        harness.Store.SaveStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        harness.Store.SaveRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var vm = Create(harness);
+        await vm.InitializeAsync();
+        vm.NotesText = "draft";
+
+        var shutdown = vm.ShutdownAsync();
+        await harness.Store.SaveStarted.Task;
+
+        vm.NotesText = "late edit";
+        Assert.Equal("draft", vm.NotesText);
+        Assert.False(vm.IsNotesEditable);
+
+        harness.Store.SaveRelease.SetResult();
+        Assert.True(await shutdown);
+        Assert.Equal("draft", harness.Store.Notes);
+    }
+
+    [Fact]
     public async Task MarkCallsTheHostAndShowsAToastThatExpires()
     {
         var harness = new Harness { Elapsed = TimeSpan.FromMinutes(12) };
@@ -340,14 +363,23 @@ public class CompanionViewModelTests
 
         public int Saves { get; private set; }
 
+        public TaskCompletionSource? SaveStarted { get; set; }
+
+        public TaskCompletionSource? SaveRelease { get; set; }
+
         public Task<string> LoadNotesAsync(string sessionId, CancellationToken cancellationToken) =>
             FailLoad ? throw new IOException("locked") : Task.FromResult(Notes);
 
-        public Task SaveNotesAsync(string sessionId, string markdown, CancellationToken cancellationToken)
+        public async Task SaveNotesAsync(string sessionId, string markdown, CancellationToken cancellationToken)
         {
             Saves++;
+            SaveStarted?.TrySetResult();
+            if (SaveRelease is not null)
+            {
+                await SaveRelease.Task;
+            }
+
             Notes = markdown;
-            return Task.CompletedTask;
         }
 
         public Task<IReadOnlyList<Session>> ListSessionsAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
