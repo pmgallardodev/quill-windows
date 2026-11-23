@@ -34,6 +34,7 @@ public static class SettingsDocument
         var summaries = root["summaries"] as JsonObject;
         var templates = root["templates"] as JsonObject;
         var export = root["export"] as JsonObject;
+        var privacy = root["privacy"] as JsonObject;
         var defaults = new SummarySettings();
 
         return new QuillSettings
@@ -66,6 +67,14 @@ public static class SettingsDocument
                 Folder = Text(export, "folder"),
                 AutoExport = Boolean(export, "auto_export") ?? false,
                 OverwriteEdited = Boolean(export, "overwrite_edited") ?? false,
+            },
+            Privacy = new PrivacySettings
+            {
+                DiscreetMode = Boolean(privacy, "discreet_mode") ?? true,
+                NeutralTrayIcon = Boolean(privacy, "neutral_tray_icon") ?? true,
+                CompanionHotkey = HotkeyGesture.TryParse(Text(privacy, "companion_hotkey"), out var gesture)
+                    ? gesture!.ToString()
+                    : HotkeyGesture.DefaultCompanion.ToString(),
             },
         };
     }
@@ -114,6 +123,11 @@ public static class SettingsDocument
         Set(export, "folder", settings.Export.Folder);
         Set(export, "auto_export", JsonValue.Create(settings.Export.AutoExport));
         Set(export, "overwrite_edited", JsonValue.Create(settings.Export.OverwriteEdited));
+
+        var privacy = Section(root, "privacy");
+        Set(privacy, "discreet_mode", JsonValue.Create(settings.Privacy.DiscreetMode));
+        Set(privacy, "neutral_tray_icon", JsonValue.Create(settings.Privacy.NeutralTrayIcon));
+        Set(privacy, "companion_hotkey", settings.Privacy.CompanionGesture.ToString());
 
         return root.ToJsonString(WriteOptions);
     }
