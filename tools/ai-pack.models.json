@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "_comment": [
+    "Models packed by tools/build-ai-pack.ps1. One entry per AiPackComponent (Quill.Core/Ports/AiPack.cs).",
+    "path: location inside the ai-pack folder, written to ai-pack.json 'files'.",
+    "volume: 'main' -> quill-ai-pack-<version>.zip (holds ai-pack.json); any other name -> quill-ai-pack-<version>-<volume>.zip.",
+    "Every volume must stay under 2 GiB, so no single model file may reach 2 GiB either.",
+    "LLM: Qwen3-4B Q4_K_M (F0's scored model) is 2.33 GiB and cannot be a GitHub asset; UD-Q3_K_XL (1.98 GiB) is the largest Qwen3-4B quant that fits.",
+    "sha256: pinned lowercase hex, or TO_FILL_ON_FIRST_BUILD to print the hash and refuse to package without -AcceptNewHashes.",
+    "size: exact bytes, or 0 when unknown (then only maxBytes bounds the download).",
+    "url: HTTPS on huggingface.co or github.com, pinned to a commit where the host supports it."
+  ],
+  "components": [
+    {
+      "component": "languageModel",
+      "name": "Qwen3-4B-Instruct-2507 GGUF UD-Q3_K_XL",
+      "path": "llm/Qwen3-4B-Instruct-2507-UD-Q3_K_XL.gguf",
+      "volume": "llm",
+      "url": "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/a06e946bb6b655725eafa393f4a9745d460374c9/Qwen3-4B-Instruct-2507-UD-Q3_K_XL.gguf",
+      "size": 2128385120,
+      "maxBytes": 2147000000,
+      "sha256": "6aa5c26f5624cf8820f6f0207479445da5a33c4db73a2e097cf6f91f9ce0550e",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/blob/main/LICENSE",
+      "source": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507",
+      "attribution": "Qwen3 by Alibaba Cloud (Qwen team); GGUF conversion by Unsloth."
+    },
+    {
+      "component": "liveWhisper",
+      "name": "Whisper small ggml Q5_1",
+      "path": "whisper/ggml-small-q5_1.bin",
+      "volume": "main",
+      "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-small-q5_1.bin",
+      "size": 190085487,
+      "maxBytes": 300000000,
+      "sha256": "ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/openai/whisper/blob/main/LICENSE",
+      "source": "https://github.com/openai/whisper",
+      "attribution": "Whisper by OpenAI; ggml conversion by the whisper.cpp project."
+    },
+    {
+      "component": "diarizationSegmentation",
+      "name": "pyannote segmentation 3.0 (sherpa-onnx ONNX export)",
+      "path": "diarization/pyannote-segmentation-3.0.onnx",
+      "volume": "main",
+      "url": "https://huggingface.co/csukuangfj/sherpa-onnx-pyannote-segmentation-3-0/resolve/9403a6902bb58e3d5ae8c7e77c3422de279db2e0/model.onnx",
+      "size": 5992913,
+      "maxBytes": 20000000,
+      "sha256": "220ad67ca923bef2fa91f2390c786097bf305bceb5e261d4af67b38e938e1079",
+      "license": "MIT",
+      "licenseUrl": "https://huggingface.co/pyannote/segmentation-3.0",
+      "source": "https://huggingface.co/pyannote/segmentation-3.0",
+      "attribution": "pyannote.audio segmentation-3.0 by Herve Bredin et al.; ONNX export by the sherpa-onnx project."
+    },
+    {
+      "component": "speakerEmbedding",
+      "name": "3D-Speaker CAM++ zh/en 16k common advanced (ONNX)",
+      "path": "diarization/3dspeaker-campplus-zh-en-16k-advanced.onnx",
+      "volume": "main",
+      "url": "https://huggingface.co/csukuangfj/speaker-embedding-models/resolve/a8055d6daef723a6a4ecf4de233708575bf4994f/3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx",
+      "size": 28281165,
+      "maxBytes": 60000000,
+      "sha256": "53cab20ba8f2eb2f6e2d89ecc18e88ef3222169b61b4419cbc13666744a4574b",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/modelscope/3D-Speaker/blob/main/LICENSE",
+      "source": "https://github.com/modelscope/3D-Speaker",
+      "attribution": "CAM++ by the 3D-Speaker project (Alibaba); ONNX export by the sherpa-onnx project."
+    },
+    {
+      "component": "textEmbedding",
+      "name": "BGE-M3 GGUF Q8_0",
+      "path": "embeddings/bge-m3-q8_0.gguf",
+      "volume": "main",
+      "url": "https://huggingface.co/ggml-org/bge-m3-Q8_0-GGUF/resolve/9eba04c5d75ba5a1595e45de734d36bef4e5cb98/bge-m3-q8_0.gguf",
+      "size": 634553760,
+      "maxBytes": 700000000,
+      "sha256": "aa473d51f451a22f0fcf39ba3330c14bed38a385712b1113440f69df4047a173",
+      "license": "MIT",
+      "licenseUrl": "https://huggingface.co/BAAI/bge-m3",
+      "source": "https://huggingface.co/BAAI/bge-m3",
+      "attribution": "BGE-M3 by BAAI; GGUF conversion by ggml-org."
+    }
+  ]
+}

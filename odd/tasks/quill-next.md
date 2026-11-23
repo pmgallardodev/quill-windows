@@ -147,6 +147,19 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       saved voice → loudest (≥25% talk time) → most talk. Owner voice learned from first 5 online
       meetings. Gap: switch not in import dialog (settable after import).
 - [ ] P1 Packaging: app ZIP + AI-pack ZIP, AI-pack detection, README update. Route D.
+      Done: 8cfc387, 62d0237, d722434, merged; build 0/0; native runtimes verified in publish.
+      Scripts unexecuted (no pwsh on Mac). OPEN owner decision: Qwen3-4B Q4_K_M is 2.33 GiB >
+      2 GiB GitHub asset cap → agent defaulted to UD-Q3_K_XL (1.98 GiB, unscored) in a separate
+      `-llm.zip` (3 assets). No LICENSE in repo (owner's call).
+      Owner decision 2026-11-23: option A — ship Qwen3-4B Q4_K_M split in two parts (3 assets).
+- [ ] P1b Split-model support: Q4_K_M as default, split into parts < 2 GiB at build time,
+      reassembled/loaded by Quill with SHA-256 verification; locator + adapter + scripts + README.
+      Route D.
+- [ ] P2 Hybrid AI-pack install (owner decision 2026-11-23, revises Q1): in-app "Descargar pack
+      de IA" button (user-initiated only, never automatic) downloading pinned Hugging Face
+      revisions with size cap + SHA-256 verification, resumable, progress, cancel, free-space
+      check; manual ZIPs (P1b) keep working offline. README "never downloads" wording updated to
+      "only when you press Download". Route D after P1b merges.
 
 ## Acceptance criteria
 - Summary JSON has all sections; empty sections render "None"; every item's timestamp exists.
