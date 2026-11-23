@@ -190,4 +190,311 @@
   <data name="A11y_AudioLevel" xml:space="preserve">
     <value>Nivel de audio</value>
   </data>
+
+  <!-- Settings window (F9) -->
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Configuración</value>
+  </data>
+  <data name="Settings_Nav_General" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="Settings_Nav_Ai" xml:space="preserve">
+    <value>IA</value>
+  </data>
+  <data name="Settings_Nav_Summaries" xml:space="preserve">
+    <value>Resúmenes</value>
+  </data>
+  <data name="Settings_Nav_Templates" xml:space="preserve">
+    <value>Plantillas</value>
+  </data>
+  <data name="Settings_Nav_Export" xml:space="preserve">
+    <value>Exportación</value>
+  </data>
+  <data name="Settings_Browse" xml:space="preserve">
+    <value>Examinar…</value>
+  </data>
+  <data name="Settings_General_ConfigFile" xml:space="preserve">
+    <value>Archivo de configuración</value>
+  </data>
+  <data name="Settings_General_RecordingsFolder" xml:space="preserve">
+    <value>Carpeta de grabaciones</value>
+  </data>
+  <data name="Settings_General_OpenConfigFolder" xml:space="preserve">
+    <value>Abrir carpeta de configuración</value>
+  </data>
+  <data name="Settings_General_RestartNote" xml:space="preserve">
+    <value>Algunos cambios (modelos, GPU, pack de IA) se aplican la próxima vez que se inicia Quill.</value>
+  </data>
+  <data name="Settings_Ai_PackHeader" xml:space="preserve">
+    <value>Pack de IA</value>
+  </data>
+  <data name="Settings_Ai_PackPath" xml:space="preserve">
+    <value>Carpeta del pack de IA</value>
+  </data>
+  <data name="Settings_Ai_PackPathHint" xml:space="preserve">
+    <value>Vacío: la carpeta ai-pack junto a Quill.</value>
+  </data>
+  <data name="Settings_Ai_PackInstalled" xml:space="preserve">
+    <value>Pack de IA instalado (versión {0}) en {1}.</value>
+    <comment>{0} = pack version, {1} = folder.</comment>
+  </data>
+  <data name="Settings_Ai_PackPartial" xml:space="preserve">
+    <value>Faltan componentes del pack de IA: {0}.</value>
+    <comment>{0} = comma-separated component names.</comment>
+  </data>
+  <data name="Settings_Ai_PackMissing" xml:space="preserve">
+    <value>No se encontró el pack de IA en {0}.</value>
+    <comment>{0} = folder.</comment>
+  </data>
+  <data name="Settings_Ai_InstallTitle" xml:space="preserve">
+    <value>Instalar pack de IA</value>
+  </data>
+  <data name="Settings_Ai_InstallGuidance" xml:space="preserve">
+    <value>Descarga quill-ai-pack-&lt;versión&gt;.zip de la misma versión que Quill y extráelo en la carpeta ai-pack junto a quill.exe, o indica arriba la carpeta donde lo extrajiste. Sin el pack, la grabación y la transcripción siguen funcionando.</value>
+  </data>
+  <data name="Settings_Ai_CheckAgain" xml:space="preserve">
+    <value>Comprobar de nuevo</value>
+  </data>
+  <data name="Settings_Ai_ModelsHeader" xml:space="preserve">
+    <value>Modelos</value>
+  </data>
+  <data name="Settings_Ai_LlmModel" xml:space="preserve">
+    <value>Modelo de lenguaje (.gguf)</value>
+  </data>
+  <data name="Settings_Ai_LiveWhisperModel" xml:space="preserve">
+    <value>Modelo de transcripción en vivo (.bin)</value>
+  </data>
+  <data name="Settings_Ai_ModelHint" xml:space="preserve">
+    <value>Vacío: el modelo incluido en el pack de IA.</value>
+  </data>
+  <data name="Settings_Ai_GpuHeader" xml:space="preserve">
+    <value>Aceleración</value>
+  </data>
+  <data name="Settings_Ai_Gpu" xml:space="preserve">
+    <value>Procesador para la IA</value>
+  </data>
+  <data name="Settings_Ai_Gpu_Auto" xml:space="preserve">
+    <value>Automático (GPU si está disponible)</value>
+  </data>
+  <data name="Settings_Ai_Gpu_Vulkan" xml:space="preserve">
+    <value>GPU (Vulkan)</value>
+  </data>
+  <data name="Settings_Ai_Gpu_Cpu" xml:space="preserve">
+    <value>Solo CPU</value>
+  </data>
+  <data name="Settings_Ai_GpuDevice" xml:space="preserve">
+    <value>Índice de GPU</value>
+  </data>
+  <data name="Settings_Ai_GpuDeviceHint" xml:space="preserve">
+    <value>Vacío: la GPU predeterminada. En equipos con dos GPU, 0 suele ser la integrada y 1 la dedicada.</value>
+  </data>
+  <data name="Settings_Ai_Component_LanguageModel" xml:space="preserve">
+    <value>modelo de lenguaje</value>
+  </data>
+  <data name="Settings_Ai_Component_LiveWhisper" xml:space="preserve">
+    <value>transcripción en vivo</value>
+  </data>
+  <data name="Settings_Ai_Component_DiarizationSegmentation" xml:space="preserve">
+    <value>separación de interlocutores</value>
+  </data>
+  <data name="Settings_Ai_Component_SpeakerEmbedding" xml:space="preserve">
+    <value>huellas de voz</value>
+  </data>
+  <data name="Settings_Ai_Component_TextEmbedding" xml:space="preserve">
+    <value>búsqueda semántica</value>
+  </data>
+  <data name="Settings_Summaries_Language" xml:space="preserve">
+    <value>Idioma de los resúmenes</value>
+  </data>
+  <data name="Settings_Summaries_LanguageHint" xml:space="preserve">
+    <value>Independiente del idioma que se habla en la reunión.</value>
+  </data>
+  <data name="Settings_Summaries_Level" xml:space="preserve">
+    <value>Nivel de detalle</value>
+  </data>
+  <data name="Settings_Summaries_Template" xml:space="preserve">
+    <value>Plantilla predeterminada</value>
+  </data>
+  <data name="Settings_Summaries_LiveHeader" xml:space="preserve">
+    <value>Resumen en vivo</value>
+  </data>
+  <data name="Settings_Summaries_Live" xml:space="preserve">
+    <value>Resumen durante la grabación</value>
+  </data>
+  <data name="Settings_Summaries_Cadence" xml:space="preserve">
+    <value>Actualizar el resumen en vivo cada (minutos)</value>
+  </data>
+  <data name="Settings_Summaries_CatchUp" xml:space="preserve">
+    <value>«¿Qué me perdí?» resume los últimos (minutos)</value>
+  </data>
+  <data name="Settings_Live_Auto" xml:space="preserve">
+    <value>Automático (activado si hay GPU)</value>
+  </data>
+  <data name="Settings_Live_On" xml:space="preserve">
+    <value>Activado</value>
+  </data>
+  <data name="Settings_Live_Off" xml:space="preserve">
+    <value>Desactivado</value>
+  </data>
+  <data name="Settings_Level_Brief" xml:space="preserve">
+    <value>Breve</value>
+  </data>
+  <data name="Settings_Level_Detailed" xml:space="preserve">
+    <value>Detallado</value>
+  </data>
+  <data name="Settings_Language_es" xml:space="preserve">
+    <value>Español</value>
+  </data>
+  <data name="Settings_Language_en" xml:space="preserve">
+    <value>Inglés</value>
+  </data>
+  <data name="Settings_Language_pt" xml:space="preserve">
+    <value>Portugués</value>
+  </data>
+  <data name="Settings_Language_fr" xml:space="preserve">
+    <value>Francés</value>
+  </data>
+  <data name="Settings_Language_de" xml:space="preserve">
+    <value>Alemán</value>
+  </data>
+  <data name="Settings_Language_it" xml:space="preserve">
+    <value>Italiano</value>
+  </data>
+  <data name="Settings_Language_ca" xml:space="preserve">
+    <value>Catalán</value>
+  </data>
+  <data name="Settings_Templates_Folder" xml:space="preserve">
+    <value>Carpeta de plantillas</value>
+  </data>
+  <data name="Settings_Templates_FolderHint" xml:space="preserve">
+    <value>Vacío: %APPDATA%\Quill\templates. Cada archivo .md es una plantilla; si se llama igual que una integrada, la sustituye.</value>
+  </data>
+  <data name="Settings_Templates_OpenFolder" xml:space="preserve">
+    <value>Abrir carpeta</value>
+  </data>
+  <data name="Settings_Templates_Customize" xml:space="preserve">
+    <value>Personalizar</value>
+  </data>
+  <data name="Settings_Templates_CustomizeHint" xml:space="preserve">
+    <value>Personalizar copia la plantilla a tu carpeta y la abre para editarla. Tu copia sustituye a la integrada.</value>
+  </data>
+  <data name="Settings_Templates_Reload" xml:space="preserve">
+    <value>Validar y recargar</value>
+  </data>
+  <data name="Settings_Templates_Source_BuiltIn" xml:space="preserve">
+    <value>Integrada</value>
+  </data>
+  <data name="Settings_Templates_Source_User" xml:space="preserve">
+    <value>Personal</value>
+  </data>
+  <data name="Settings_Templates_Source_Override" xml:space="preserve">
+    <value>Personalizada</value>
+  </data>
+  <data name="Settings_Templates_Sections" xml:space="preserve">
+    <value>Secciones</value>
+  </data>
+  <data name="Settings_Templates_AllSections" xml:space="preserve">
+    <value>Todas</value>
+  </data>
+  <data name="Settings_Templates_Level" xml:space="preserve">
+    <value>Nivel</value>
+  </data>
+  <data name="Settings_Templates_Language" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+  <data name="Settings_Templates_LanguageDefault" xml:space="preserve">
+    <value>El de la configuración</value>
+  </data>
+  <data name="Settings_Templates_Body" xml:space="preserve">
+    <value>Instrucciones</value>
+  </data>
+  <data name="Settings_Templates_File" xml:space="preserve">
+    <value>Archivo</value>
+  </data>
+  <data name="Settings_Templates_ProblemsHeader" xml:space="preserve">
+    <value>Plantillas con errores</value>
+  </data>
+  <data name="Settings_Templates_NoProblems" xml:space="preserve">
+    <value>Todas las plantillas son válidas.</value>
+  </data>
+  <data name="Settings_Templates_Problem" xml:space="preserve">
+    <value>{0}: {1}</value>
+    <comment>{0} = file name, {1} = issues.</comment>
+  </data>
+  <data name="Settings_Templates_Created" xml:space="preserve">
+    <value>Se creó {0}. Edítala y pulsa «Validar y recargar».</value>
+    <comment>{0} = file path.</comment>
+  </data>
+  <data name="Settings_Templates_Exists" xml:space="preserve">
+    <value>Ya existía {0}; se abre para editarla.</value>
+    <comment>{0} = file path.</comment>
+  </data>
+  <data name="Settings_TemplateIssue_Unreadable" xml:space="preserve">
+    <value>no se puede leer ({0})</value>
+    <comment>{0} = system error.</comment>
+  </data>
+  <data name="Settings_TemplateIssue_UnclosedFrontmatter" xml:space="preserve">
+    <value>falta la línea --- que cierra la cabecera</value>
+  </data>
+  <data name="Settings_TemplateIssue_MissingName" xml:space="preserve">
+    <value>falta el nombre (name: ...)</value>
+  </data>
+  <data name="Settings_TemplateIssue_UnknownSection" xml:space="preserve">
+    <value>la sección «{0}» no existe (válidas: executiveSummary, decisions, actionItems, openQuestions, topics, risks, keyFacts, nextSteps)</value>
+    <comment>{0} = section key.</comment>
+  </data>
+  <data name="Settings_TemplateIssue_EmptyBody" xml:space="preserve">
+    <value>faltan las instrucciones después de la cabecera</value>
+  </data>
+  <data name="Settings_TemplateIssue_DuplicateName" xml:space="preserve">
+    <value>otra plantilla ya se llama «{0}»</value>
+    <comment>{0} = template name.</comment>
+  </data>
+  <data name="Settings_Error_Minutes" xml:space="preserve">
+    <value>«{0}» debe ser un número entero entre {1} y {2}.</value>
+    <comment>{0} = field label, {1}/{2} = bounds.</comment>
+  </data>
+  <data name="Settings_Error_GpuDevice" xml:space="preserve">
+    <value>El índice de GPU debe ser un número entero mayor o igual que 0.</value>
+  </data>
+  <data name="Settings_Error_Save" xml:space="preserve">
+    <value>No se pudo guardar la configuración: {0}</value>
+    <comment>{0} = error.</comment>
+  </data>
+  <data name="Settings_Error_Open" xml:space="preserve">
+    <value>No se pudo abrir {0}: {1}</value>
+    <comment>{0} = path, {1} = error.</comment>
+  </data>
+  <data name="Export_Folder" xml:space="preserve">
+    <value>Carpeta de exportación</value>
+  </data>
+  <data name="Export_FolderHint" xml:space="preserve">
+    <value>Por ejemplo, una carpeta de tu bóveda de Obsidian. Se crea un archivo .md por reunión.</value>
+  </data>
+  <data name="Export_Auto" xml:space="preserve">
+    <value>Exportar automáticamente al terminar el resumen final</value>
+  </data>
+  <data name="Export_OverwriteEdited" xml:space="preserve">
+    <value>Sobrescribir notas exportadas que hayas editado</value>
+  </data>
+  <data name="Export_OverwriteEditedHint" xml:space="preserve">
+    <value>Desactivado: si editas una nota exportada, Quill no vuelve a escribirla.</value>
+  </data>
+  <data name="Export_ExportAll" xml:space="preserve">
+    <value>Exportar todo ahora</value>
+  </data>
+  <data name="Export_Running" xml:space="preserve">
+    <value>Exportando… {0} reuniones procesadas.</value>
+    <comment>{0} = count.</comment>
+  </data>
+  <data name="Export_Done" xml:space="preserve">
+    <value>Exportación terminada: {0} nuevas, {1} actualizadas, {2} sin cambios, {3} editadas por ti (no se tocaron), {4} con errores.</value>
+    <comment>{0}..{4} = counts.</comment>
+  </data>
+  <data name="Export_NoFolder" xml:space="preserve">
+    <value>Elige primero una carpeta de exportación.</value>
+  </data>
+  <data name="Export_NotAvailable" xml:space="preserve">
+    <value>Exportar todo no está disponible ahora mismo.</value>
+  </data>
 </root>
