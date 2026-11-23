@@ -1101,4 +1101,46 @@ Esto no se puede deshacer.</value>
   <data name="Privacy_Error_Hotkey" xml:space="preserve">
     <value>El atajo del panel no es válido. Usa, por ejemplo, Ctrl+Shift+Q.</value>
   </data>
+  <data name="Tray_Settings" xml:space="preserve">
+    <value>Ajustes</value>
+  </data>
+  <data name="Tray_Import" xml:space="preserve">
+    <value>Importar grabación…</value>
+  </data>
+  <data name="Tray_NoticeStatus" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Pipeline_Running" xml:space="preserve">
+    <value>{0}: identificando interlocutores y generando el resumen…</value>
+  </data>
+  <data name="Pipeline_Done" xml:space="preserve">
+    <value>{0}: reunión procesada.</value>
+  </data>
+  <data name="Pipeline_DoneWithIssues" xml:space="preserve">
+    <value>{0}: procesada con avisos ({1}).</value>
+  </data>
+  <data name="Pipeline_StepFailed" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Pipeline_Step_Speakers" xml:space="preserve">
+    <value>interlocutores</value>
+  </data>
+  <data name="Pipeline_Step_Summary" xml:space="preserve">
+    <value>resumen</value>
+  </data>
+  <data name="Pipeline_Step_Export" xml:space="preserve">
+    <value>exportación</value>
+  </data>
+  <data name="Pipeline_NoTranscript" xml:space="preserve">
+    <value>La reunión aún no tiene transcripción.</value>
+  </data>
+  <data name="Pipeline_SummaryFailed" xml:space="preserve">
+    <value>No se pudo generar el resumen.</value>
+  </data>
+  <data name="Pipeline_SessionNotFound" xml:space="preserve">
+    <value>No se encontró la reunión.</value>
+  </data>
+  <data name="Pipeline_SegmentNotFound" xml:space="preserve">
+    <value>No se encontró ese fragmento en la transcripción. Recarga la reunión e inténtalo de nuevo.</value>
+  </data>
 </root>

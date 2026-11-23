@@ -28,7 +28,8 @@ internal sealed record TranscriptRow(TranscriptSegment Segment)
 /// </summary>
 internal sealed class CompanionViewModel : INotifyPropertyChanged
 {
-    public static readonly TimeSpan CatchUpWindow = CatchUpSummarizer.DefaultWindow;
+    /// <summary>Notices from the host (notifications kept in-app) stay longer than confirmations.</summary>
+    private static readonly TimeSpan NoticeMinimumDuration = TimeSpan.FromSeconds(5);
 
     private static readonly TimeSpan ToastDuration = TimeSpan.FromSeconds(3);
 
@@ -257,6 +258,9 @@ internal sealed class CompanionViewModel : INotifyPropertyChanged
     }
 
     public string CatchUpTitle => Loc.Format("Companion_CatchUp_Title", (int)CatchUpWindow.TotalMinutes);
+
+    /// <summary>Window of "¿Qué me perdí?" for this recording.</summary>
+    public TimeSpan CatchUpWindow => _context.CatchUpWindow > TimeSpan.Zero ? _context.CatchUpWindow : CatchUpSummarizer.DefaultWindow;
 
     public bool IsCatchUpVisible => _catchUpState != CatchUpState.Hidden;
 
@@ -525,6 +529,21 @@ internal sealed class CompanionViewModel : INotifyPropertyChanged
     private void ShowToast(string message)
     {
         _toastUntil = _now() + ToastDuration;
+        Toast = message;
+    }
+
+    /// <summary>
+    /// Shows a host notice (a notification kept in-app in discreet mode) in the toast area for
+    /// <paramref name="duration"/>, at least a few seconds. UI thread.
+    /// </summary>
+    public void ShowNotice(string message, TimeSpan duration)
+    {
+        if (_closed || string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+
+        _toastUntil = _now() + (duration > NoticeMinimumDuration ? duration : NoticeMinimumDuration);
         Toast = message;
     }
 

@@ -3,16 +3,16 @@ using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Threading;
-using Quill.Core.AiPack;
-using Quill.Core.Ports;
-using Quill.Core.Scheduling;
-using Quill.Core.Storage;
+using Quill.Core.Pipeline;
 using Quill.Windows.Audio;
+using Quill.Windows.Composition;
 using Quill.Windows.Infrastructure;
 using Quill.Windows.Privacy;
+using Quill.Windows.Resources;
 using Quill.Windows.Sessions;
 using Quill.Windows.Transcription;
 using Quill.Windows.UI.Companion;
+using Quill.Windows.UI.Settings;
 using Forms = System.Windows.Forms;
 using WpfApplication = System.Windows.Application;
 
@@ -34,8 +34,11 @@ internal static class TrayApplication
             ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown,
         };
         Theme.ThemeBootstrapper.Initialize(application);
-        DiscreetMode.Initialize(ConfigStore.LoadSettings().Privacy);
-        using var controller = new TrayController(application, recordingsRoot);
+        var settings = ConfigStore.LoadSettings();
+        DiscreetMode.Initialize(settings.Privacy);
+        // Disposed after the controller (reverse order): the controller's cleanup still uses it.
+        using var services = new QuillServices(recordingsRoot, settings, application.Dispatcher);
+        using var controller = new TrayController(application, recordingsRoot, services);
         var exitCode = application.Run();
         controller.WaitForCleanup();
         return exitCode;
@@ -59,10 +62,9 @@ internal sealed class TrayController : IDisposable
     private readonly MainViewModel _sessionsViewModel;
     private MainWindow? _sessionsWindow;
     private RecordingSession? _session;
-    /// <summary>Serializes live Whisper (and later the LLM) so jobs never fight over the GPU.</summary>
-    private readonly InferenceScheduler _inference = new();
-    private readonly IAiPackLocator _aiPack = new ManifestAiPackLocator(AppContext.BaseDirectory);
-    private LiveTranscriptionModule? _live;
+    /// <summary>Composition root: scheduler, AI modules, companion panel, session actions.</summary>
+    private readonly QuillServices _services;
+    private LiveRecording? _live;
     private DateTimeOffset? _recordingStartedAt;
     private readonly GlobalHotkeys? _hotkeys;
     private readonly bool _detectsMeetings;
@@ -81,10 +83,11 @@ internal sealed class TrayController : IDisposable
     private bool _shutdownRequested;
     private string? _stoppingSessionDirectory;
 
-    public TrayController(WpfApplication application, string recordingsRoot)
+    public TrayController(WpfApplication application, string recordingsRoot, QuillServices services)
     {
         _application = application;
         _recordingsRoot = recordingsRoot;
+        _services = services ?? throw new ArgumentNullException(nameof(services));
         Directory.CreateDirectory(recordingsRoot);
 
         var menu = new Forms.ContextMenuStrip();
@@ -95,7 +98,9 @@ internal sealed class TrayController : IDisposable
         _marker = new Forms.ToolStripMenuItem("Marcar momento", null, (_, _) => AddMarker()) { Visible = false };
         menu.Items.Add(_marker);
         menu.Items.Add(new Forms.ToolStripMenuItem("Ver sesiones", null, (_, _) => ShowSessions()));
+        menu.Items.Add(new Forms.ToolStripMenuItem(Loc.Get("Tray_Import"), null, (_, _) => ImportRecording()));
         menu.Items.Add(new Forms.ToolStripMenuItem("Abrir grabaciones", null, (_, _) => OpenRecordings()));
+        menu.Items.Add(new Forms.ToolStripMenuItem(Loc.Get("Tray_Settings"), null, (_, _) => SettingsModule.Show(_services.Store)));
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add(new Forms.ToolStripMenuItem("Salir", null, (_, _) => _ = RequestShutdownAsync()));
 
@@ -113,6 +118,9 @@ internal sealed class TrayController : IDisposable
         // cortar una reunion en curso.
         _icon.DoubleClick += (_, _) => ShowSessions();
         _notifier = new QuillNotifier(ShowOsNotification, () => DiscreetMode.IsOn);
+        _notifier.InAppNotification += OnInAppNotification;
+        _notifier.MeetingDetected += OnMeetingDetected;
+        CompanionPanel = _services.Companion;
         // The tray menu is a WinForms popup, not a WPF window: protect it when it opens.
         menu.Opened += (_, _) => DiscreetMode.ProtectSurface(menu.Handle);
         DiscreetMode.Changed += OnDiscreetModeChanged;
@@ -126,6 +134,11 @@ internal sealed class TrayController : IDisposable
             if (_disposed || _coreDisposed)
             {
                 return;
+            }
+
+            if (update.State == SessionState.Done)
+            {
+                _ = RunPostTranscriptionAsync(update.SessionDirectory);
             }
 
             try
@@ -144,7 +157,12 @@ internal sealed class TrayController : IDisposable
             }
         };
         _transcription.StateChanged += _transcriptionStateHandler;
-        _sessionsViewModel = new MainViewModel(recordingsRoot, _transcription, _application.Dispatcher);
+        _sessionsViewModel = new MainViewModel(
+            recordingsRoot,
+            _transcription,
+            _application.Dispatcher,
+            _services.Store,
+            _services.SessionActions);
         var recording = ConfigStore.Load().Recording;
         _detectsMeetings = recording.DetectsMeetings;
         _startsMeetingsAutomatically = recording.StartsMeetingsAutomatically;
@@ -227,6 +245,10 @@ internal sealed class TrayController : IDisposable
         }
 
         DiscreetMode.Changed -= OnDiscreetModeChanged;
+        _notifier.InAppNotification -= OnInAppNotification;
+        _notifier.MeetingDetected -= OnMeetingDetected;
+        CompanionPanel = null;
+        _services.Companion.Close();
         _hotkeys?.Dispose();
         _sessionsViewModel.Dispose();
         _transcription.StateChanged -= _transcriptionStateHandler;
@@ -237,7 +259,7 @@ internal sealed class TrayController : IDisposable
             _ = live.DisposeAsync().AsTask();
         }
 
-        _inference.Dispose();
+        // QuillServices (scheduler, models) is disposed by TrayApplication.Run after this.
         _icon.Visible = false;
         _icon.Dispose();
         _recordingIcon?.Dispose();
@@ -351,17 +373,16 @@ internal sealed class TrayController : IDisposable
         }
 
         _recordingGeneration++;
-        var live = CreateLiveTranscription();
+        LiveRecording? live = _services.CreateLiveRecording();
         try
         {
-            _session = RecordingSession.Start(_recordingsRoot, live?.Tap);
+            _session = RecordingSession.Start(_recordingsRoot, live.Tap);
             _session.CaptureFailed += OnCaptureFailed;
-            if (live is not null)
-            {
-                live.Start(new FileSessionStore(_recordingsRoot), Path.GetFileName(_session.Directory));
-                _live = live;
-                live = null;
-            }
+            var sessionId = Path.GetFileName(_session.Directory);
+            live.Start(_services.Store, sessionId, _services.LiveSummaryOptions());
+            _live = live;
+            live = null;
+            ShowCompanion(_session, sessionId, _live);
 
             _recordingStartedAt = DateTimeOffset.UtcNow;
             DiscreetMode.SetRecording(true);
@@ -414,26 +435,47 @@ internal sealed class TrayController : IDisposable
                 _ = live.DisposeAsync().AsTask();
             }
 
+            if (_live is { } started)
+            {
+                _live = null;
+                _ = started.DisposeAsync().AsTask();
+            }
+
+            _services.Companion.Close();
             _notifier.Notify(6_000, "quill - error", exception.Message, NotificationKind.Error);
         }
     }
 
-    /// <summary>Null when the AI pack has no live model: recording then works without live text.</summary>
-    private LiveTranscriptionModule? CreateLiveTranscription()
+    /// <summary>
+    /// Opens the companion panel for the recording. Everything optional degrades inside the panel
+    /// (no live text, no AI pack); a failure here never affects capture.
+    /// </summary>
+    private void ShowCompanion(RecordingSession session, string sessionId, LiveRecording live)
     {
         try
         {
-            var config = ConfigStore.Load().Transcription;
-            var language = string.IsNullOrWhiteSpace(config.Language) ? "auto" : config.Language.Trim();
-            var threads = WhisperStreamingTranscriber.LiveThreads(Environment.ProcessorCount);
-            return LiveTranscriptionModule.TryCreate(
-                _aiPack.Locate(),
-                modelPath => WhisperStreamingTranscriber.Create(modelPath, language, threads, _inference));
+            var settings = _services.Settings;
+            _services.Companion.Show(new CompanionContext
+            {
+                SessionId = sessionId,
+                Store = _services.Store,
+                Elapsed = () => session.Elapsed,
+                IsPaused = () => session.IsPaused,
+                TogglePause = TogglePause,
+                Stop = () => _ = ToggleAsync(),
+                AddMarker = session.AddMarker,
+                Transcript = live.Transcript,
+                LiveSummary = live.Summary,
+                IsAiPackInstalled = _services.Summaries.IsLanguageModelInstalled,
+                CatchUpWindow = settings.Summaries.CatchUpWindow,
+                CatchUp = _services.CreateCatchUp(live.Transcript),
+                MicrophoneLevel = () => session.MicrophoneLevel,
+                SystemLevel = () => session.SystemLevel,
+            });
         }
         catch (Exception exception) when (exception is not OutOfMemoryException)
         {
-            Trace.TraceWarning($"quill: live transcription unavailable: {exception.Message}");
-            return null;
+            Trace.TraceWarning($"quill: companion panel unavailable: {exception.Message}");
         }
     }
 
@@ -448,8 +490,11 @@ internal sealed class TrayController : IDisposable
         _isStopping = true;
         _recordingGeneration++;
         _session = null;
-        DiscreetMode.SetRecording(false);
         _stoppingSessionDirectory = session.Directory;
+
+        // Notes typed in the panel must be on disk before the final summary reads them.
+        // CloseAsync never throws.
+        await _services.Companion.CloseAsync();
         if (!_detectsMeetings)
         {
             _ticker.Stop();
@@ -489,6 +534,9 @@ internal sealed class TrayController : IDisposable
             _live = null;
             await live.StopAsync(TimeSpan.FromSeconds(15));
         }
+
+        // Taskbar buttons come back only once nothing of the recording is on screen.
+        DiscreetMode.SetRecording(false);
 
         // A capture error can be reported after metadata was written. Do not lose
         // the valid session just because Stop surfaced that warning to the caller.
@@ -761,6 +809,82 @@ internal sealed class TrayController : IDisposable
         _sessionsWindow ??= new MainWindow(_sessionsViewModel);
         _sessionsWindow.ShowRefreshed();
     }
+
+    /// <summary>"Importar grabación" from the tray: the main window's file picker and import dialog.</summary>
+    private void ImportRecording()
+    {
+        ShowSessions();
+        _sessionsWindow?.PickAndImport();
+    }
+
+    /// <summary>
+    /// Speakers → final summary → auto-export once a session's final transcript is written (any
+    /// thread). The modules run their model work at Background priority on the shared scheduler,
+    /// so this never competes with a recording's live work. Never throws.
+    /// </summary>
+    private async Task RunPostTranscriptionAsync(string sessionDirectory)
+    {
+        var sessionId = Path.GetFileName(sessionDirectory);
+        var anyAi = _services.Summaries.IsLanguageModelInstalled || _services.Speakers.IsAvailable;
+        if (anyAi)
+        {
+            _sessionsViewModel.ShowHostStatus(Loc.Format("Pipeline_Running", sessionId));
+        }
+
+        try
+        {
+            var report = await _services.PostTranscription.RunAsync(sessionId, _services.Lifetime).ConfigureAwait(false);
+            foreach (var step in report.Steps.Where(step => step.Status != PipelineStepStatus.Completed))
+            {
+                Trace.TraceInformation($"quill: {sessionId} {step.Step} {step.Status}: {step.Detail}");
+            }
+
+            var failed = report.Steps.Where(step => step.Status == PipelineStepStatus.Failed).ToList();
+            if (failed.Count > 0)
+            {
+                var steps = string.Join(", ", failed.Select(step => $"{StepLabel(step.Step)}: {step.Detail}"));
+                _sessionsViewModel.ShowHostStatus(Loc.Format("Pipeline_DoneWithIssues", sessionId, steps), sessionId);
+            }
+            else if (anyAi || report.Of(PostTranscriptionStep.Export)?.Status == PipelineStepStatus.Completed)
+            {
+                _sessionsViewModel.ShowHostStatus(Loc.Format("Pipeline_Done", sessionId), sessionId);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Shutting down.
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            Trace.TraceWarning($"quill: post-transcription of {sessionId} failed: {exception}");
+            _sessionsViewModel.ShowHostStatus(Loc.Format("Pipeline_StepFailed", sessionId, exception.Message), sessionId);
+        }
+    }
+
+    private static string StepLabel(PostTranscriptionStep step) => step switch
+    {
+        PostTranscriptionStep.Speakers => Loc.Get("Pipeline_Step_Speakers"),
+        PostTranscriptionStep.Summary => Loc.Get("Pipeline_Step_Summary"),
+        _ => Loc.Get("Pipeline_Step_Export"),
+    };
+
+    /// <summary>
+    /// Discreet mode keeps notifications off the OS (a balloon could pop over a shared screen):
+    /// show them inside the capture-excluded companion panel, else in the main window status line.
+    /// </summary>
+    private void OnInAppNotification(object? sender, QuillNotification notification)
+    {
+        if (_services.Companion.ShowNotice(notification.Text, notification.Duration))
+        {
+            return;
+        }
+
+        _sessionsViewModel.ShowHostStatus(Loc.Format("Tray_NoticeStatus", notification.Title, notification.Text));
+    }
+
+    /// <summary>Also offered in the main window, so "record" is one glance away even without a balloon.</summary>
+    private void OnMeetingDetected(object? sender, QuillNotification notification) =>
+        _sessionsViewModel.ShowHostStatus(notification.Text);
 
     private void OpenRecordings()
     {

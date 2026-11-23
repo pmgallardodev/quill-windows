@@ -45,6 +45,9 @@ internal sealed record CompanionContext
     /// <summary>Whether the AI pack provides a language model (SummariesModule.IsLanguageModelInstalled).</summary>
     public bool IsAiPackInstalled { get; init; }
 
+    /// <summary>How far back "¿Qué me perdí?" looks (settings "summaries.catch_up_minutes").</summary>
+    public TimeSpan CatchUpWindow { get; init; } = CatchUpSummarizer.DefaultWindow;
+
     /// <summary>Recap of the last minutes, or null when no language model is available.</summary>
     public CatchUpHandler? CatchUp { get; init; }
 

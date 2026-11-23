@@ -89,6 +89,12 @@ internal sealed class RecordingSession : IDisposable
 
     public bool IsPaused => _pausedAt is not null;
 
+    /// <summary>Microphone level 0..1 (peak in dBFS mapped over 60 dB, with decay). Lock-free; any thread.</summary>
+    public double MicrophoneLevel => _microphoneWriter.Level;
+
+    /// <summary>System audio level 0..1, same scale as <see cref="MicrophoneLevel"/>.</summary>
+    public double SystemLevel => _systemAudioWriter.Level;
+
     public event Action<Exception>? CaptureFailed;
 
     /// <summary>Tiempo grabado de verdad: lo que se pasa en pausa no cuenta.</summary>
@@ -483,6 +489,8 @@ internal sealed class RecordingSession : IDisposable
         private bool _disposeSignalRequested;
         private bool _captureSignalDisposed;
         private Exception? _captureError;
+        private float _level;
+        private long _levelAt;
 
         public TrackWriter(IWaveIn capture, string outputPath, bool voiceQuality, LiveTrackInput? live)
         {
@@ -532,6 +540,10 @@ internal sealed class RecordingSession : IDisposable
 
         /// <summary>Mientras esta en pausa se descarta lo que llega, sin cerrar el WAV.</summary>
         public bool IsPaused { get; set; }
+
+        /// <summary>Last metered level 0..1; written by the capture thread, read by the UI.</summary>
+        /// Zero when no buffer arrived lately: loopback capture delivers nothing while the system is silent.
+        public double Level => Environment.TickCount64 - Volatile.Read(ref _levelAt) > 300 ? 0 : Volatile.Read(ref _level);
 
         public void Dispose()
         {
@@ -630,6 +642,7 @@ internal sealed class RecordingSession : IDisposable
                 // Raw device bytes: the tap converts on its own thread, whether or not this
                 // writer converts to voice quality. It never blocks or throws.
                 _live?.Write(FirstBufferAt!.Value, eventArgs.Buffer, eventArgs.BytesRecorded);
+                Meter(eventArgs.Buffer, eventArgs.BytesRecorded);
 
                 try
                 {
@@ -650,6 +663,47 @@ internal sealed class RecordingSession : IDisposable
                 }
             }
         }
+
+        /// <summary>
+        /// Peak of the raw device buffer already passing through, as a 0..1 meter value (-60 dBFS
+        /// to 0 dBFS). The previous value decays per buffer so short peaks stay visible to a UI
+        /// polling a few times per second. Never throws: a meter must not break capture.
+        /// </summary>
+        private void Meter(byte[] buffer, int count)
+        {
+            var format = _capture.WaveFormat;
+            var peak = PeakOf(buffer, count, format);
+            var decayed = Volatile.Read(ref _level) * 0.85f;
+            Volatile.Write(ref _level, Math.Max(ToMeter(peak), decayed));
+            Volatile.Write(ref _levelAt, Environment.TickCount64);
+        }
+
+        internal static float PeakOf(byte[] buffer, int count, WaveFormat format)
+        {
+            var peak = 0f;
+            var isFloat = format.Encoding == WaveFormatEncoding.IeeeFloat ||
+                (format.Encoding == WaveFormatEncoding.Extensible && format.BitsPerSample == 32);
+            if (isFloat && format.BitsPerSample == 32)
+            {
+                // Every few samples is plenty for a meter.
+                for (var offset = 0; offset + 4 <= count; offset += 16)
+                {
+                    peak = Math.Max(peak, Math.Abs(BitConverter.ToSingle(buffer, offset)));
+                }
+            }
+            else if (format.BitsPerSample == 16)
+            {
+                for (var offset = 0; offset + 2 <= count; offset += 8)
+                {
+                    peak = Math.Max(peak, Math.Abs(BitConverter.ToInt16(buffer, offset) / 32768f));
+                }
+            }
+
+            return float.IsFinite(peak) ? Math.Min(peak, 1f) : 0f;
+        }
+
+        private static float ToMeter(float peak) =>
+            peak <= 0.001f ? 0f : Math.Clamp((20f * MathF.Log10(peak) + 60f) / 60f, 0f, 1f);
 
         /// <summary>Debe llamarse con _writeLock tomado.</summary>
         private void DrainConverted()
