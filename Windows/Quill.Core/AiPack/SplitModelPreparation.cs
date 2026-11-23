@@ -44,7 +44,8 @@ public sealed class SplitModelPreparation
         var start = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         lock (_gate)
         {
-            if (_entries.TryGetValue(Key(job), out var entry) && !CanRetry(entry))
+            if (_entries.TryGetValue(Key(job), out var entry) && !CanRetry(entry) &&
+                !(entry.State.State == ModelPreparationState.Ready && !HasJoinedOutput(job)))
             {
                 return entry.State;
             }
@@ -85,6 +86,9 @@ public sealed class SplitModelPreparation
     }
 
     private static string Key(SplitModelJob job) => $"{job.Sha256}|{job.TargetPath}";
+
+    private static bool HasJoinedOutput(SplitModelJob job) =>
+        File.Exists(job.TargetPath) || File.Exists(job.FallbackPath);
 
     private bool CanRetry(Entry entry) =>
         entry.State.State == ModelPreparationState.Failed &&

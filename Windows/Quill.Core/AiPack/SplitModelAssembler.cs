@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Collections.Concurrent;
 using Quill.Core.Ports;
 
 namespace Quill.Core.AiPack;
@@ -91,6 +92,7 @@ public sealed class SplitModelAssembler
 
     private readonly Func<string, long?> _freeSpace;
     private readonly int _bufferSize;
+    private static readonly ConcurrentDictionary<string, byte> ActiveStaging = new(StringComparer.OrdinalIgnoreCase);
 
     /// <param name="freeSpace">Free bytes on the volume of a folder, or null when unknown (then joining is attempted).</param>
     public SplitModelAssembler(Func<string, long?>? freeSpace = null, int bufferSize = 1024 * 1024)
@@ -127,55 +129,84 @@ public sealed class SplitModelAssembler
                 continue;
             }
 
-            var free = SafeFreeSpace(folder);
-            if (free is { } bytes && bytes < job.Size + FreeSpaceMarginBytes)
+            var temporary = TemporaryPath(target);
+            if (!ActiveStaging.TryAdd(temporary, 0))
             {
-                lackedSpace = true;
+                // Another join in this process owns the reservation. Do not truncate its
+                // preallocated output; the fallback target may still be available.
                 continue;
             }
 
-            var temporary = TemporaryPath(target);
             FileStream output;
             try
             {
                 Directory.CreateDirectory(folder);
-                output = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None, _bufferSize, FileOptions.Asynchronous);
+                // Open-or-create while holding an exclusive handle. A stale reservation from an
+                // interrupted process is safely reused after this succeeds; an active join keeps
+                // its handle open and therefore cannot be truncated by a concurrent join.
+                output = new FileStream(temporary, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, _bufferSize, FileOptions.Asynchronous);
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
+                ActiveStaging.TryRemove(temporary, out _);
                 continue;
             }
 
-            SplitAssemblyResult? failure;
             try
             {
-                await using (output.ConfigureAwait(false))
+                // Reclaim an interrupted reservation before checking free space. Checking the
+                // logical length first can reject a retry even though truncating the stale file
+                // has released its real allocation. The exclusive handle remains held throughout.
+                output.SetLength(0);
+                output.Flush(flushToDisk: true);
+                var free = SafeFreeSpace(folder);
+                if (free is { } bytes && bytes < job.Size + FreeSpaceMarginBytes)
+                {
+                    lackedSpace = true;
+                    output.Dispose();
+                    TryDelete(temporary);
+                    continue;
+                }
+
+                SplitAssemblyResult? failure;
+                try
                 {
                     output.SetLength(job.Size);
                     output.Position = 0;
-                    failure = await CopyPartsAsync(job, output, progress, cancellationToken).ConfigureAwait(false);
-                    output.Flush(flushToDisk: true);
+                    await using (output.ConfigureAwait(false))
+                    {
+                        failure = await CopyPartsAsync(job, output, progress, cancellationToken).ConfigureAwait(false);
+                        output.Flush(flushToDisk: true);
+                    }
                 }
-            }
-            catch
-            {
-                TryDelete(temporary);
-                throw;
-            }
+                catch
+                {
+                    TryDelete(temporary);
+                    throw;
+                }
 
-            if (failure is not null)
-            {
-                TryDelete(temporary);
-                return failure;
-            }
+                if (failure is not null)
+                {
+                    TryDelete(temporary);
+                    return failure;
+                }
 
-            File.Move(temporary, target, overwrite: true);
-            foreach (var part in job.Parts)
-            {
-                TryDelete(part.Path);
-            }
+                File.Move(temporary, target, overwrite: true);
+                if (string.Equals(target, job.TargetPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (var part in job.Parts)
+                    {
+                        TryDelete(part.Path);
+                    }
+                }
 
-            return new SplitAssemblyResult(SplitAssemblyOutcome.Assembled, target, null);
+                return new SplitAssemblyResult(SplitAssemblyOutcome.Assembled, target, null);
+            }
+            finally
+            {
+                output.Dispose();
+                ActiveStaging.TryRemove(temporary, out _);
+            }
         }
 
         return lackedSpace
