@@ -1,0 +1,3823 @@
+{
+ "engine": "synthetic",
+ "model": "quill-bench-corpus-v1",
+ "created_at": "2026-11-23T09:00:00+00:00",
+ "segments": [
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2000,
+   "end_ms": 8262,
+   "text": "Claro, los datos de uso muestran que la mayoría usa dos o tres proyectos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 9478,
+   "end_ms": 16452,
+   "text": "Eh la página de precios actual tiene una tasa de conversión baja por lo que he visto."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 15012,
+   "end_ms": 19268,
+   "text": "En otros equipos lo han resuelto de forma similar vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 19866,
+   "end_ms": 24997,
+   "text": "sí sí hmm a mí me cuadra lo que estáis contando no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 26381,
+   "end_ms": 33407,
+   "text": "Vale, en las demos casi nadie pregunta por el plan básico por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 33818,
+   "end_ms": 39088,
+   "text": "Claro, es más una cuestión de costumbre que de otra cosa la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 40324,
+   "end_ms": 46560,
+   "text": "no no mira los números del último trimestre fueron mejores de lo esperado vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 45364,
+   "end_ms": 51107,
+   "text": "Fíjate que el plan gratuito trae mucho tráfico a la web en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 52440,
+   "end_ms": 56496,
+   "text": "Mira, no es algo nuevo pero sí conviene tenerlo presente."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 56844,
+   "end_ms": 62254,
+   "text": "Ya es más una cuestión de costumbre que de otra cosa digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 63557,
+   "end_ms": 70923,
+   "text": "vale vale bueno, empezamos, que vamos tarde. Hoy hay que cerrar el lanzamiento de los nuevos precios."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 70167,
+   "end_ms": 75700,
+   "text": "Un segundo que cierro la ventana que hay mucho ruido en la calle."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 76065,
+   "end_ms": 80098,
+   "text": "El plan profesional es el que más ingresos genera."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 80447,
+   "end_ms": 82112,
+   "text": "Ajá vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 82390,
+   "end_ms": 88887,
+   "text": "Mira, los datos de uso muestran que la mayoría usa dos o tres proyectos ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 90162,
+   "end_ms": 95671,
+   "text": "o sea pues la competencia lleva un año con precios parecidos digo yo"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 96068,
+   "end_ms": 101767,
+   "text": "perdón en las demos casi nadie pregunta por el plan básico digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 100730,
+   "end_ms": 106228,
+   "text": "o sea qué calor hace hoy en la oficina, no hay quien trabaje."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 107287,
+   "end_ms": 114629,
+   "text": "Eh, me acuerdo de cuando lo montamos la primera vez y era mucho más lento digo yo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 115963,
+   "end_ms": 120113,
+   "text": "A mí me cuadra lo que estáis contando sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 120567,
+   "end_ms": 127565,
+   "text": "perdón sí, en otros equipos lo han resuelto de forma similar por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 128648,
+   "end_ms": 134715,
+   "text": "espera es más una cuestión de costumbre que de otra cosa o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 135091,
+   "end_ms": 141425,
+   "text": "A ver, las encuestas dicen que el precio no es la primera queja la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 142481,
+   "end_ms": 147895,
+   "text": "Claro yo lo veo bastante parecido a lo que comentabas antes no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 148437,
+   "end_ms": 154926,
+   "text": "a ver a ver eh eso encaja con lo que vimos en los números del trimestre."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 155900,
+   "end_ms": 161603,
+   "text": "Pues en las demos casi nadie pregunta por el plan básico o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 162901,
+   "end_ms": 168012,
+   "text": "Eh la competencia lleva un año con precios parecidos o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 168870,
+   "end_ms": 175259,
+   "text": "O sea, los números del último trimestre fueron mejores de lo esperado o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 175782,
+   "end_ms": 178201,
+   "text": "Bueno, eso es la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 179221,
+   "end_ms": 186550,
+   "text": "no no lo he estado pensando durante el fin de semana y sigo opinando igual en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 186902,
+   "end_ms": 193594,
+   "text": "Sí, en ventas se nota que los clientes preguntan cada vez más por el anual ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 194905,
+   "end_ms": 200832,
+   "text": "o sea y nada el embudo de conversión ha mejorado desde el rediseño no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 201751,
+   "end_ms": 210295,
+   "text": "Eh, en ventas se nota que los clientes preguntan cada vez más por el anual por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 211252,
+   "end_ms": 217888,
+   "text": "Yo lo tengo claro: lanzamos el uno de marzo que es inicio de trimestre para ventas."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 218921,
+   "end_ms": 223647,
+   "text": "Claro, el feedback que nos llegó fue bastante positivo en general"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 224811,
+   "end_ms": 230148,
+   "text": "El contexto ha cambiado un poco desde la última vez o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 230925,
+   "end_ms": 235779,
+   "text": "perdón a ver, el embudo de conversión ha mejorado desde el rediseño"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 236942,
+   "end_ms": 241465,
+   "text": "En las demos casi nadie pregunta por el plan básico."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 241898,
+   "end_ms": 246155,
+   "text": "Exacto el plan profesional es el que más ingresos genera"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 246756,
+   "end_ms": 252161,
+   "text": "No os he dicho que al final me compré la bici estoy encantado."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 252499,
+   "end_ms": 257754,
+   "text": "Ya, el embudo de conversión ha mejorado desde el rediseño la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 258279,
+   "end_ms": 261019,
+   "text": "Los clientes grandes suelen negociar igualmente."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 259526,
+   "end_ms": 263799,
+   "text": "Hay que reconocer que el equipo ha respondido muy bien."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 264269,
+   "end_ms": 271167,
+   "text": "vale vale claro, es curioso porque al principio pensaba lo contrario por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 269618,
+   "end_ms": 274821,
+   "text": "Eh, la página de precios actual tiene una tasa de conversión baja ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 275944,
+   "end_ms": 280380,
+   "text": "Total hay que reconocer que el equipo ha respondido muy bien."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 281396,
+   "end_ms": 285604,
+   "text": "Sí en resumen es lo que estábamos comentando vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 286795,
+   "end_ms": 293301,
+   "text": "Eh, en ventas se nota que los clientes preguntan cada vez más por el anual."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 294622,
+   "end_ms": 300466,
+   "text": "Eh lo he estado pensando durante el fin de semana y sigo opinando igual."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 301106,
+   "end_ms": 305696,
+   "text": "Bueno, eso me recuerda a una conversación que tuvimos hace meses."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 306557,
+   "end_ms": 310821,
+   "text": "bueno a ver, eso es por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 311343,
+   "end_ms": 315415,
+   "text": "Fíjate que la competencia lleva un año con precios parecidos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 316395,
+   "end_ms": 321432,
+   "text": "o sea ya, el plan gratuito trae mucho tráfico a la web"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 322724,
+   "end_ms": 328192,
+   "text": "Fíjate que el plan gratuito trae mucho tráfico a la web digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 329476,
+   "end_ms": 335504,
+   "text": "perdón y nada, me parece razonable el enfoque tal y como está planteado la verdad"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 335952,
+   "end_ms": 339841,
+   "text": "perdón los clientes grandes suelen negociar igualmente digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 338746,
+   "end_ms": 344121,
+   "text": "O sea, el plan profesional es el que más ingresos genera vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 344783,
+   "end_ms": 348623,
+   "text": "a ver a ver mira ya veo no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 349713,
+   "end_ms": 352789,
+   "text": "Mira te sigo te sigo en general."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 353879,
+   "end_ms": 357758,
+   "text": "Eh, la competencia lleva un año con precios parecidos"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 358701,
+   "end_ms": 363959,
+   "text": "Eso lo hablamos en su momento y la idea sigue siendo la misma."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 365003,
+   "end_ms": 368465,
+   "text": "Vale, pues lanzamos el uno de marzo. Apuntado."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 368967,
+   "end_ms": 374271,
+   "text": "bueno y nada lo importante es que todos tengamos el mismo contexto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 375073,
+   "end_ms": 376840,
+   "text": "Tiene sentido ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 377950,
+   "end_ms": 383324,
+   "text": "Y nada, es verdad que el último mes ha sido bastante intenso"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 384059,
+   "end_ms": 389302,
+   "text": "O sea yo lo veo bastante parecido a lo que comentabas antes sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 389911,
+   "end_ms": 394853,
+   "text": "Fíjate que perdona que vuelva un momento sobre lo de antes."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 395297,
+   "end_ms": 400511,
+   "text": "vale vale mira, los clientes pequeños son los más sensibles al precio ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 398992,
+   "end_ms": 406222,
+   "text": "A ver eso me recuerda a una conversación que tuvimos hace meses por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 407342,
+   "end_ms": 412416,
+   "text": "Bueno no es algo nuevo pero sí conviene tenerlo presente en general."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 411709,
+   "end_ms": 416242,
+   "text": "Mira el embudo de conversión ha mejorado desde el rediseño no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 415635,
+   "end_ms": 421434,
+   "text": "Mira la página de precios actual tiene una tasa de conversión baja sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 421748,
+   "end_ms": 427860,
+   "text": "eh a ver, ya sabemos cómo suelen ir estas cosas por lo que he visto"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 428729,
+   "end_ms": 432986,
+   "text": "Fíjate que los clientes grandes suelen negociar igualmente digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 434224,
+   "end_ms": 440534,
+   "text": "a ver a ver hmm, tampoco es que haya una única forma correcta de hacerlo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 440797,
+   "end_ms": 446733,
+   "text": "eh pues la página de precios actual tiene una tasa de conversión baja sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 447415,
+   "end_ms": 452121,
+   "text": "Las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 452809,
+   "end_ms": 458510,
+   "text": "Y nada a veces nos complicamos más de la cuenta con estas cosas."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 458949,
+   "end_ms": 464280,
+   "text": "Total, los clientes grandes suelen negociar igualmente por lo que he visto"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 465527,
+   "end_ms": 470559,
+   "text": "sí sí exacto, es curioso porque al principio pensaba lo contrario ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 471008,
+   "end_ms": 477098,
+   "text": "vale vale claro, los números del último trimestre fueron mejores de lo esperado digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 478494,
+   "end_ms": 484325,
+   "text": "Mira, los números del último trimestre fueron mejores de lo esperado en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 485328,
+   "end_ms": 490969,
+   "text": "espera ¿se me oye bien? es que tengo la conexión un poco regular hoy."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 491710,
+   "end_ms": 497577,
+   "text": "perdón bueno, los números del último trimestre fueron mejores de lo esperado vamos"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 497995,
+   "end_ms": 504927,
+   "text": "Y nada, los datos de uso muestran que la mayoría usa dos o tres proyectos ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 506086,
+   "end_ms": 509936,
+   "text": "Vale, la competencia lleva un año con precios parecidos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 510885,
+   "end_ms": 515382,
+   "text": "Sobre el plan gratuito, propongo mantenerlo pero limitado a tres proyectos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 516434,
+   "end_ms": 522045,
+   "text": "Y nada hay que reconocer que el equipo ha respondido muy bien sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 522678,
+   "end_ms": 527761,
+   "text": "Sí, es un tema que da para mucho pero no quiero alargarme"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 528180,
+   "end_ms": 533003,
+   "text": "Los clientes pequeños son los más sensibles al precio la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 533411,
+   "end_ms": 539650,
+   "text": "no no vale es más una cuestión de costumbre que de otra cosa en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 541044,
+   "end_ms": 544149,
+   "text": "no no y nada, ya veo ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 545423,
+   "end_ms": 553086,
+   "text": "O sea, eso lo hablamos en su momento y la idea sigue siendo la misma o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 554437,
+   "end_ms": 559783,
+   "text": "bueno vale me parece razonable el enfoque tal y como está planteado."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 560152,
+   "end_ms": 566010,
+   "text": "Vale, el plan gratuito trae mucho tráfico a la web o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 566710,
+   "end_ms": 571221,
+   "text": "En las demos casi nadie pregunta por el plan básico."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 572071,
+   "end_ms": 579251,
+   "text": "bueno en ventas se nota que los clientes preguntan cada vez más por el anual o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 579950,
+   "end_ms": 583077,
+   "text": "Ya veo por lo que he visto."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 583351,
+   "end_ms": 589278,
+   "text": "Vale, los datos de uso muestran que la mayoría usa dos o tres proyectos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 589857,
+   "end_ms": 595269,
+   "text": "vale vale ya, en las demos casi nadie pregunta por el plan básico."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 595926,
+   "end_ms": 602033,
+   "text": "o sea bueno, no es algo nuevo pero sí conviene tenerlo presente la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 600600,
+   "end_ms": 601759,
+   "text": "Mira, correcto."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 602883,
+   "end_ms": 607775,
+   "text": "Mira, el plan gratuito trae mucho tráfico a la web digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 608122,
+   "end_ms": 611501,
+   "text": "Vale, entendido por lo que he visto."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 612795,
+   "end_ms": 616119,
+   "text": "Claro, los clientes grandes suelen negociar igualmente."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 617123,
+   "end_ms": 622776,
+   "text": "Mira yo no le daría más vueltas de las necesarias o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 623604,
+   "end_ms": 626534,
+   "text": "Eh, los clientes grandes suelen negociar igualmente."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 625094,
+   "end_ms": 630436,
+   "text": "Las encuestas dicen que el precio no es la primera queja ¿sabes?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 631690,
+   "end_ms": 636677,
+   "text": "Mira, el embudo de conversión ha mejorado desde el rediseño la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 638071,
+   "end_ms": 644946,
+   "text": "Exacto, me acuerdo de cuando lo montamos la primera vez y era mucho más lento ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 645588,
+   "end_ms": 650611,
+   "text": "Sí, el plan gratuito trae mucho tráfico a la web vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 650985,
+   "end_ms": 655630,
+   "text": "A ver, es curioso porque al principio pensaba lo contrario."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 656895,
+   "end_ms": 661817,
+   "text": "Los datos lo apoyan la mayoría usa dos o tres proyectos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 662678,
+   "end_ms": 669047,
+   "text": "eh bueno, los datos de uso muestran que la mayoría usa dos o tres proyectos vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 667655,
+   "end_ms": 672213,
+   "text": "Fíjate que a mí me cuadra lo que estáis contando ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 670522,
+   "end_ms": 676243,
+   "text": "sí sí bueno, el plan gratuito trae mucho tráfico a la web ¿sabes?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 677378,
+   "end_ms": 681632,
+   "text": "o sea eh, los clientes grandes suelen negociar igualmente."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 682247,
+   "end_ms": 686376,
+   "text": "Claro, en resumen es lo que estábamos comentando vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 687283,
+   "end_ms": 691457,
+   "text": "Claro cuando lo explicas así se entiende mucho mejor no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 691995,
+   "end_ms": 697052,
+   "text": "Exacto, eso encaja con lo que vimos en los números del trimestre."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 697887,
+   "end_ms": 704027,
+   "text": "Me acuerdo de cuando lo montamos la primera vez y era mucho más lento."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 704807,
+   "end_ms": 709561,
+   "text": "Hmm, en las demos casi nadie pregunta por el plan básico."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 708840,
+   "end_ms": 714468,
+   "text": "¿se me oye bien? es que tengo la conexión un poco regular hoy."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 715318,
+   "end_ms": 718640,
+   "text": "no no ya tiene sentido en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 719716,
+   "end_ms": 724343,
+   "text": "Mira los clientes pequeños son los más sensibles al precio."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 724632,
+   "end_ms": 727714,
+   "text": "Vale, ajá por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 728797,
+   "end_ms": 733429,
+   "text": "Ya la competencia lleva un año con precios parecidos en general."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 731876,
+   "end_ms": 736006,
+   "text": "Eh, el embudo de conversión ha mejorado desde el rediseño."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 736779,
+   "end_ms": 740845,
+   "text": "Total, la competencia lleva un año con precios parecidos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 741361,
+   "end_ms": 745158,
+   "text": "El embudo de conversión ha mejorado desde el rediseño."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 746370,
+   "end_ms": 751504,
+   "text": "Mira, las encuestas dicen que el precio no es la primera queja"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 749925,
+   "end_ms": 755399,
+   "text": "Pues eso me recuerda a una conversación que tuvimos hace meses vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 755750,
+   "end_ms": 759849,
+   "text": "Pues decidido: mantenemos el plan gratuito, limitado a tres proyectos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 760305,
+   "end_ms": 762432,
+   "text": "Eh, ajá la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 762763,
+   "end_ms": 769188,
+   "text": "Ya, los datos de uso muestran que la mayoría usa dos o tres proyectos ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 770127,
+   "end_ms": 775133,
+   "text": "bueno sí, es curioso porque al principio pensaba lo contrario digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 775565,
+   "end_ms": 780436,
+   "text": "espera sí, el plan profesional es el que más ingresos genera."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 780853,
+   "end_ms": 787397,
+   "text": "a ver a ver o sea, en las demos casi nadie pregunta por el plan básico."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 788351,
+   "end_ms": 789989,
+   "text": "Ajá vamos"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 790481,
+   "end_ms": 796463,
+   "text": "Ya lo he estado pensando durante el fin de semana y sigo opinando igual."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 796780,
+   "end_ms": 801218,
+   "text": "vale vale hmm, es curioso porque al principio pensaba lo contrario."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 802223,
+   "end_ms": 806498,
+   "text": "A ver, cuando lo explicas así se entiende mucho mejor."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 807112,
+   "end_ms": 813367,
+   "text": "perdón a ver, es más una cuestión de costumbre que de otra cosa ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 813716,
+   "end_ms": 818624,
+   "text": "Por cierto, ¿sabéis que Pepe ha sido padre? enhorabuena desde aquí."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 819895,
+   "end_ms": 824065,
+   "text": "O sea, en resumen es lo que estábamos comentando vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 824690,
+   "end_ms": 829078,
+   "text": "A ver, los clientes grandes suelen negociar igualmente digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 829885,
+   "end_ms": 835191,
+   "text": "vale vale eh, los clientes pequeños son los más sensibles al precio."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 833656,
+   "end_ms": 840472,
+   "text": "vale vale bueno los números del último trimestre fueron mejores de lo esperado o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 841835,
+   "end_ms": 847236,
+   "text": "O sea la página de precios actual tiene una tasa de conversión baja."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 847822,
+   "end_ms": 851782,
+   "text": "vale vale ya, sí, sí, eso está claro vamos"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 853051,
+   "end_ms": 859624,
+   "text": "eh eh, los datos de uso muestran que la mayoría usa dos o tres proyectos ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 860167,
+   "end_ms": 866615,
+   "text": "Mira, los datos de uso muestran que la mayoría usa dos o tres proyectos ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 867522,
+   "end_ms": 872378,
+   "text": "sí sí pues cuando lo explicas así se entiende mucho mejor."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 872657,
+   "end_ms": 877719,
+   "text": "eh las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 878309,
+   "end_ms": 882223,
+   "text": "Hmm cuando lo explicas así se entiende mucho mejor."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 883209,
+   "end_ms": 888929,
+   "text": "Bueno, la página de precios actual tiene una tasa de conversión baja ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 889399,
+   "end_ms": 895838,
+   "text": "Mira, esto ya nos pasó en el proyecto anterior y al final salió bien digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 896107,
+   "end_ms": 900626,
+   "text": "bueno pues ya sabemos cómo suelen ir estas cosas la verdad"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 901340,
+   "end_ms": 908128,
+   "text": "Ojo que eso puede hacer que se vayan clientes pequeños, eh, el límite les va a molestar."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 908950,
+   "end_ms": 915714,
+   "text": "a ver a ver me gusta que lo estemos hablando con calma por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 916694,
+   "end_ms": 922372,
+   "text": "En las demos casi nadie pregunta por el plan básico o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 923489,
+   "end_ms": 930897,
+   "text": "bueno exacto, en ventas se nota que los clientes preguntan cada vez más por el anual ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 932148,
+   "end_ms": 936999,
+   "text": "Total es verdad que el último mes ha sido bastante intenso no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 938028,
+   "end_ms": 942565,
+   "text": "bueno eh, no es algo nuevo pero sí conviene tenerlo presente."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 942882,
+   "end_ms": 949119,
+   "text": "Eh, me parece razonable el enfoque tal y como está planteado o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 950346,
+   "end_ms": 955748,
+   "text": "Exacto me parece razonable el enfoque tal y como está planteado digo yo"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 956056,
+   "end_ms": 960258,
+   "text": "Bueno el plan profesional es el que más ingresos genera."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 961043,
+   "end_ms": 966473,
+   "text": "Hmm los números del último trimestre fueron mejores de lo esperado en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 967822,
+   "end_ms": 974933,
+   "text": "Exacto, las encuestas dicen que el precio no es la primera queja por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 976054,
+   "end_ms": 981950,
+   "text": "Mira los clientes pequeños son los más sensibles al precio o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 982270,
+   "end_ms": 986956,
+   "text": "Eh, es verdad que el último mes ha sido bastante intenso."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 988162,
+   "end_ms": 992401,
+   "text": "no no y nada, los clientes grandes suelen negociar igualmente."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 993189,
+   "end_ms": 999814,
+   "text": "Ya los datos de uso muestran que la mayoría usa dos o tres proyectos no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1001192,
+   "end_ms": 1003933,
+   "text": "Los clientes grandes suelen negociar igualmente."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1005256,
+   "end_ms": 1009879,
+   "text": "Sí, no es algo nuevo pero sí conviene tenerlo presente ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1011000,
+   "end_ms": 1015450,
+   "text": "Bueno, los clientes pequeños son los más sensibles al precio."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1016773,
+   "end_ms": 1022482,
+   "text": "Y nada en otros equipos lo han resuelto de forma similar o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1023144,
+   "end_ms": 1028826,
+   "text": "Para eso preparo un análisis de bajas por segmento para el martes que viene."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1028114,
+   "end_ms": 1033118,
+   "text": "Mira, la competencia lleva un año con precios parecidos o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1034155,
+   "end_ms": 1036836,
+   "text": "bueno claro, perfecto, me sirve ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1038195,
+   "end_ms": 1045001,
+   "text": "o sea o sea el feedback que nos llegó fue bastante positivo en general la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1045913,
+   "end_ms": 1051746,
+   "text": "perdón claro, las encuestas dicen que el precio no es la primera queja ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1052383,
+   "end_ms": 1057396,
+   "text": "Vale tampoco es que haya una única forma correcta de hacerlo"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1058208,
+   "end_ms": 1065227,
+   "text": "Total, en ventas se nota que los clientes preguntan cada vez más por el anual la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1066053,
+   "end_ms": 1073189,
+   "text": "bueno y nada los datos de uso muestran que la mayoría usa dos o tres proyectos sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1074158,
+   "end_ms": 1079651,
+   "text": "La página de precios actual tiene una tasa de conversión baja ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1080947,
+   "end_ms": 1085821,
+   "text": "Ya la página de precios actual tiene una tasa de conversión baja."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1087115,
+   "end_ms": 1092829,
+   "text": "bueno y nada, el plan profesional es el que más ingresos genera ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1093943,
+   "end_ms": 1098119,
+   "text": "vale vale me gusta que lo estemos hablando con calma."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1099300,
+   "end_ms": 1102258,
+   "text": "bueno claro te sigo te sigo"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1102694,
+   "end_ms": 1107423,
+   "text": "El embudo de conversión ha mejorado desde el rediseño ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1108391,
+   "end_ms": 1112952,
+   "text": "Uf la máquina de café de la tercera planta sigue estropeada."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1113525,
+   "end_ms": 1118051,
+   "text": "Sí, eso me recuerda a una conversación que tuvimos hace meses."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1118721,
+   "end_ms": 1123266,
+   "text": "o sea en resumen es lo que estábamos comentando digo yo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1124132,
+   "end_ms": 1126646,
+   "text": "Bueno, sí, sí, eso está claro."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1125128,
+   "end_ms": 1127405,
+   "text": "Bueno, perfecto, me sirve."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1128398,
+   "end_ms": 1134618,
+   "text": "En ventas se nota que los clientes preguntan cada vez más por el anual."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1135187,
+   "end_ms": 1140418,
+   "text": "perdón para el plan anual yo daría un quince por ciento de descuento."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1141285,
+   "end_ms": 1148218,
+   "text": "Bueno, esto ya nos pasó en el proyecto anterior y al final salió bien la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1149570,
+   "end_ms": 1154822,
+   "text": "no no los clientes pequeños son los más sensibles al precio ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1155689,
+   "end_ms": 1160508,
+   "text": "Hmm, en las demos casi nadie pregunta por el plan básico."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1161015,
+   "end_ms": 1166186,
+   "text": "Pues hay que reconocer que el equipo ha respondido muy bien sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1167150,
+   "end_ms": 1172773,
+   "text": "o sea exacto, el plan gratuito trae mucho tráfico a la web la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1174120,
+   "end_ms": 1181324,
+   "text": "sí sí total las encuestas dicen que el precio no es la primera queja o eso creo"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1182565,
+   "end_ms": 1188203,
+   "text": "eh pues el contexto ha cambiado un poco desde la última vez digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1188908,
+   "end_ms": 1194125,
+   "text": "Claro, el feedback que nos llegó fue bastante positivo en general ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1195523,
+   "end_ms": 1200023,
+   "text": "Ya, la competencia lleva un año con precios parecidos ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1201151,
+   "end_ms": 1203600,
+   "text": "Sí, vale, entendido la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1204009,
+   "end_ms": 1210974,
+   "text": "a ver a ver bueno, hay que reconocer que el equipo ha respondido muy bien ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1212328,
+   "end_ms": 1216535,
+   "text": "Bueno, no es algo nuevo pero sí conviene tenerlo presente."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1217654,
+   "end_ms": 1222363,
+   "text": "Hmm, los clientes pequeños son los más sensibles al precio ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1222718,
+   "end_ms": 1226737,
+   "text": "Mira, sí, sí, eso está claro o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1227264,
+   "end_ms": 1233314,
+   "text": "eh no os he dicho que al final me compré la bici, estoy encantado."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1231552,
+   "end_ms": 1236065,
+   "text": "eh eh, los clientes pequeños son los más sensibles al precio."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1236678,
+   "end_ms": 1241883,
+   "text": "o sea exacto, el plan profesional es el que más ingresos genera."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1242814,
+   "end_ms": 1247509,
+   "text": "Total en las demos casi nadie pregunta por el plan básico"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1248340,
+   "end_ms": 1254397,
+   "text": "Bueno, la página de precios actual tiene una tasa de conversión baja en general."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1255015,
+   "end_ms": 1259705,
+   "text": "Claro el plan profesional es el que más ingresos genera"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1260221,
+   "end_ms": 1266491,
+   "text": "no no total, el plan gratuito trae mucho tráfico a la web en general."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1267530,
+   "end_ms": 1272435,
+   "text": "sí sí los números del último trimestre fueron mejores de lo esperado."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1272955,
+   "end_ms": 1279012,
+   "text": "Hmm, hay que reconocer que el equipo ha respondido muy bien o eso creo"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1280333,
+   "end_ms": 1284538,
+   "text": "A ver, la competencia lleva un año con precios parecidos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1285516,
+   "end_ms": 1290192,
+   "text": "A ver, ya sabemos cómo suelen ir estas cosas ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1289462,
+   "end_ms": 1295800,
+   "text": "Me acuerdo de cuando lo montamos la primera vez y era mucho más lento ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1294939,
+   "end_ms": 1298706,
+   "text": "Yo iría al veinticinco para empujar el anual."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1299567,
+   "end_ms": 1306195,
+   "text": "eh exacto, en ventas se nota que los clientes preguntan cada vez más por el anual."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1307037,
+   "end_ms": 1311239,
+   "text": "Hmm yo no le daría más vueltas de las necesarias."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1311775,
+   "end_ms": 1319414,
+   "text": "vale vale bueno esto ya nos pasó en el proyecto anterior y al final salió bien o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1320659,
+   "end_ms": 1326383,
+   "text": "Hmm, a veces nos complicamos más de la cuenta con estas cosas digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1327407,
+   "end_ms": 1333681,
+   "text": "a ver a ver claro el plan gratuito trae mucho tráfico a la web no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1334022,
+   "end_ms": 1341217,
+   "text": "Exacto, las encuestas dicen que el precio no es la primera queja por lo que he visto."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1342459,
+   "end_ms": 1348529,
+   "text": "o sea fíjate que tampoco es que haya una única forma correcta de hacerlo vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1349319,
+   "end_ms": 1353937,
+   "text": "Qué calor hace hoy en la oficina no hay quien trabaje."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1353098,
+   "end_ms": 1360001,
+   "text": "a ver a ver a ver los números del último trimestre fueron mejores de lo esperado vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1360717,
+   "end_ms": 1366322,
+   "text": "Las encuestas dicen que el precio no es la primera queja la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1366705,
+   "end_ms": 1372574,
+   "text": "no no bueno, las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1373750,
+   "end_ms": 1379150,
+   "text": "o sea mira, los números del último trimestre fueron mejores de lo esperado."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1379746,
+   "end_ms": 1386500,
+   "text": "o sea pues yo no le daría más vueltas de las necesarias por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1387417,
+   "end_ms": 1391168,
+   "text": "El embudo de conversión ha mejorado desde el rediseño"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1392083,
+   "end_ms": 1399688,
+   "text": "espera ¿Y si lo dejamos en el veinte por ciento? Es lo que hace casi todo el mercado."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1400948,
+   "end_ms": 1405959,
+   "text": "Hmm, las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1406830,
+   "end_ms": 1411842,
+   "text": "no no eh el plan gratuito trae mucho tráfico a la web."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1413144,
+   "end_ms": 1415863,
+   "text": "vale vale pues ajá vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1416794,
+   "end_ms": 1422890,
+   "text": "perdón los datos de uso muestran que la mayoría usa dos o tres proyectos ¿sabes?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1423225,
+   "end_ms": 1429634,
+   "text": "O sea, a veces nos complicamos más de la cuenta con estas cosas en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1430200,
+   "end_ms": 1435266,
+   "text": "Perdón, que me están llamando al móvil, ya está, ya está."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1436251,
+   "end_ms": 1440359,
+   "text": "Me gusta que lo estemos hablando con calma digo yo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1439177,
+   "end_ms": 1444286,
+   "text": "Los clientes pequeños son los más sensibles al precio la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1445013,
+   "end_ms": 1452205,
+   "text": "o sea pues es verdad que el último mes ha sido bastante intenso por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1452780,
+   "end_ms": 1458046,
+   "text": "Fíjate que el plan profesional es el que más ingresos genera en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1458716,
+   "end_ms": 1467680,
+   "text": "a ver a ver pues en ventas se nota que los clientes preguntan cada vez más por el anual digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1468189,
+   "end_ms": 1472674,
+   "text": "sí sí la competencia lleva un año con precios parecidos ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1473280,
+   "end_ms": 1478175,
+   "text": "perdón pues me parece razonable el enfoque tal y como está planteado"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1478948,
+   "end_ms": 1485028,
+   "text": "Exacto, lo he estado pensando durante el fin de semana y sigo opinando igual ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1485724,
+   "end_ms": 1491935,
+   "text": "vale vale total el plan gratuito trae mucho tráfico a la web o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1492301,
+   "end_ms": 1498001,
+   "text": "o sea yo lo veo bastante parecido a lo que comentabas antes la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1499156,
+   "end_ms": 1504041,
+   "text": "Eh, el embudo de conversión ha mejorado desde el rediseño ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1502823,
+   "end_ms": 1507248,
+   "text": "La competencia lleva un año con precios parecidos en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1508147,
+   "end_ms": 1515547,
+   "text": "Total, en ventas se nota que los clientes preguntan cada vez más por el anual la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1516823,
+   "end_ms": 1521316,
+   "text": "Claro el feedback que nos llegó fue bastante positivo en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1522127,
+   "end_ms": 1529040,
+   "text": "Ya, las encuestas dicen que el precio no es la primera queja por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1530072,
+   "end_ms": 1534587,
+   "text": "Pues perdona que vuelva un momento sobre lo de antes no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1535871,
+   "end_ms": 1540884,
+   "text": "Y nada, los clientes pequeños son los más sensibles al precio."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1541555,
+   "end_ms": 1546322,
+   "text": "Venga, veinte por ciento de descuento en el plan anual. Cerrado."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1547012,
+   "end_ms": 1554395,
+   "text": "o sea y nada, el plan gratuito trae mucho tráfico a la web por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1555156,
+   "end_ms": 1562626,
+   "text": "a ver a ver bueno, la página de precios actual tiene una tasa de conversión baja digo yo"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1560828,
+   "end_ms": 1567265,
+   "text": "o sea claro la competencia lleva un año con precios parecidos por lo que he visto."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1568234,
+   "end_ms": 1574300,
+   "text": "espera fíjate que el embudo de conversión ha mejorado desde el rediseño o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1574924,
+   "end_ms": 1581058,
+   "text": "Sí eso lo hablamos en su momento y la idea sigue siendo la misma"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1579307,
+   "end_ms": 1585869,
+   "text": "Vale, el feedback que nos llegó fue bastante positivo en general por lo que he visto."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1586938,
+   "end_ms": 1591916,
+   "text": "Claro, los clientes pequeños son los más sensibles al precio ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1593057,
+   "end_ms": 1598429,
+   "text": "Exacto en las demos casi nadie pregunta por el plan básico la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1599376,
+   "end_ms": 1602190,
+   "text": "eh bueno, perfecto, me sirve."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1602649,
+   "end_ms": 1608845,
+   "text": "Fíjate que en las demos casi nadie pregunta por el plan básico o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1610108,
+   "end_ms": 1616540,
+   "text": "Pues los datos de uso muestran que la mayoría usa dos o tres proyectos sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1617393,
+   "end_ms": 1621028,
+   "text": "a ver a ver o sea, ya veo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1621898,
+   "end_ms": 1627388,
+   "text": "Total, eso encaja con lo que vimos en los números del trimestre."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1627878,
+   "end_ms": 1634760,
+   "text": "a ver a ver bueno el plan profesional es el que más ingresos genera en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1635246,
+   "end_ms": 1642386,
+   "text": "A ver en ventas se nota que los clientes preguntan cada vez más por el anual sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1643143,
+   "end_ms": 1650835,
+   "text": "vale vale eh, en ventas se nota que los clientes preguntan cada vez más por el anual en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1651997,
+   "end_ms": 1657056,
+   "text": "Uf, la máquina de café de la tercera planta sigue estropeada."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1658357,
+   "end_ms": 1663683,
+   "text": "Yo escribo las preguntas frecuentes y los textos de la página de precios."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1664353,
+   "end_ms": 1671181,
+   "text": "bueno exacto, el embudo de conversión ha mejorado desde el rediseño por lo que he visto."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1671914,
+   "end_ms": 1677996,
+   "text": "Bueno, las encuestas dicen que el precio no es la primera queja en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1678534,
+   "end_ms": 1685562,
+   "text": "A ver, el contexto ha cambiado un poco desde la última vez por lo que he visto"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1686156,
+   "end_ms": 1690801,
+   "text": "Bueno, los números del último trimestre fueron mejores de lo esperado."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1692198,
+   "end_ms": 1698783,
+   "text": "Sí los datos de uso muestran que la mayoría usa dos o tres proyectos no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1699286,
+   "end_ms": 1704687,
+   "text": "¿se me oye bien? es que tengo la conexión un poco regular hoy"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1705421,
+   "end_ms": 1708071,
+   "text": "no no vale, eso es ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1709456,
+   "end_ms": 1715993,
+   "text": "vale vale o sea, la página de precios actual tiene una tasa de conversión baja ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1716489,
+   "end_ms": 1722324,
+   "text": "Claro, esto ya nos pasó en el proyecto anterior y al final salió bien."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1722753,
+   "end_ms": 1724538,
+   "text": "Perfecto, me sirve ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1725870,
+   "end_ms": 1733412,
+   "text": "o sea bueno, eso lo hablamos en su momento y la idea sigue siendo la misma o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1733888,
+   "end_ms": 1739784,
+   "text": "¿Y el plan enterprise? ¿Ponemos el precio público o dejamos el contacte con nosotros?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1738995,
+   "end_ms": 1744578,
+   "text": "Ya, la gente con la que he hablado tiene una impresión parecida ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1743955,
+   "end_ms": 1749741,
+   "text": "sí sí bueno la competencia lleva un año con precios parecidos digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1750199,
+   "end_ms": 1754256,
+   "text": "Pues el plan profesional es el que más ingresos genera."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1754905,
+   "end_ms": 1759108,
+   "text": "A ver, los clientes grandes suelen negociar igualmente ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1759686,
+   "end_ms": 1764309,
+   "text": "Hmm, ahí hay matices pero en el fondo coincido la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1765292,
+   "end_ms": 1771104,
+   "text": "Esto me recuerda a las vacaciones, que ya queda poco para el puente."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1772308,
+   "end_ms": 1777602,
+   "text": "Fíjate que eso encaja con lo que vimos en los números del trimestre."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1777853,
+   "end_ms": 1784643,
+   "text": "Y nada, las encuestas dicen que el precio no es la primera queja o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1785337,
+   "end_ms": 1791180,
+   "text": "Claro, los números del último trimestre fueron mejores de lo esperado en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1791816,
+   "end_ms": 1796689,
+   "text": "A ver, cuando lo explicas así se entiende mucho mejor digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1798085,
+   "end_ms": 1803571,
+   "text": "Claro, en las demos casi nadie pregunta por el plan básico ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1804232,
+   "end_ms": 1810881,
+   "text": "sí sí total los datos de uso muestran que la mayoría usa dos o tres proyectos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1811917,
+   "end_ms": 1818780,
+   "text": "O sea me acuerdo de cuando lo montamos la primera vez y era mucho más lento sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1819695,
+   "end_ms": 1823463,
+   "text": "espera la competencia lleva un año con precios parecidos"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1824020,
+   "end_ms": 1829183,
+   "text": "Hmm lo veo como una evolución natural de lo que ya teníamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1829600,
+   "end_ms": 1833489,
+   "text": "Uf, eso no lo tengo claro, lo dejamos abierto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1834583,
+   "end_ms": 1839651,
+   "text": "Y nada, ya sabemos cómo suelen ir estas cosas la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1840661,
+   "end_ms": 1846361,
+   "text": "bueno a ver, en las demos casi nadie pregunta por el plan básico."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1847218,
+   "end_ms": 1852113,
+   "text": "Total, los números del último trimestre fueron mejores de lo esperado ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1853040,
+   "end_ms": 1860376,
+   "text": "Sí, en ventas se nota que los clientes preguntan cada vez más por el anual en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1861414,
+   "end_ms": 1865150,
+   "text": "Los clientes pequeños son los más sensibles al precio."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1866485,
+   "end_ms": 1870798,
+   "text": "Mira, creo que en lo general estamos alineados la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1869088,
+   "end_ms": 1873944,
+   "text": "Sí el plan profesional es el que más ingresos genera en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1875284,
+   "end_ms": 1881541,
+   "text": "eh claro la página de precios actual tiene una tasa de conversión baja vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1882158,
+   "end_ms": 1886674,
+   "text": "eh me parece razonable el enfoque tal y como está planteado."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1887012,
+   "end_ms": 1893789,
+   "text": "Ya, en ventas se nota que los clientes preguntan cada vez más por el anual ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1894753,
+   "end_ms": 1899190,
+   "text": "Los números del último trimestre fueron mejores de lo esperado vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1900187,
+   "end_ms": 1903293,
+   "text": "Los clientes grandes suelen negociar igualmente."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1904115,
+   "end_ms": 1908777,
+   "text": "Yo no le daría más vueltas de las necesarias ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1909759,
+   "end_ms": 1916319,
+   "text": "a ver a ver uf, la máquina de café de la tercera planta sigue estropeada."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1914941,
+   "end_ms": 1919201,
+   "text": "Sí, el plan profesional es el que más ingresos genera."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1919927,
+   "end_ms": 1926042,
+   "text": "o sea y nada, la competencia lleva un año con precios parecidos digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1927183,
+   "end_ms": 1935018,
+   "text": "Una cosa importante: hay que hablar con el equipo de facturación para el cambio de planes en la integración."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1935359,
+   "end_ms": 1942019,
+   "text": "sí sí fíjate que el plan gratuito trae mucho tráfico a la web la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1943284,
+   "end_ms": 1950570,
+   "text": "eh bueno en ventas se nota que los clientes preguntan cada vez más por el anual en general"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1951863,
+   "end_ms": 1956620,
+   "text": "Ya, tampoco es que haya una única forma correcta de hacerlo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1957693,
+   "end_ms": 1962941,
+   "text": "Pues las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1964035,
+   "end_ms": 1966350,
+   "text": "perdón eh, eso es."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1967078,
+   "end_ms": 1971999,
+   "text": "Mira, las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1973020,
+   "end_ms": 1979801,
+   "text": "a ver a ver fíjate que es curioso porque al principio pensaba lo contrario la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1980137,
+   "end_ms": 1985626,
+   "text": "eh claro, las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1984513,
+   "end_ms": 1989137,
+   "text": "Total el plan gratuito trae mucho tráfico a la web."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1989535,
+   "end_ms": 1997805,
+   "text": "Vale, en ventas se nota que los clientes preguntan cada vez más por el anual por lo que he visto"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1998123,
+   "end_ms": 2001943,
+   "text": "eh hmm, sí, sí, eso está claro digo yo"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2002911,
+   "end_ms": 2007446,
+   "text": "eh vale, la competencia lleva un año con precios parecidos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2006800,
+   "end_ms": 2012234,
+   "text": "Esto me recuerda a las vacaciones que ya queda poco para el puente."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2013008,
+   "end_ms": 2017648,
+   "text": "Hmm, el plan profesional es el que más ingresos genera ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2018897,
+   "end_ms": 2025297,
+   "text": "o sea ya, la gente con la que he hablado tiene una impresión parecida en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2026573,
+   "end_ms": 2031696,
+   "text": "Ya la página de precios actual tiene una tasa de conversión baja."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2032748,
+   "end_ms": 2037784,
+   "text": "Ya las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2038659,
+   "end_ms": 2046849,
+   "text": "no no a ver, tampoco es que haya una única forma correcta de hacerlo por lo que he visto."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2047377,
+   "end_ms": 2050863,
+   "text": "bueno sí los clientes grandes suelen negociar igualmente."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2051712,
+   "end_ms": 2054630,
+   "text": "Lo haces tú o lo hago yo?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2055457,
+   "end_ms": 2060375,
+   "text": "Claro, los números del último trimestre fueron mejores de lo esperado vamos"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2061359,
+   "end_ms": 2063016,
+   "text": "Total ajá sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2064036,
+   "end_ms": 2068212,
+   "text": "Mira en otros equipos lo han resuelto de forma similar."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2068979,
+   "end_ms": 2075368,
+   "text": "perdón total, las encuestas dicen que el precio no es la primera queja en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2076180,
+   "end_ms": 2081315,
+   "text": "perdón total, me parece razonable el enfoque tal y como está planteado."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2082436,
+   "end_ms": 2087903,
+   "text": "Ya el plan profesional es el que más ingresos genera digo yo"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2088958,
+   "end_ms": 2096036,
+   "text": "no no eh, la página de precios actual tiene una tasa de conversión baja o eso creo"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2095024,
+   "end_ms": 2098855,
+   "text": "El embudo de conversión ha mejorado desde el rediseño"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2100183,
+   "end_ms": 2104842,
+   "text": "o sea pues cuando lo explicas así se entiende mucho mejor."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2103730,
+   "end_ms": 2108284,
+   "text": "Ya, a mí me cuadra lo que estáis contando en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2109164,
+   "end_ms": 2114867,
+   "text": "a ver a ver eh el embudo de conversión ha mejorado desde el rediseño"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2115137,
+   "end_ms": 2123960,
+   "text": "vale vale exacto esto ya nos pasó en el proyecto anterior y al final salió bien por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2125127,
+   "end_ms": 2132068,
+   "text": "Bueno los datos de uso muestran que la mayoría usa dos o tres proyectos en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2132572,
+   "end_ms": 2137931,
+   "text": "Total es verdad que el último mes ha sido bastante intenso digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2138737,
+   "end_ms": 2142410,
+   "text": "a ver a ver a ver vale entendido."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2143664,
+   "end_ms": 2149774,
+   "text": "Hmm, en ventas se nota que los clientes preguntan cada vez más por el anual."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2151141,
+   "end_ms": 2153966,
+   "text": "No sé, bueno, ya lo vemos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2154829,
+   "end_ms": 2158769,
+   "text": "A ver ya sabemos cómo suelen ir estas cosas."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2157023,
+   "end_ms": 2161490,
+   "text": "Vale, en las demos casi nadie pregunta por el plan básico."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2162359,
+   "end_ms": 2167435,
+   "text": "Y nada, yo no le daría más vueltas de las necesarias ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2168092,
+   "end_ms": 2174483,
+   "text": "sí sí exacto eso encaja con lo que vimos en los números del trimestre la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2175299,
+   "end_ms": 2180237,
+   "text": "Por cierto, ¿visteis el partido de ayer? qué final más tremendo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2180843,
+   "end_ms": 2186125,
+   "text": "perdón por cierto, ¿sabéis que Pepe ha sido padre? enhorabuena desde aquí."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2184988,
+   "end_ms": 2189611,
+   "text": "Es curioso porque al principio pensaba lo contrario en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2190561,
+   "end_ms": 2195448,
+   "text": "bueno mira, los números del último trimestre fueron mejores de lo esperado."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2196086,
+   "end_ms": 2200147,
+   "text": "Yo no le daría más vueltas de las necesarias."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2200591,
+   "end_ms": 2204962,
+   "text": "Ya, perdona que vuelva un momento sobre lo de antes"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2205983,
+   "end_ms": 2210956,
+   "text": "Y nada es verdad que el último mes ha sido bastante intenso."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2212289,
+   "end_ms": 2217556,
+   "text": "Exacto, las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2217881,
+   "end_ms": 2224055,
+   "text": "no no claro, es curioso porque al principio pensaba lo contrario o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2225003,
+   "end_ms": 2231068,
+   "text": "vale vale los clientes pequeños son los más sensibles al precio o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2231575,
+   "end_ms": 2236965,
+   "text": "Mira en las demos casi nadie pregunta por el plan básico la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2238297,
+   "end_ms": 2243117,
+   "text": "espera por cierto, ¿visteis el partido de ayer? qué final más tremendo"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2241346,
+   "end_ms": 2247926,
+   "text": "espera exacto, los clientes pequeños son los más sensibles al precio por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2249009,
+   "end_ms": 2256160,
+   "text": "Es que la migración a Stripe de facturación igual no está lista para la fecha de lanzamiento."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2254501,
+   "end_ms": 2258198,
+   "text": "Claro, la competencia lleva un año con precios parecidos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2258973,
+   "end_ms": 2264061,
+   "text": "Me he quedado sin batería en los cascos cambio al portátil."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2265451,
+   "end_ms": 2273605,
+   "text": "a ver a ver y nada, los datos de uso muestran que la mayoría usa dos o tres proyectos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2273908,
+   "end_ms": 2280629,
+   "text": "a ver a ver bueno, la página de precios actual tiene una tasa de conversión baja."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2281979,
+   "end_ms": 2288257,
+   "text": "Exacto, la página de precios actual tiene una tasa de conversión baja en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2288769,
+   "end_ms": 2295826,
+   "text": "Pues en ventas se nota que los clientes preguntan cada vez más por el anual la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2296103,
+   "end_ms": 2303033,
+   "text": "Sí, la página de precios actual tiene una tasa de conversión baja por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2301716,
+   "end_ms": 2305534,
+   "text": "Ya, ya veo por lo que he visto."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2306461,
+   "end_ms": 2311642,
+   "text": "Claro, los números del último trimestre fueron mejores de lo esperado vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2312921,
+   "end_ms": 2317646,
+   "text": "Bueno, cuando lo explicas así se entiende mucho mejor vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2318460,
+   "end_ms": 2323853,
+   "text": "espera me he quedado sin batería en los cascos cambio al portátil."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2324336,
+   "end_ms": 2330853,
+   "text": "sí sí fíjate que me parece razonable el enfoque tal y como está planteado la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2331610,
+   "end_ms": 2334698,
+   "text": "Ya, sí, sí, eso está claro."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2335115,
+   "end_ms": 2339458,
+   "text": "Pues los clientes grandes suelen negociar igualmente la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2339751,
+   "end_ms": 2344064,
+   "text": "Ya, la competencia lleva un año con precios parecidos"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2345000,
+   "end_ms": 2350304,
+   "text": "Eh, hay que reconocer que el equipo ha respondido muy bien digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2351283,
+   "end_ms": 2356771,
+   "text": "A ver la página de precios actual tiene una tasa de conversión baja."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2357094,
+   "end_ms": 2361294,
+   "text": "bueno perdona que vuelva un momento sobre lo de antes"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2362667,
+   "end_ms": 2367879,
+   "text": "La página de precios actual tiene una tasa de conversión baja vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2368195,
+   "end_ms": 2371522,
+   "text": "Exacto los clientes grandes suelen negociar igualmente."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2372538,
+   "end_ms": 2379182,
+   "text": "A ver, en ventas se nota que los clientes preguntan cada vez más por el anual."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2379825,
+   "end_ms": 2383992,
+   "text": "perdón vale en resumen es lo que estábamos comentando"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2384716,
+   "end_ms": 2389679,
+   "text": "espera a ver, no es algo nuevo pero sí conviene tenerlo presente."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2391065,
+   "end_ms": 2395018,
+   "text": "Sí, te sigo, te sigo o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2396008,
+   "end_ms": 2401314,
+   "text": "no no hmm, en resumen es lo que estábamos comentando la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2401700,
+   "end_ms": 2405424,
+   "text": "Eh, perfecto, me sirve por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2406490,
+   "end_ms": 2411876,
+   "text": "o sea el embudo de conversión ha mejorado desde el rediseño la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2412855,
+   "end_ms": 2419094,
+   "text": "Por cierto, ¿qué pasa con los clientes mensuales que están a mitad de ciclo? ¿Prorrateamos?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2419649,
+   "end_ms": 2427032,
+   "text": "Exacto, en ventas se nota que los clientes preguntan cada vez más por el anual o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2428056,
+   "end_ms": 2432676,
+   "text": "a ver a ver a ver vale entendido o eso creo"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2433180,
+   "end_ms": 2436224,
+   "text": "Mira, los clientes grandes suelen negociar igualmente."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2437592,
+   "end_ms": 2443937,
+   "text": "Bueno en ventas se nota que los clientes preguntan cada vez más por el anual."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2444847,
+   "end_ms": 2449304,
+   "text": "Eso me recuerda a una conversación que tuvimos hace meses."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2449696,
+   "end_ms": 2451302,
+   "text": "Vale, entendido ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2452088,
+   "end_ms": 2456144,
+   "text": "Vale, en resumen es lo que estábamos comentando ¿sabes?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2457015,
+   "end_ms": 2464317,
+   "text": "eh las encuestas dicen que el precio no es la primera queja por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2464936,
+   "end_ms": 2469699,
+   "text": "Exacto la competencia lleva un año con precios parecidos digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2470112,
+   "end_ms": 2476333,
+   "text": "Mira, las encuestas dicen que el precio no es la primera queja la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2476735,
+   "end_ms": 2481713,
+   "text": "Total, a veces nos complicamos más de la cuenta con estas cosas."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2482291,
+   "end_ms": 2487636,
+   "text": "Vale, a veces nos complicamos más de la cuenta con estas cosas ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2488814,
+   "end_ms": 2494262,
+   "text": "Bueno, las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2495408,
+   "end_ms": 2499113,
+   "text": "Me gusta que lo estemos hablando con calma."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2499600,
+   "end_ms": 2505054,
+   "text": "eh o sea, el embudo de conversión ha mejorado desde el rediseño ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2506419,
+   "end_ms": 2512481,
+   "text": "sí sí pues me parece razonable el enfoque tal y como está planteado digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2513412,
+   "end_ms": 2519606,
+   "text": "Claro, esto ya nos pasó en el proyecto anterior y al final salió bien."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2520331,
+   "end_ms": 2522087,
+   "text": "o sea exacto, ajá"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2522492,
+   "end_ms": 2528265,
+   "text": "Ya, hay que reconocer que el equipo ha respondido muy bien o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2529047,
+   "end_ms": 2534909,
+   "text": "Claro, en otros equipos lo han resuelto de forma similar o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2536043,
+   "end_ms": 2542539,
+   "text": "o sea hmm, eso me recuerda a una conversación que tuvimos hace meses o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2543381,
+   "end_ms": 2547197,
+   "text": "Claro, es curioso porque al principio pensaba lo contrario"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2547608,
+   "end_ms": 2552895,
+   "text": "eh en las demos casi nadie pregunta por el plan básico ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2553927,
+   "end_ms": 2557750,
+   "text": "Mira, los clientes grandes suelen negociar igualmente ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2559076,
+   "end_ms": 2563635,
+   "text": "espera creo que en lo general estamos alineados o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2564668,
+   "end_ms": 2570075,
+   "text": "Exacto las encuestas dicen que el precio no es la primera queja vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2571077,
+   "end_ms": 2575676,
+   "text": "Sí los clientes pequeños son los más sensibles al precio vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2576780,
+   "end_ms": 2579683,
+   "text": "ni idea, eso habría que verlo"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2581005,
+   "end_ms": 2587105,
+   "text": "o sea los clientes pequeños son los más sensibles al precio o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2587970,
+   "end_ms": 2591974,
+   "text": "eh los clientes grandes suelen negociar igualmente en general"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2592267,
+   "end_ms": 2597026,
+   "text": "Me he quedado sin batería en los cascos cambio al portátil."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2597966,
+   "end_ms": 2603547,
+   "text": "no no los números del último trimestre fueron mejores de lo esperado no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2602624,
+   "end_ms": 2607315,
+   "text": "Las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2608369,
+   "end_ms": 2611541,
+   "text": "sí sí o sea, tiene sentido."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2612664,
+   "end_ms": 2617034,
+   "text": "Los clientes pequeños son los más sensibles al precio vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2617383,
+   "end_ms": 2622067,
+   "text": "Mira me gusta que lo estemos hablando con calma la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2622659,
+   "end_ms": 2627682,
+   "text": "Ya el plan profesional es el que más ingresos genera digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2628030,
+   "end_ms": 2634638,
+   "text": "vale vale fíjate que eso encaja con lo que vimos en los números del trimestre no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2634990,
+   "end_ms": 2638584,
+   "text": "sí sí mira perfecto me sirve digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2639644,
+   "end_ms": 2644803,
+   "text": "Y nada, en otros equipos lo han resuelto de forma similar ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2645140,
+   "end_ms": 2649467,
+   "text": "Vale, el plan profesional es el que más ingresos genera"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2650065,
+   "end_ms": 2652735,
+   "text": "Los clientes grandes suelen negociar igualmente."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2652096,
+   "end_ms": 2658076,
+   "text": "no no a ver, las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2658747,
+   "end_ms": 2662569,
+   "text": "Sí, los clientes grandes suelen negociar igualmente ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2663415,
+   "end_ms": 2668919,
+   "text": "La gente con la que he hablado tiene una impresión parecida digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2670166,
+   "end_ms": 2675956,
+   "text": "Sí, los datos de uso muestran que la mayoría usa dos o tres proyectos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2676206,
+   "end_ms": 2680653,
+   "text": "Mira, en otros equipos lo han resuelto de forma similar"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2679694,
+   "end_ms": 2684678,
+   "text": "sí sí sí, los clientes pequeños son los más sensibles al precio."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2685369,
+   "end_ms": 2691933,
+   "text": "Sobre los clientes actuales: mantienen el precio antiguo durante seis meses y luego pasan al nuevo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2692355,
+   "end_ms": 2694044,
+   "text": "O sea ajá."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2694323,
+   "end_ms": 2699328,
+   "text": "sí sí mira a mí me cuadra lo que estáis contando vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2699800,
+   "end_ms": 2703251,
+   "text": "Y nada vale entendido o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2703699,
+   "end_ms": 2708049,
+   "text": "En resumen es lo que estábamos comentando la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2708718,
+   "end_ms": 2713752,
+   "text": "espera es un tema que da para mucho pero no quiero alargarme."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2714214,
+   "end_ms": 2719480,
+   "text": "No os he dicho que al final me compré la bici estoy encantado."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2720629,
+   "end_ms": 2726759,
+   "text": "Los datos de uso muestran que la mayoría usa dos o tres proyectos la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2728106,
+   "end_ms": 2735754,
+   "text": "a ver a ver total, los números del último trimestre fueron mejores de lo esperado o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2737019,
+   "end_ms": 2741811,
+   "text": "Y nada, yo no le daría más vueltas de las necesarias."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2742870,
+   "end_ms": 2749467,
+   "text": "O sea los datos de uso muestran que la mayoría usa dos o tres proyectos sabes?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2750332,
+   "end_ms": 2754427,
+   "text": "Mira, en resumen es lo que estábamos comentando ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2755699,
+   "end_ms": 2761487,
+   "text": "Vale, los números del último trimestre fueron mejores de lo esperado digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2762654,
+   "end_ms": 2767500,
+   "text": "Total, el plan gratuito trae mucho tráfico a la web en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2768827,
+   "end_ms": 2774590,
+   "text": "Eh, los clientes pequeños son los más sensibles al precio o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2775459,
+   "end_ms": 2782301,
+   "text": "sí sí bueno, la gente con la que he hablado tiene una impresión parecida en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2783636,
+   "end_ms": 2788853,
+   "text": "Claro, en las demos casi nadie pregunta por el plan básico ¿sabes?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2790114,
+   "end_ms": 2794522,
+   "text": "Mira, la competencia lleva un año con precios parecidos vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2795762,
+   "end_ms": 2801042,
+   "text": "Vale, el email a los clientes actuales anunciando el cambio lo mando yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2802148,
+   "end_ms": 2807488,
+   "text": "no no a veces nos complicamos más de la cuenta con estas cosas."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2807893,
+   "end_ms": 2811846,
+   "text": "Los clientes grandes suelen negociar igualmente digo yo"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2812357,
+   "end_ms": 2818059,
+   "text": "sí sí hmm, en las demos casi nadie pregunta por el plan básico vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2819025,
+   "end_ms": 2826263,
+   "text": "Vale, la página de precios actual tiene una tasa de conversión baja por lo que he visto"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2827208,
+   "end_ms": 2832477,
+   "text": "espera pues en las demos casi nadie pregunta por el plan básico sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2832744,
+   "end_ms": 2835525,
+   "text": "espera hmm eso es no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2835851,
+   "end_ms": 2841421,
+   "text": "No os he dicho que al final me compré la bici, estoy encantado."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2840167,
+   "end_ms": 2847383,
+   "text": "no no o sea, las encuestas dicen que el precio no es la primera queja digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2848596,
+   "end_ms": 2853944,
+   "text": "Eh, los números del último trimestre fueron mejores de lo esperado digo yo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2854644,
+   "end_ms": 2859546,
+   "text": "Ya, el contexto ha cambiado un poco desde la última vez."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2860753,
+   "end_ms": 2865103,
+   "text": "Fíjate que creo que en lo general estamos alineados."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2865935,
+   "end_ms": 2871270,
+   "text": "Hmm el embudo de conversión ha mejorado desde el rediseño la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2871985,
+   "end_ms": 2878477,
+   "text": "vale vale eh, eso me recuerda a una conversación que tuvimos hace meses digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2879244,
+   "end_ms": 2883719,
+   "text": "Vale, los números del último trimestre fueron mejores de lo esperado."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2884461,
+   "end_ms": 2889160,
+   "text": "Hmm, el embudo de conversión ha mejorado desde el rediseño vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2889979,
+   "end_ms": 2895074,
+   "text": "¿Hace falta revisión legal del cambio en los términos y condiciones?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2895861,
+   "end_ms": 2901373,
+   "text": "Exacto, la página de precios actual tiene una tasa de conversión baja."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2902618,
+   "end_ms": 2905786,
+   "text": "Los clientes grandes suelen negociar igualmente no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2906192,
+   "end_ms": 2908534,
+   "text": "Y nada, correcto digo yo"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2907649,
+   "end_ms": 2912515,
+   "text": "Por cierto, ¿visteis el partido de ayer? qué final más tremendo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2912789,
+   "end_ms": 2917371,
+   "text": "Vale, es curioso porque al principio pensaba lo contrario la verdad"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2918525,
+   "end_ms": 2925451,
+   "text": "Pues en ventas se nota que los clientes preguntan cada vez más por el anual la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2926264,
+   "end_ms": 2930751,
+   "text": "Total perdona que vuelva un momento sobre lo de antes no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2931081,
+   "end_ms": 2935994,
+   "text": "Mira, el plan profesional es el que más ingresos genera ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2937313,
+   "end_ms": 2943393,
+   "text": "Mira, las encuestas dicen que el precio no es la primera queja digo yo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2943801,
+   "end_ms": 2949922,
+   "text": "A ver a mí me cuadra lo que estáis contando por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2951321,
+   "end_ms": 2955354,
+   "text": "Sí, a mí me cuadra lo que estáis contando."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2954006,
+   "end_ms": 2956134,
+   "text": "Fíjate que vale entendido no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2957069,
+   "end_ms": 2960433,
+   "text": "sí sí a ver, vale, entendido digo yo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2961456,
+   "end_ms": 2966639,
+   "text": "Total los clientes pequeños son los más sensibles al precio la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2967191,
+   "end_ms": 2969830,
+   "text": "no no total, eso es."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2971010,
+   "end_ms": 2978265,
+   "text": "no no sí, en ventas se nota que los clientes preguntan cada vez más por el anual ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2979643,
+   "end_ms": 2981634,
+   "text": "no no vale, correcto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2982265,
+   "end_ms": 2987156,
+   "text": "Eh, es más una cuestión de costumbre que de otra cosa."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2988450,
+   "end_ms": 2993458,
+   "text": "Además he oído que la competencia lanza un plan parecido en marzo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2993888,
+   "end_ms": 2998823,
+   "text": "O sea, me parece razonable el enfoque tal y como está planteado."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2999115,
+   "end_ms": 3005230,
+   "text": "Fíjate que la gente con la que he hablado tiene una impresión parecida ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3006018,
+   "end_ms": 3012996,
+   "text": "Sí, en ventas se nota que los clientes preguntan cada vez más por el anual digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3011819,
+   "end_ms": 3018062,
+   "text": "A ver, el plan profesional es el que más ingresos genera o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3017070,
+   "end_ms": 3022413,
+   "text": "Claro, las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3022917,
+   "end_ms": 3028348,
+   "text": "Un segundo que cierro la ventana que hay mucho ruido en la calle."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3027723,
+   "end_ms": 3030270,
+   "text": "A ver, tiene sentido la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3031028,
+   "end_ms": 3037039,
+   "text": "bueno los datos de uso muestran que la mayoría usa dos o tres proyectos vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3037334,
+   "end_ms": 3043128,
+   "text": "O sea, me parece razonable el enfoque tal y como está planteado en general"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3043877,
+   "end_ms": 3047163,
+   "text": "Vale, entendido por lo que he visto"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3048306,
+   "end_ms": 3053802,
+   "text": "El feedback que nos llegó fue bastante positivo en general la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3055077,
+   "end_ms": 3060516,
+   "text": "Claro, en las demos casi nadie pregunta por el plan básico digo yo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3059833,
+   "end_ms": 3063789,
+   "text": "Los clientes grandes suelen negociar igualmente digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3064721,
+   "end_ms": 3071469,
+   "text": "Mira esto ya nos pasó en el proyecto anterior y al final salió bien la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3072326,
+   "end_ms": 3075223,
+   "text": "Eh tiene sentido o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3076423,
+   "end_ms": 3082623,
+   "text": "Pues el plan gratuito trae mucho tráfico a la web por lo que he visto."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3083566,
+   "end_ms": 3088296,
+   "text": "Y nada los clientes pequeños son los más sensibles al precio."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3088936,
+   "end_ms": 3094053,
+   "text": "Ya las encuestas dicen que el precio no es la primera queja."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3095142,
+   "end_ms": 3100781,
+   "text": "Yo formo al equipo de ventas en los planes nuevos antes del lanzamiento."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3099878,
+   "end_ms": 3106120,
+   "text": "Pues las encuestas dicen que el precio no es la primera queja o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3106816,
+   "end_ms": 3110919,
+   "text": "Mira, lo importante es que todos tengamos el mismo contexto."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3111430,
+   "end_ms": 3118455,
+   "text": "En ventas se nota que los clientes preguntan cada vez más por el anual la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3119306,
+   "end_ms": 3126890,
+   "text": "o sea o sea, los datos de uso muestran que la mayoría usa dos o tres proyectos ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3127268,
+   "end_ms": 3134504,
+   "text": "O sea, en ventas se nota que los clientes preguntan cada vez más por el anual en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3134996,
+   "end_ms": 3140682,
+   "text": "Total, los números del último trimestre fueron mejores de lo esperado digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3141299,
+   "end_ms": 3146353,
+   "text": "Qué calor hace hoy en la oficina no hay quien trabaje."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3147611,
+   "end_ms": 3152437,
+   "text": "Vale, los números del último trimestre fueron mejores de lo esperado."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3153207,
+   "end_ms": 3161354,
+   "text": "Eh lo he estado pensando durante el fin de semana y sigo opinando igual por lo que he visto."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3162556,
+   "end_ms": 3167693,
+   "text": "Sí, la página de precios actual tiene una tasa de conversión baja."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3166008,
+   "end_ms": 3170602,
+   "text": "Uf, la máquina de café de la tercera planta sigue estropeada"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3171837,
+   "end_ms": 3173219,
+   "text": "Bueno, ajá."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3173692,
+   "end_ms": 3179344,
+   "text": "no no hmm, no es algo nuevo pero sí conviene tenerlo presente vamos"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3180544,
+   "end_ms": 3186221,
+   "text": "Total eso me recuerda a una conversación que tuvimos hace meses o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3186695,
+   "end_ms": 3191698,
+   "text": "Es más una cuestión de costumbre que de otra cosa vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3192636,
+   "end_ms": 3197070,
+   "text": "Y yo preparo la campaña de lanzamiento, email y LinkedIn."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3197601,
+   "end_ms": 3201647,
+   "text": "El embudo de conversión ha mejorado desde el rediseño vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3201969,
+   "end_ms": 3205693,
+   "text": "Claro, me gusta que lo estemos hablando con calma."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3207029,
+   "end_ms": 3211745,
+   "text": "vale vale el plan profesional es el que más ingresos genera."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3210816,
+   "end_ms": 3216304,
+   "text": "Pues los clientes pequeños son los más sensibles al precio digo yo"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3216765,
+   "end_ms": 3224028,
+   "text": "bueno pues en ventas se nota que los clientes preguntan cada vez más por el anual vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3224668,
+   "end_ms": 3229282,
+   "text": "Por cierto sabéis que Pepe ha sido padre? enhorabuena desde aquí."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3230416,
+   "end_ms": 3237526,
+   "text": "a ver a ver claro en las demos casi nadie pregunta por el plan básico en general"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3238223,
+   "end_ms": 3244836,
+   "text": "Claro esto ya nos pasó en el proyecto anterior y al final salió bien vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3245896,
+   "end_ms": 3251296,
+   "text": "El contexto ha cambiado un poco desde la última vez digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3252042,
+   "end_ms": 3258111,
+   "text": "Fíjate que los datos de uso muestran que la mayoría usa dos o tres proyectos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3259378,
+   "end_ms": 3266372,
+   "text": "no no volviendo a la fecha: con lo de Stripe, el uno de marzo no llegamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3267698,
+   "end_ms": 3273358,
+   "text": "o sea bueno el plan profesional es el que más ingresos genera no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3273911,
+   "end_ms": 3280139,
+   "text": "o sea hmm, los clientes pequeños son los más sensibles al precio en general"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3280526,
+   "end_ms": 3286780,
+   "text": "espera bueno el embudo de conversión ha mejorado desde el rediseño o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3287119,
+   "end_ms": 3293076,
+   "text": "A ver, las encuestas dicen que el precio no es la primera queja ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3294199,
+   "end_ms": 3298307,
+   "text": "Ya, los clientes pequeños son los más sensibles al precio."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3299578,
+   "end_ms": 3306535,
+   "text": "espera es verdad que el último mes ha sido bastante intenso por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3307736,
+   "end_ms": 3312779,
+   "text": "Vale, el contexto ha cambiado un poco desde la última vez vamos"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3313502,
+   "end_ms": 3316587,
+   "text": "sí sí sí, te sigo, te sigo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3317976,
+   "end_ms": 3320414,
+   "text": "Eh ajá o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3321324,
+   "end_ms": 3324942,
+   "text": "sí sí o sea, vale, entendido la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3323553,
+   "end_ms": 3330131,
+   "text": "bueno y nada, en las demos casi nadie pregunta por el plan básico o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3330458,
+   "end_ms": 3334578,
+   "text": "Ya, el plan profesional es el que más ingresos genera."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3335933,
+   "end_ms": 3338213,
+   "text": "Total, perfecto, me sirve vamos"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3338835,
+   "end_ms": 3346084,
+   "text": "o sea pues eso lo hablamos en su momento y la idea sigue siendo la misma ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3346639,
+   "end_ms": 3352046,
+   "text": "Total, el plan gratuito trae mucho tráfico a la web o eso creo"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3352731,
+   "end_ms": 3354359,
+   "text": "Eso es."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3354963,
+   "end_ms": 3360942,
+   "text": "Eh los clientes pequeños son los más sensibles al precio por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3360330,
+   "end_ms": 3363371,
+   "text": "o sea sí eso es digo yo"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3364496,
+   "end_ms": 3369545,
+   "text": "Bueno, en otros equipos lo han resuelto de forma similar en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3368125,
+   "end_ms": 3373497,
+   "text": "Fíjate que el plan profesional es el que más ingresos genera ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3374293,
+   "end_ms": 3379542,
+   "text": "A ver me parece razonable el enfoque tal y como está planteado sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3379981,
+   "end_ms": 3387229,
+   "text": "sí sí y nada, los datos de uso muestran que la mayoría usa dos o tres proyectos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3388342,
+   "end_ms": 3394994,
+   "text": "O sea, la página de precios actual tiene una tasa de conversión baja la verdad"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3395576,
+   "end_ms": 3399121,
+   "text": "Total sí sí eso está claro no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3399436,
+   "end_ms": 3406600,
+   "text": "eh bueno, los datos de uso muestran que la mayoría usa dos o tres proyectos la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3407552,
+   "end_ms": 3413132,
+   "text": "Vale, cambiamos: el lanzamiento pasa al quince de marzo. Olvidad lo del uno."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3413983,
+   "end_ms": 3420404,
+   "text": "Eh en ventas se nota que los clientes preguntan cada vez más por el anual."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3421411,
+   "end_ms": 3427761,
+   "text": "Ya, el plan profesional es el que más ingresos genera por lo que he visto."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3426801,
+   "end_ms": 3431654,
+   "text": "El plan gratuito trae mucho tráfico a la web o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3433017,
+   "end_ms": 3437957,
+   "text": "Bueno los clientes pequeños son los más sensibles al precio no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3438822,
+   "end_ms": 3444321,
+   "text": "Fíjate que hay que reconocer que el equipo ha respondido muy bien."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3444718,
+   "end_ms": 3450877,
+   "text": "A ver, las encuestas dicen que el precio no es la primera queja vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3451837,
+   "end_ms": 3454807,
+   "text": "Pues te sigo, te sigo en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3455607,
+   "end_ms": 3459541,
+   "text": "bueno mira, los clientes grandes suelen negociar igualmente."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3460601,
+   "end_ms": 3465308,
+   "text": "El plan profesional es el que más ingresos genera vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3466052,
+   "end_ms": 3468600,
+   "text": "Bueno, perfecto, me sirve ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3469004,
+   "end_ms": 3476063,
+   "text": "Fíjate que los datos de uso muestran que la mayoría usa dos o tres proyectos la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3477384,
+   "end_ms": 3483218,
+   "text": "Exacto, la página de precios actual tiene una tasa de conversión baja ¿sabes?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3484428,
+   "end_ms": 3487248,
+   "text": "Te sigo, te sigo digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3488111,
+   "end_ms": 3492698,
+   "text": "Bueno el embudo de conversión ha mejorado desde el rediseño sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3493647,
+   "end_ms": 3499026,
+   "text": "Pues el feedback que nos llegó fue bastante positivo en general la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3499322,
+   "end_ms": 3504961,
+   "text": "perdón a ver el embudo de conversión ha mejorado desde el rediseño sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3506284,
+   "end_ms": 3512056,
+   "text": "Hmm, los números del último trimestre fueron mejores de lo esperado o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3513241,
+   "end_ms": 3515780,
+   "text": "Bueno, quince de marzo, me vale."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3514159,
+   "end_ms": 3517159,
+   "text": "Pues correcto por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3518217,
+   "end_ms": 3522762,
+   "text": "Sí yo lo veo bastante parecido a lo que comentabas antes."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3523165,
+   "end_ms": 3529775,
+   "text": "eh eh, el plan profesional es el que más ingresos genera por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3530690,
+   "end_ms": 3538385,
+   "text": "a ver a ver vale, el plan gratuito trae mucho tráfico a la web por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3539706,
+   "end_ms": 3544957,
+   "text": "Eh, en las demos casi nadie pregunta por el plan básico la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3544276,
+   "end_ms": 3547958,
+   "text": "Claro, ahí hay matices pero en el fondo coincido."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3548325,
+   "end_ms": 3554017,
+   "text": "bueno no os he dicho que al final me compré la bici, estoy encantado"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3554794,
+   "end_ms": 3558856,
+   "text": "Bueno, es curioso porque al principio pensaba lo contrario."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3557237,
+   "end_ms": 3562386,
+   "text": "Sí, perdona que vuelva un momento sobre lo de antes en general"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3562938,
+   "end_ms": 3565239,
+   "text": "Fíjate que ya veo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3566538,
+   "end_ms": 3573130,
+   "text": "sí sí vale, los clientes pequeños son los más sensibles al precio o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3574338,
+   "end_ms": 3582814,
+   "text": "sí sí o sea los datos de uso muestran que la mayoría usa dos o tres proyectos o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3581306,
+   "end_ms": 3587887,
+   "text": "Total, los datos de uso muestran que la mayoría usa dos o tres proyectos en general."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3588414,
+   "end_ms": 3594549,
+   "text": "A ver los números del último trimestre fueron mejores de lo esperado o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3595562,
+   "end_ms": 3600236,
+   "text": "a ver a ver pues lo dejamos aquí gracias a todos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3601437,
+   "end_ms": 3607713,
+   "text": "Sí, eso encaja con lo que vimos en los números del trimestre en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3607112,
+   "end_ms": 3611320,
+   "text": "Claro, yo no le daría más vueltas de las necesarias."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3609629,
+   "end_ms": 3614955,
+   "text": "Sí las encuestas dicen que el precio no es la primera queja no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3615961,
+   "end_ms": 3622128,
+   "text": "no no exacto, eso encaja con lo que vimos en los números del trimestre."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3622562,
+   "end_ms": 3626821,
+   "text": "Total, el plan profesional es el que más ingresos genera."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3627766,
+   "end_ms": 3629773,
+   "text": "Eh eso es sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3630195,
+   "end_ms": 3637049,
+   "text": "Hmm, los datos de uso muestran que la mayoría usa dos o tres proyectos en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3637522,
+   "end_ms": 3641304,
+   "text": "Hmm, la competencia lleva un año con precios parecidos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3639746,
+   "end_ms": 3646194,
+   "text": "o sea eh, es verdad que el último mes ha sido bastante intenso o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3646645,
+   "end_ms": 3652022,
+   "text": "espera sí los clientes grandes suelen negociar igualmente por lo que he visto."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3653146,
+   "end_ms": 3656615,
+   "text": "Ya, eso es por lo que he visto."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 3657351,
+   "end_ms": 3662418,
+   "text": "Claro los números del último trimestre fueron mejores de lo esperado."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3661262,
+   "end_ms": 3663776,
+   "text": "Exacto, sí, sí, eso está claro."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3664290,
+   "end_ms": 3670329,
+   "text": "perdón a ver el plan profesional es el que más ingresos genera digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3671416,
+   "end_ms": 3677076,
+   "text": "Eh, hay que reconocer que el equipo ha respondido muy bien en general"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 3677523,
+   "end_ms": 3682761,
+   "text": "Claro el embudo de conversión ha mejorado desde el rediseño o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 3683385,
+   "end_ms": 3689182,
+   "text": "a ver a ver pues lo importante es que todos tengamos el mismo contexto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 3690014,
+   "end_ms": 3694910,
+   "text": "Fíjate que el embudo de conversión ha mejorado desde el rediseño."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 3695494,
+   "end_ms": 3698778,
+   "text": "Es curioso porque al principio pensaba lo contrario."
+  }
+ ]
+}

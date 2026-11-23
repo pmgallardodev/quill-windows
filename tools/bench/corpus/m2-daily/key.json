@@ -1,0 +1,121 @@
+{
+ "meeting": "m2-daily",
+ "title": "Daily del equipo de producto",
+ "speakers": {
+  "me": "Pablo (usuario)",
+  "speaker-1": "Ana",
+  "speaker-2": "Jorge",
+  "speaker-3": "Elena"
+ },
+ "duration_ms": 934493,
+ "notes": "",
+ "decisions": [
+  {
+   "id": "D1",
+   "text": "Congelar los merges a main desde el miércoles por la tarde hasta la release del jueves",
+   "keywords": [
+    "congelar",
+    "merges",
+    "miercoles"
+   ],
+   "at_ms": 462970,
+   "speaker": "me"
+  },
+  {
+   "id": "D2",
+   "text": "El arreglo del bug del login va en un hotfix aparte, no en la release",
+   "keywords": [
+    "login",
+    "hotfix"
+   ],
+   "at_ms": 746768,
+   "speaker": "me"
+  }
+ ],
+ "actionItems": [
+  {
+   "id": "A1",
+   "text": "Revisar el PR de notificaciones de Ana hoy",
+   "keywords": [
+    "revis",
+    "notificaciones"
+   ],
+   "at_ms": 173016,
+   "speaker": "speaker-2",
+   "owner": "speaker-2",
+   "isMine": false
+  },
+  {
+   "id": "A2",
+   "text": "Escribir el test de integración del reintento de notificaciones push",
+   "keywords": [
+    "test de integracion",
+    "reintento"
+   ],
+   "at_ms": 221617,
+   "speaker": "speaker-1",
+   "owner": "speaker-1",
+   "isMine": false
+  },
+  {
+   "id": "A3",
+   "text": "Contactar con el proveedor para renovar las credenciales del sandbox de SMS",
+   "keywords": [
+    "proveedor",
+    "credenciales"
+   ],
+   "at_ms": 344201,
+   "speaker": "speaker-3",
+   "owner": "speaker-3",
+   "isMine": false
+  },
+  {
+   "id": "A4",
+   "text": "Actualizar las notas de la release antes del miércoles",
+   "keywords": [
+    "notas"
+   ],
+   "at_ms": 821727,
+   "speaker": "me",
+   "owner": "me",
+   "isMine": true
+  }
+ ],
+ "openQuestions": [
+  {
+   "id": "Q1",
+   "text": "¿Está refrescada en staging la copia de la base de datos de producción?",
+   "keywords": [
+    "staging",
+    "base de datos"
+   ],
+   "at_ms": 623198,
+   "speaker": "speaker-3"
+  }
+ ],
+ "risks": [
+  {
+   "id": "R1",
+   "text": "Las credenciales del sandbox de SMS han caducado y bloquean las pruebas de doble factor",
+   "keywords": [
+    "credenciales",
+    "sms",
+    "doble factor"
+   ],
+   "at_ms": 269676,
+   "speaker": "speaker-3"
+  },
+  {
+   "id": "R2",
+   "text": "La integración continua tarda cuarenta minutos y puede retrasar la release",
+   "keywords": [
+    "integracion continua",
+    "cuarenta minutos"
+   ],
+   "at_ms": 397051,
+   "speaker": "speaker-2"
+  }
+ ],
+ "superseded": [],
+ "acceptable": []
+}

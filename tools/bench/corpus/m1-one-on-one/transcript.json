@@ -1,0 +1,727 @@
+{
+ "engine": "synthetic",
+ "model": "quill-bench-corpus-v1",
+ "created_at": "2026-11-23T09:00:00+00:00",
+ "segments": [
+  {
+   "speaker": "me",
+   "start_ms": 2000,
+   "end_ms": 6619,
+   "text": "Exacto, en resumen es lo que estábamos comentando o eso creo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 7917,
+   "end_ms": 12273,
+   "text": "Ya, con el equipo de soporte la relación es buena."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 12813,
+   "end_ms": 19804,
+   "text": "Pues el equipo de pagos ha ido mejor de lo que esperaba este trimestre digo yo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 20084,
+   "end_ms": 23992,
+   "text": "Lo importante es que todos tengamos el mismo contexto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 24303,
+   "end_ms": 30803,
+   "text": "Exacto, lo he estado pensando durante el fin de semana y sigo opinando igual ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 31531,
+   "end_ms": 39309,
+   "text": "Bueno Lucía, ¿qué tal todo? Quería hablar de la migración de pagos y de tu plan de carrera."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 40161,
+   "end_ms": 44082,
+   "text": "Bueno, en resumen es lo que estábamos comentando vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 44977,
+   "end_ms": 48060,
+   "text": "Claro, sí, sí, eso está claro."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 48531,
+   "end_ms": 53346,
+   "text": "Pues el código del módulo de pagos es antiguo pero se entiende."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 54033,
+   "end_ms": 60431,
+   "text": "Total, el equipo de pagos ha ido mejor de lo que esperaba este trimestre vamos."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 60830,
+   "end_ms": 66732,
+   "text": "Bueno, lo veo como una evolución natural de lo que ya teníamos la verdad."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 67663,
+   "end_ms": 73647,
+   "text": "Bien, con ganas de hablar de eso. Me interesa mucho llevar algo técnico más grande."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 74736,
+   "end_ms": 81181,
+   "text": "Sí, lo de la certificación de AWS lo tengo en la cabeza desde hace tiempo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 82428,
+   "end_ms": 87377,
+   "text": "A ver, las guardias de este mes han sido llevaderas digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 88485,
+   "end_ms": 93300,
+   "text": "Pues es verdad que el último mes ha sido bastante intenso vamos."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 94102,
+   "end_ms": 95646,
+   "text": "Claro, eso es."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 96703,
+   "end_ms": 98274,
+   "text": "Sí, ya veo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 99428,
+   "end_ms": 103933,
+   "text": "Eh, con el equipo de soporte la relación es buena ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 104335,
+   "end_ms": 108761,
+   "text": "Mira, con el equipo de soporte la relación es buena."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 109939,
+   "end_ms": 117961,
+   "text": "Pues lo tengo claro: quiero que lideres tú la migración del módulo de pagos a la API nueva. ¿Te parece?"
+  },
+  {
+   "speaker": "them",
+   "start_ms": 119201,
+   "end_ms": 124334,
+   "text": "Ya, me siento cómoda con el ritmo actual del equipo en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 125051,
+   "end_ms": 130263,
+   "text": "A ver, el contexto ha cambiado un poco desde la última vez."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 131501,
+   "end_ms": 135586,
+   "text": "Eso me recuerda a una conversación que tuvimos hace meses."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 136885,
+   "end_ms": 142310,
+   "text": "Pues el contexto ha cambiado un poco desde la última vez ¿no?"
+  },
+  {
+   "speaker": "them",
+   "start_ms": 143565,
+   "end_ms": 147716,
+   "text": "Marcos se está adaptando bien aunque todavía pregunta mucho."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 149111,
+   "end_ms": 150672,
+   "text": "Tiene sentido ¿no?"
+  },
+  {
+   "speaker": "them",
+   "start_ms": 150955,
+   "end_ms": 155048,
+   "text": "Exacto, me siento cómoda con el ritmo actual del equipo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 155658,
+   "end_ms": 158069,
+   "text": "Sí, me parece genial. Acepto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 159074,
+   "end_ms": 163073,
+   "text": "O sea, creo que en lo general estamos alineados."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 164391,
+   "end_ms": 169957,
+   "text": "Eso lo hablamos en su momento y la idea sigue siendo la misma."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 170845,
+   "end_ms": 177132,
+   "text": "Esto ya nos pasó en el proyecto anterior y al final salió bien digo yo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 178035,
+   "end_ms": 183664,
+   "text": "La API nueva ya tiene buena pinta en los entornos de prueba digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 184179,
+   "end_ms": 188304,
+   "text": "O sea, me gusta que lo estemos hablando con calma."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 189408,
+   "end_ms": 196561,
+   "text": "Perfecto. Para arrancar necesitaría un documento con el plan técnico de la migración para el viernes que viene."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 197834,
+   "end_ms": 202503,
+   "text": "Pues es curioso porque al principio pensaba lo contrario ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 202900,
+   "end_ms": 208881,
+   "text": "Bueno, la API nueva ya tiene buena pinta en los entornos de prueba vamos."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 210068,
+   "end_ms": 214815,
+   "text": "Las guardias de este mes han sido llevaderas o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 215244,
+   "end_ms": 222243,
+   "text": "Sí, lo de la certificación de AWS lo tengo en la cabeza desde hace tiempo digo yo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 222516,
+   "end_ms": 228450,
+   "text": "A ver, Marcos se está adaptando bien aunque todavía pregunta mucho o eso creo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 229605,
+   "end_ms": 234930,
+   "text": "Vale, lo preparo yo y te lo paso el viernes que viene."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 235674,
+   "end_ms": 240882,
+   "text": "Hmm, lo veo como una evolución natural de lo que ya teníamos."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 241581,
+   "end_ms": 248058,
+   "text": "A ver, lo he estado pensando durante el fin de semana y sigo opinando igual."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 249026,
+   "end_ms": 253571,
+   "text": "Me parece razonable el enfoque tal y como está planteado ¿no?"
+  },
+  {
+   "speaker": "them",
+   "start_ms": 254743,
+   "end_ms": 261784,
+   "text": "Hmm, lo de la certificación de AWS lo tengo en la cabeza desde hace tiempo vamos."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 262679,
+   "end_ms": 270825,
+   "text": "Una cosa que me preocupa: tengo vacaciones en agosto y coinciden justo con la fecha límite de la migración."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 272001,
+   "end_ms": 276631,
+   "text": "Cuando lo explicas así se entiende mucho mejor en general."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 277606,
+   "end_ms": 282450,
+   "text": "Con el equipo de soporte la relación es buena en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 283631,
+   "end_ms": 289090,
+   "text": "Mira, el código del módulo de pagos es antiguo pero se entiende."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 289576,
+   "end_ms": 293826,
+   "text": "O sea, las guardias de este mes han sido llevaderas."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 295049,
+   "end_ms": 298587,
+   "text": "Bien visto, lo tenemos en cuenta al planificar."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 299202,
+   "end_ms": 300833,
+   "text": "Perfecto, me sirve."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 301791,
+   "end_ms": 306623,
+   "text": "Y nada, las guardias de este mes han sido llevaderas ¿sabes?"
+  },
+  {
+   "speaker": "them",
+   "start_ms": 307331,
+   "end_ms": 312347,
+   "text": "Vale, me siento cómoda con el ritmo actual del equipo digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 312610,
+   "end_ms": 318144,
+   "text": "Y nada, con el equipo de soporte la relación es buena la verdad."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 318813,
+   "end_ms": 324486,
+   "text": "A ver, la API nueva ya tiene buena pinta en los entornos de prueba."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 325370,
+   "end_ms": 331695,
+   "text": "Bueno, las revisiones de código están siendo más rápidas últimamente por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 332978,
+   "end_ms": 339800,
+   "text": "Sobre Marcos, el nuevo: me gustaría que hicieras pair programming con él dos tardes a la semana."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 340126,
+   "end_ms": 343852,
+   "text": "Total, cuando lo explicas así se entiende mucho mejor."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 344980,
+   "end_ms": 351430,
+   "text": "Fíjate que la gente con la que he hablado tiene una impresión parecida la verdad."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 351984,
+   "end_ms": 354333,
+   "text": "Exacto, vale, entendido digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 355482,
+   "end_ms": 361986,
+   "text": "Fíjate que el código del módulo de pagos es antiguo pero se entiende en general."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 363289,
+   "end_ms": 365266,
+   "text": "Bueno, ajá ¿no?"
+  },
+  {
+   "speaker": "them",
+   "start_ms": 365942,
+   "end_ms": 374145,
+   "text": "Sin problema, lo hago. ¿Pero Marcos va a entrar en pagos o se queda en soporte? No lo tengo claro."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 374684,
+   "end_ms": 379278,
+   "text": "Total, con el equipo de soporte la relación es buena."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 379762,
+   "end_ms": 384336,
+   "text": "Pues con el equipo de soporte la relación es buena."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 385406,
+   "end_ms": 390391,
+   "text": "Sí, con el equipo de soporte la relación es buena digo yo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 390775,
+   "end_ms": 394688,
+   "text": "Hmm, en resumen es lo que estábamos comentando vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 395907,
+   "end_ms": 400833,
+   "text": "Hmm, las revisiones de código están siendo más rápidas últimamente digo yo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 401475,
+   "end_ms": 407095,
+   "text": "Bueno, el equipo de pagos ha ido mejor de lo que esperaba este trimestre."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 407742,
+   "end_ms": 414345,
+   "text": "Claro, el equipo de pagos ha ido mejor de lo que esperaba este trimestre la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 415616,
+   "end_ms": 420538,
+   "text": "Buena pregunta, todavía no está decidido, lo tengo que hablar con dirección."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 421811,
+   "end_ms": 427938,
+   "text": "Bueno, las guardias de este mes han sido llevaderas por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 429082,
+   "end_ms": 434448,
+   "text": "Y nada, me siento cómoda con el ritmo actual del equipo ¿sabes?"
+  },
+  {
+   "speaker": "them",
+   "start_ms": 435116,
+   "end_ms": 438947,
+   "text": "A ver, perfecto, me sirve o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 439476,
+   "end_ms": 444490,
+   "text": "Ya, las revisiones de código están siendo más rápidas últimamente la verdad."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 445186,
+   "end_ms": 450136,
+   "text": "Sí, lo veo como una evolución natural de lo que ya teníamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 450566,
+   "end_ms": 456355,
+   "text": "Hmm, la API nueva ya tiene buena pinta en los entornos de prueba vamos."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 457429,
+   "end_ms": 462118,
+   "text": "Otra cosa: la certificación de AWS. ¿Hay presupuesto de formación?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 462404,
+   "end_ms": 467733,
+   "text": "O sea, hay que reconocer que el equipo ha respondido muy bien."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 468370,
+   "end_ms": 472980,
+   "text": "Sí, perdona que vuelva un momento sobre lo de antes."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 474284,
+   "end_ms": 478447,
+   "text": "Vale, perdona que vuelva un momento sobre lo de antes."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 479114,
+   "end_ms": 485259,
+   "text": "Yo hablo con recursos humanos sobre el presupuesto de formación para tu certificación de AWS."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 485832,
+   "end_ms": 489187,
+   "text": "A mí me cuadra lo que estáis contando."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 489635,
+   "end_ms": 494121,
+   "text": "Hmm, el último despliegue fue bastante tranquilo o eso creo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 494801,
+   "end_ms": 499264,
+   "text": "Yo lo veo bastante parecido a lo que comentabas antes."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 500443,
+   "end_ms": 504586,
+   "text": "Pues las revisiones de código están siendo más rápidas últimamente."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 505885,
+   "end_ms": 513591,
+   "text": "Lo he estado pensando durante el fin de semana y sigo opinando igual por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 514232,
+   "end_ms": 518825,
+   "text": "Bueno, las revisiones de código están siendo más rápidas últimamente ¿no?"
+  },
+  {
+   "speaker": "them",
+   "start_ms": 519905,
+   "end_ms": 526700,
+   "text": "Fíjate que las revisiones de código están siendo más rápidas últimamente por lo que he visto."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 527321,
+   "end_ms": 534474,
+   "text": "Genial. Aunque no sé si el presupuesto cubre también la tasa del examen o solo el curso."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 535147,
+   "end_ms": 539972,
+   "text": "Claro, las revisiones de código están siendo más rápidas últimamente digo yo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 540950,
+   "end_ms": 542601,
+   "text": "Tiene sentido."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 543463,
+   "end_ms": 549061,
+   "text": "Ya, me siento cómoda con el ritmo actual del equipo o eso creo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 550365,
+   "end_ms": 554912,
+   "text": "Sí, no es algo nuevo pero sí conviene tenerlo presente vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 555383,
+   "end_ms": 560398,
+   "text": "Exacto, es más una cuestión de costumbre que de otra cosa vamos."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 561417,
+   "end_ms": 567180,
+   "text": "Bueno, el código del módulo de pagos es antiguo pero se entiende ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 568536,
+   "end_ms": 571948,
+   "text": "Eso no lo sé, lo pregunto también."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 573049,
+   "end_ms": 578041,
+   "text": "Exacto, a mí me cuadra lo que estáis contando en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 578383,
+   "end_ms": 583705,
+   "text": "Pues Marcos se está adaptando bien aunque todavía pregunta mucho digo yo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 585064,
+   "end_ms": 590939,
+   "text": "Hmm, es un tema que da para mucho pero no quiero alargarme digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 592267,
+   "end_ms": 599114,
+   "text": "O sea, el código del módulo de pagos es antiguo pero se entiende o eso creo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 599916,
+   "end_ms": 604981,
+   "text": "Claro, eso encaja con lo que vimos en los números del trimestre."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 605318,
+   "end_ms": 610155,
+   "text": "Pues eso me recuerda a una conversación que tuvimos hace meses."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 610507,
+   "end_ms": 617455,
+   "text": "Y una última cosa: ¿pasamos este uno a uno del jueves al martes, cada dos semanas?"
+  },
+  {
+   "speaker": "them",
+   "start_ms": 618358,
+   "end_ms": 622065,
+   "text": "Total, ya sabemos cómo suelen ir estas cosas ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 623386,
+   "end_ms": 626329,
+   "text": "Vale, el último despliegue fue bastante tranquilo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 627433,
+   "end_ms": 633913,
+   "text": "Lo de la certificación de AWS lo tengo en la cabeza desde hace tiempo la verdad."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 634907,
+   "end_ms": 638636,
+   "text": "Sí, el martes me viene mucho mejor. Hecho."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 639172,
+   "end_ms": 645053,
+   "text": "Hmm, el código del módulo de pagos es antiguo pero se entiende la verdad."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 645566,
+   "end_ms": 651816,
+   "text": "Y nada, la API nueva ya tiene buena pinta en los entornos de prueba ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 652622,
+   "end_ms": 654990,
+   "text": "A ver, correcto en general."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 655628,
+   "end_ms": 659932,
+   "text": "A ver, sí, sí, eso está claro en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 660306,
+   "end_ms": 665225,
+   "text": "Hmm, el código del módulo de pagos es antiguo pero se entiende."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 665930,
+   "end_ms": 672077,
+   "text": "La API nueva ya tiene buena pinta en los entornos de prueba en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 672807,
+   "end_ms": 675960,
+   "text": "Pues nada, gracias Lucía, buen trabajo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 676974,
+   "end_ms": 682680,
+   "text": "A ver, las revisiones de código están siendo más rápidas últimamente la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 683203,
+   "end_ms": 688473,
+   "text": "Sí, lo importante es que todos tengamos el mismo contexto digo yo."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 689592,
+   "end_ms": 694691,
+   "text": "Vale, es curioso porque al principio pensaba lo contrario la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 695607,
+   "end_ms": 701016,
+   "text": "Hmm, Marcos se está adaptando bien aunque todavía pregunta mucho en general."
+  },
+  {
+   "speaker": "them",
+   "start_ms": 701464,
+   "end_ms": 706721,
+   "text": "Las revisiones de código están siendo más rápidas últimamente o eso creo."
+  }
+ ]
+}

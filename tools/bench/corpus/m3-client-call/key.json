@@ -1,0 +1,141 @@
+{
+ "meeting": "m3-client-call",
+ "title": "Llamada con cliente: portal de operaciones",
+ "speakers": {
+  "me": "Pablo (usuario, agencia)",
+  "speaker-1": "Sr. Ramírez (cliente, director de operaciones)",
+  "speaker-2": "Marta (cliente, IT)",
+  "speaker-3": "Diego (agencia, diseño)"
+ },
+ "duration_ms": 1569277,
+ "notes": "",
+ "decisions": [
+  {
+   "id": "D1",
+   "text": "La fase uno es solo la aplicación web; la aplicación móvil pasa a la fase dos",
+   "keywords": [
+    "fase uno",
+    "web",
+    "movil"
+   ],
+   "at_ms": 321319,
+   "speaker": "speaker-1"
+  },
+  {
+   "id": "D2",
+   "text": "La aplicación se aloja en la cuenta de Azure del cliente",
+   "keywords": [
+    "azure",
+    "cuenta"
+   ],
+   "at_ms": 557135,
+   "speaker": "me"
+  },
+  {
+   "id": "D3",
+   "text": "Demo semanal los viernes a las doce",
+   "keywords": [
+    "demo",
+    "viernes"
+   ],
+   "at_ms": 1375802,
+   "speaker": "speaker-1"
+  }
+ ],
+ "actionItems": [
+  {
+   "id": "A1",
+   "text": "Enviar el presupuesto actualizado con la división en fases antes del lunes",
+   "keywords": [
+    "presupuesto",
+    "fases"
+   ],
+   "at_ms": 421980,
+   "speaker": "me",
+   "owner": "me",
+   "isMine": true
+  },
+  {
+   "id": "A2",
+   "text": "Enviar el acceso a Azure y la documentación del SSO",
+   "keywords": [
+    "acceso",
+    "sso"
+   ],
+   "at_ms": 667361,
+   "speaker": "speaker-2",
+   "owner": "speaker-2",
+   "isMine": false
+  },
+  {
+   "id": "A3",
+   "text": "Compartir las nuevas maquetas del panel de control el miércoles",
+   "keywords": [
+    "maquetas",
+    "panel"
+   ],
+   "at_ms": 821012,
+   "speaker": "speaker-3",
+   "owner": "speaker-3",
+   "isMine": false
+  },
+  {
+   "id": "A4",
+   "text": "Confirmar con finanzas el anticipo del treinta por ciento",
+   "keywords": [
+    "anticipo",
+    "finanzas"
+   ],
+   "at_ms": 1241924,
+   "speaker": "speaker-1",
+   "owner": "speaker-1",
+   "isMine": false
+  }
+ ],
+ "openQuestions": [
+  {
+   "id": "Q1",
+   "text": "¿Hace falta un contrato de encargado del tratamiento (RGPD) y quién lo firma?",
+   "keywords": [
+    "encargado del tratamiento",
+    "rgpd"
+   ],
+   "at_ms": 882428,
+   "speaker": "speaker-1"
+  },
+  {
+   "id": "Q2",
+   "text": "¿Qué versión de API de SAP (ERP) está disponible para la integración?",
+   "keywords": [
+    "sap",
+    "api"
+   ],
+   "at_ms": 1097775,
+   "speaker": "speaker-2"
+  }
+ ],
+ "risks": [
+  {
+   "id": "R1",
+   "text": "El SSO depende del equipo de IT del cliente, con poca gente hasta marzo",
+   "keywords": [
+    "sso",
+    "marzo"
+   ],
+   "at_ms": 770006,
+   "speaker": "speaker-2"
+  },
+  {
+   "id": "R2",
+   "text": "La salida del uno de junio es muy justa si la integración con SAP entra en el alcance",
+   "keywords": [
+    "junio",
+    "sap"
+   ],
+   "at_ms": 1154269,
+   "speaker": "me"
+  }
+ ],
+ "superseded": [],
+ "acceptable": []
+}
