@@ -161,6 +161,9 @@
                                 LostFocus="OnNotesLostFocus" />
                 </DockPanel>
             </TabItem>
+            <TabItem Header="{loc:Str Ask_Tab}">
+                <local:AskTabView SessionId="{Binding Row.SessionId}" />
+            </TabItem>
         </TabControl>
     </DockPanel>
 </UserControl>

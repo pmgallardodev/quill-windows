@@ -1,0 +1,14 @@
+<UserControl x:Class="Quill.Windows.UI.AskTabView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:Quill.Windows.Resources"
+             xmlns:local="clr-namespace:Quill.Windows.UI"
+             x:ClassModifier="internal">
+    <!-- "Preguntar" tab of a meeting. Set SessionId; the view model comes from AskModule.Current. -->
+    <Grid>
+        <local:AskPanelView x:Name="AskPanel" />
+        <TextBlock x:Name="Unavailable" Margin="2,12,0,0" Visibility="Collapsed" TextWrapping="Wrap"
+                   Text="{loc:Str Ask_Unavailable}"
+                   Style="{StaticResource Quill.Text.Secondary}" />
+    </Grid>
+</UserControl>

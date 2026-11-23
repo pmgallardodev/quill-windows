@@ -1,4 +1,5 @@
 using Quill.Core.Pipeline;
+using Quill.Core.Tests.Summaries;
 using Xunit;
 
 namespace Quill.Core.Tests.Pipeline;
@@ -104,6 +105,49 @@ public sealed class PostTranscriptionPipelineTests
         await Task.WhenAll(first, second);
 
         Assert.Equal(["speakers:s1", "summary:s1", "export:s1", "speakers:s2", "summary:s2", "export:s2"], steps.Calls);
+    }
+
+    [Fact]
+    public async Task ExistingSummaryIsKeptAndMarkedOutdatedWhileSpeakersStillRun()
+    {
+        var steps = new FakeSteps();
+        var state = new FakeSummaryStateStore();
+        state.ExistingSummaries.Add("s1");
+        var pipeline = new PostTranscriptionPipeline(steps, state);
+
+        var report = await pipeline.RunAsync("s1", CancellationToken.None);
+
+        Assert.Equal(["speakers:s1", "export:s1"], steps.Calls);
+        var summary = report.Of(PostTranscriptionStep.Summary)!;
+        Assert.Equal(PipelineStepStatus.Skipped, summary.Status);
+        Assert.Equal(PostTranscriptionPipeline.SummaryKeptDetail, summary.Detail);
+        Assert.True((await state.LoadStateAsync("s1", CancellationToken.None)).Outdated);
+        Assert.False(report.HasFailures);
+    }
+
+    [Fact]
+    public async Task NoExistingSummaryRunsTheSummaryAsBefore()
+    {
+        var steps = new FakeSteps();
+        var state = new FakeSummaryStateStore();
+        var pipeline = new PostTranscriptionPipeline(steps, state);
+
+        await pipeline.RunAsync("s1", CancellationToken.None);
+
+        Assert.Equal(["speakers:s1", "summary:s1", "export:s1"], steps.Calls);
+        Assert.False((await state.LoadStateAsync("s1", CancellationToken.None)).Outdated);
+    }
+
+    [Fact]
+    public async Task UnreadableSummaryStateFallsBackToSummarizing()
+    {
+        var steps = new FakeSteps();
+        var state = new FakeSummaryStateStore { Throw = new IOException("locked") };
+        var pipeline = new PostTranscriptionPipeline(steps, state);
+
+        await pipeline.RunAsync("s1", CancellationToken.None);
+
+        Assert.Equal(["speakers:s1", "summary:s1", "export:s1"], steps.Calls);
     }
 
     private sealed class FakeSteps : IPostTranscriptionSteps

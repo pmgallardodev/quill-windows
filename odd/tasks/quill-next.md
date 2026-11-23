@@ -109,9 +109,12 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       Evidence: 6e6ac21, 0953eca, 44f21a4, merged clean. Post-merge: Core 372/372 (net10),
       Windows 0/0, resx valid. Gaps: GPU/model change needs restart; Recent notifications not
       replayed; GPU probe = vulkan-1.dll present.
-- [ ] R1 Regenerating a summary must preserve user state (action-item done flags) by matching
+- [x] R1 Regenerating a summary must preserve user state (action-item done flags) by matching
       items; also avoid re-running the full pipeline on transcription retry when a summary
       exists unless the user asks. Route D.
+      Evidence: 83d1988, 1ea6fb2, merged; parent wired FileSummaryStateStore into
+      PostTranscriptionPipeline (QuillServices.cs:58). Core 390/390, Windows 0/0.
+      Pending (polish): show "Regenerar" when summary.state.json outdated=true in SummaryViewModel.
 - [x] F8 Audio playback from transcript, transcript editing + re-summarize, import. Route D.
       Evidence: 0c16ae0, a099b55, 3038aa8, 1fc82a3, e8f5443, merged clean. Post-merge: Core
       330/330, Windows projects 0/0, resx valid. Custom WSOLA time-stretch (NAudio has none).
@@ -123,9 +126,19 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       TemplateCatalog, live cadence/GPU gate, auto-export, model/GPU overrides) → I1.
 
 ### Wave C (parallel)
-- [ ] F10 Ask (per meeting + across meetings) + local semantic search. Route D.
+- [x] F10 Ask (per meeting + across meetings) + local semantic search. Route D.
+      Evidence: 9986749, e22dc0d, c27f04d, 5abba69, merged clean. Post-merge: Core 573/573,
+      Windows 0/0, resx valid. Hybrid BM25 + vector (RRF), file index `.quill-index/`.
+      Embedding model: BGE-M3 GGUF Q8_0 (~0.6 GB). Wiring (AskModule, IApiSearch) → I2.
 - [ ] F11 Optional speaker-naming memory (local voice embeddings, "Sounds like Juan?"). Route D.
-- [ ] F12 Local API (127.0.0.1 + token), loopback-only webhooks, MCP endpoint. Route D.
+- [x] F12 Local API (127.0.0.1 + token), loopback-only webhooks, MCP endpoint. Route D.
+      Evidence: 8bd3df5, e912231, 094721d, fabaa71, c593bcf, 1ea0ade, merged clean. Post-merge:
+      Core 538/538, Windows 0/0, resx valid. TcpListener on 127.0.0.1 (no http.sys/Kestrel),
+      hand-written MCP subset, API off by default. Wiring → I2.
+- [ ] I2 Final wiring: LocalApiModule (start/restart on ApiSettingsStore.Saved, Publish events
+      at recording stop / transcript / summary, dispose), F10 AskModule + IApiSearch for API/MCP,
+      "Regenerar" banner when summary.state.json outdated, Core README rows (Api, Search, Ask).
+      Route D after F10 + F11/F13 merge.
 - [ ] F13 Opt-in in-person mode (diarize mic track, recognize owner). Route D.
 - [ ] P1 Packaging: app ZIP + AI-pack ZIP, AI-pack detection, README update. Route D.
 
