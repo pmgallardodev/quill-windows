@@ -64,6 +64,8 @@ internal sealed class AiPackDownloadViewModel : INotifyPropertyChanged
     private readonly Func<string?> _packPath;
     private AiPackDownloadOffer? _offer;
     private CancellationTokenSource? _running;
+    private bool _preparing;
+    private bool _startAdmission;
     private AiPackDownloadState _state = AiPackDownloadState.NothingToDownload;
     private string _statusText = string.Empty;
     private string _totalText = string.Empty;
@@ -100,7 +102,7 @@ internal sealed class AiPackDownloadViewModel : INotifyPropertyChanged
         }
     }
 
-    public bool CanStart => State is AiPackDownloadState.Ready or AiPackDownloadState.Paused or AiPackDownloadState.Failed;
+    public bool CanStart => !_preparing && !_startAdmission && State is AiPackDownloadState.Ready or AiPackDownloadState.Paused or AiPackDownloadState.Failed;
 
     public bool ShowStart => State is not (AiPackDownloadState.NothingToDownload or AiPackDownloadState.Downloading or AiPackDownloadState.Completed);
 
@@ -134,36 +136,81 @@ internal sealed class AiPackDownloadViewModel : INotifyPropertyChanged
 
     public double TotalPercent { get => _totalPercent; private set => Set(ref _totalPercent, value); }
 
-    /// <summary>Recomputes the offer from the disk (destination, missing files, free space).</summary>
-    public void Refresh()
+    /// <summary>Recomputes the offer from disk without blocking the UI while files are hashed.</summary>
+    public async Task RefreshAsync(CancellationToken cancellationToken = default)
     {
-        if (State == AiPackDownloadState.Downloading)
+        if (State == AiPackDownloadState.Downloading || _startAdmission || _preparing)
         {
             return;
         }
 
-        if (!TryPrepare(out var offer))
+        var path = _packPath();
+        _preparing = true;
+        OnPropertyChanged(nameof(CanStart));
+        try
         {
-            return;
-        }
+            var offer = await TryPrepareAsync(path, cancellationToken).ConfigureAwait(true);
+            if (offer is null || cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
 
-        StatusText = string.Empty;
-        State = StateOf(offer);
-        if (State == AiPackDownloadState.NothingToDownload)
-        {
-            StatusText = Loc.Get("AiPackDownload_NothingToDownload");
+            if (!string.Equals(path, _packPath(), StringComparison.Ordinal))
+            {
+                ClearStaleOffer();
+                return;
+            }
+
+            ApplyOffer(offer);
         }
-        else if (State == AiPackDownloadState.NotEnoughSpace)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            StatusText = NotEnoughSpaceText(offer);
+        }
+        finally
+        {
+            _preparing = false;
+            OnPropertyChanged(nameof(CanStart));
         }
     }
 
     public async Task StartAsync(CancellationToken windowClosing)
     {
-        if (!CanStart || !TryPrepare(out var offer))
+        if (!CanStart || _startAdmission)
         {
             return;
+        }
+
+        _startAdmission = true;
+        _preparing = true;
+        OnPropertyChanged(nameof(CanStart));
+        var path = _packPath();
+        AiPackDownloadOffer offer;
+        try
+        {
+            var prepared = await TryPrepareAsync(path, windowClosing).ConfigureAwait(true);
+            if (prepared is null || windowClosing.IsCancellationRequested)
+            {
+                return;
+            }
+
+            if (!string.Equals(path, _packPath(), StringComparison.Ordinal))
+            {
+                ClearStaleOffer();
+                return;
+            }
+
+            offer = prepared;
+            ApplyOffer(offer);
+        }
+        catch (OperationCanceledException) when (windowClosing.IsCancellationRequested)
+        {
+            return;
+        }
+        finally
+        {
+            _preparing = false;
+            _startAdmission = false;
+            OnPropertyChanged(nameof(CanStart));
         }
 
         if (StateOf(offer) is var state && state != AiPackDownloadState.Ready)
@@ -188,6 +235,7 @@ internal sealed class AiPackDownloadViewModel : INotifyPropertyChanged
 
         using var running = CancellationTokenSource.CreateLinkedTokenSource(windowClosing);
         _running = running;
+        _startAdmission = true;
         try
         {
             await _downloader.DownloadAsync(offer, new Progress<AiPackDownloadProgress>(OnProgress), running.Token);
@@ -197,6 +245,11 @@ internal sealed class AiPackDownloadViewModel : INotifyPropertyChanged
         }
         catch (OperationCanceledException)
         {
+            if (windowClosing.IsCancellationRequested)
+            {
+                return;
+            }
+
             State = AiPackDownloadState.Paused;
             StatusText = Loc.Get("AiPackDownload_Paused");
         }
@@ -218,9 +271,14 @@ internal sealed class AiPackDownloadViewModel : INotifyPropertyChanged
         finally
         {
             _running = null;
+            _startAdmission = false;
+            OnPropertyChanged(nameof(CanStart));
         }
 
-        Ended?.Invoke(this, offer.Destination);
+        if (!windowClosing.IsCancellationRequested)
+        {
+            Ended?.Invoke(this, offer.Destination);
+        }
     }
 
     public void Cancel() => _running?.Cancel();
@@ -261,25 +319,56 @@ internal sealed class AiPackDownloadViewModel : INotifyPropertyChanged
     private static string NotEnoughSpaceText(AiPackDownloadOffer offer) =>
         Loc.Format("AiPackDownload_NotEnoughSpace", offer.Destination.Root, FormatBytes(offer.Plan.RequiredFreeBytes));
 
-    private bool TryPrepare(out AiPackDownloadOffer offer)
+    private async Task<AiPackDownloadOffer?> TryPrepareAsync(string? path, CancellationToken cancellationToken)
     {
         try
         {
-            offer = _downloader.Prepare(_packPath());
+            return await _downloader.PrepareAsync(path, cancellationToken).ConfigureAwait(true);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return null;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            offer = null!;
-            State = AiPackDownloadState.Failed;
-            StatusText = Loc.Format("AiPackDownload_Error_Disk", _packPath() ?? string.Empty, exception.Message);
-            return false;
-        }
+            if (!string.Equals(path, _packPath(), StringComparison.Ordinal))
+            {
+                ClearStaleOffer();
+                return null;
+            }
 
+            State = AiPackDownloadState.Failed;
+            StatusText = Loc.Format("AiPackDownload_Error_Disk", path ?? string.Empty, exception.Message);
+            return null;
+        }
+    }
+
+    private void ApplyOffer(AiPackDownloadOffer offer)
+    {
         _offer = offer;
         OnPropertyChanged(nameof(DestinationText));
         OnPropertyChanged(nameof(FreeSpaceText));
+        StatusText = string.Empty;
+        State = StateOf(offer);
+        if (State == AiPackDownloadState.NothingToDownload)
+        {
+            StatusText = Loc.Get("AiPackDownload_NothingToDownload");
+        }
+        else if (State == AiPackDownloadState.NotEnoughSpace)
+        {
+            StatusText = NotEnoughSpaceText(offer);
+        }
         OnPropertyChanged(nameof(StartText));
-        return true;
+    }
+
+    private void ClearStaleOffer()
+    {
+        _offer = null;
+        OnPropertyChanged(nameof(DestinationText));
+        OnPropertyChanged(nameof(FreeSpaceText));
+        OnPropertyChanged(nameof(StartText));
+        StatusText = string.Empty;
+        State = AiPackDownloadState.Ready;
     }
 
     private void OnProgress(AiPackDownloadProgress progress)

@@ -71,7 +71,7 @@ public sealed class AiPackDownloadPlanTests
     }
 
     [Fact]
-    public void CountsPartialAndCompleteFilesAsAlreadyDownloaded()
+    public async Task CountsPartialAndCompleteFilesAsAlreadyDownloaded()
     {
         using var temp = new TempDirectory();
         Directory.CreateDirectory(Path.Combine(temp.Path, "llm"));
@@ -79,10 +79,42 @@ public sealed class AiPackDownloadPlanTests
         File.WriteAllBytes(Path.Combine(temp.Path, "llm", "model.gguf.partial"), new byte[10]);
         File.WriteAllBytes(Path.Combine(temp.Path, "whisper", "ggml.bin"), WhisperBytes);
 
-        var plan = Plan(temp.Path, Llm(), Whisper());
+        var plan = await AiPackDownloadPlan.CreateAsync(new AiPackCatalog([Llm(), Whisper()]), AiPackStatus.NotInstalled, temp.Path);
 
         Assert.Equal(10 + WhisperBytes.Length, plan.AlreadyDownloadedBytes);
         Assert.Equal(LlmBytes.Length - 10, plan.RemainingBytes);
+    }
+
+    [Fact]
+    public async Task DoesNotCreditSameSizeFileWithIncorrectPinnedHash()
+    {
+        using var temp = new TempDirectory();
+        var entry = Llm();
+        var target = AiPackDownloadPlan.TargetPath(temp.Path, entry);
+        Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+        File.WriteAllBytes(target, new byte[entry.Size]);
+        File.WriteAllBytes(target + AiPackDownloadPlan.PartialSuffix, LlmBytes[..8]);
+
+        var plan = await AiPackDownloadPlan.CreateAsync(new AiPackCatalog([entry]), AiPackStatus.NotInstalled, temp.Path);
+
+        Assert.Equal(8, plan.AlreadyDownloadedBytes);
+        var remaining = entry.Size - 8;
+        Assert.Equal(remaining + (long)Math.Ceiling(remaining * AiPackDownloadPlan.FreeSpaceMargin), plan.RequiredFreeBytes);
+    }
+
+    [Fact]
+    public async Task CreditsVerifiedSameSizeOrphanWithoutAdditionalFreeSpace()
+    {
+        using var temp = new TempDirectory();
+        var entry = Llm();
+        var target = AiPackDownloadPlan.TargetPath(temp.Path, entry);
+        Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+        File.WriteAllBytes(target, LlmBytes);
+
+        var plan = await AiPackDownloadPlan.CreateAsync(new AiPackCatalog([entry]), AiPackStatus.NotInstalled, temp.Path);
+
+        Assert.Equal(entry.Size, plan.AlreadyDownloadedBytes);
+        Assert.Equal(0, plan.RequiredFreeBytes);
     }
 
     [Fact]

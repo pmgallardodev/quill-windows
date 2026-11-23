@@ -17,12 +17,12 @@ public sealed class AiPackDownloadViewModelTests
         new string('a', 64));
 
     [Fact]
-    public void RefreshOffersTheDownloadWithoutTouchingTheNetwork()
+    public async Task RefreshOffersTheDownloadWithoutTouchingTheNetwork()
     {
         var downloader = new FakeDownloader(free: 10_000);
         var viewModel = new AiPackDownloadViewModel(downloader, () => null);
 
-        viewModel.Refresh();
+        await viewModel.RefreshAsync();
 
         Assert.Equal(AiPackDownloadState.Ready, viewModel.State);
         Assert.True(viewModel.CanStart);
@@ -31,11 +31,11 @@ public sealed class AiPackDownloadViewModelTests
     }
 
     [Fact]
-    public void NotEnoughSpaceDisablesTheButton()
+    public async Task NotEnoughSpaceDisablesTheButton()
     {
         var viewModel = new AiPackDownloadViewModel(new FakeDownloader(free: 1000), () => null);
 
-        viewModel.Refresh();
+        await viewModel.RefreshAsync();
 
         Assert.Equal(AiPackDownloadState.NotEnoughSpace, viewModel.State);
         Assert.False(viewModel.CanStart);
@@ -47,7 +47,7 @@ public sealed class AiPackDownloadViewModelTests
         var viewModel = new AiPackDownloadViewModel(new FakeDownloader(free: 10_000), () => null);
         AiPackDestination? ended = null;
         viewModel.Ended += (_, destination) => ended = destination;
-        viewModel.Refresh();
+        await viewModel.RefreshAsync();
 
         await viewModel.StartAsync(CancellationToken.None);
 
@@ -61,7 +61,7 @@ public sealed class AiPackDownloadViewModelTests
     {
         var downloader = new FakeDownloader(free: 10_000) { Fail = _ => new OperationCanceledException() };
         var viewModel = new AiPackDownloadViewModel(downloader, () => null);
-        viewModel.Refresh();
+        await viewModel.RefreshAsync();
 
         await viewModel.StartAsync(CancellationToken.None);
 
@@ -77,7 +77,7 @@ public sealed class AiPackDownloadViewModelTests
             Fail = _ => new AiPackDownloadException(AiPackDownloadFailure.HashMismatch, AiPackComponent.LanguageModel, "bad"),
         };
         var viewModel = new AiPackDownloadViewModel(downloader, () => null);
-        viewModel.Refresh();
+        await viewModel.RefreshAsync();
 
         await viewModel.StartAsync(CancellationToken.None);
 
@@ -86,17 +86,55 @@ public sealed class AiPackDownloadViewModelTests
         Assert.True(viewModel.CanStart);
     }
 
+    [Fact]
+    public async Task StartAdmissionIsAsyncAndRejectsAStaleTypedPath()
+    {
+        var downloader = new FakeDownloader(free: 10_000);
+        string? path = null;
+        var viewModel = new AiPackDownloadViewModel(downloader, () => path);
+        await viewModel.RefreshAsync();
+        var delayed = new TaskCompletionSource<AiPackDownloadOffer>(TaskCreationOptions.RunContinuationsAsynchronously);
+        downloader.PrepareOverride = (_, _) => delayed.Task;
+
+        var start = viewModel.StartAsync(CancellationToken.None);
+
+        Assert.False(viewModel.CanStart);
+        path = "typed-while-hashing";
+        await viewModel.StartAsync(CancellationToken.None);
+        Assert.Equal(2, downloader.Preparations);
+
+        delayed.SetResult(downloader.Offer);
+        await start;
+
+        Assert.Equal(0, downloader.Downloads);
+        Assert.Equal(AiPackDownloadState.Ready, viewModel.State);
+        Assert.True(viewModel.CanStart);
+    }
+
     private sealed class FakeDownloader(long free) : IAiPackDownloader
     {
         public int Downloads { get; private set; }
 
+        public int Preparations { get; private set; }
+
+        public AiPackDownloadOffer Offer { get; private set; } = null!;
+
+        public Func<string?, CancellationToken, Task<AiPackDownloadOffer>>? PrepareOverride { get; set; }
+
         public Func<AiPackDownloadOffer, Exception?> Fail { get; init; } = _ => null;
 
-        public AiPackDownloadOffer Prepare(string? packPath)
+        public Task<AiPackDownloadOffer> PrepareAsync(string? packPath, CancellationToken cancellationToken)
         {
+            Preparations++;
+            if (PrepareOverride is { } prepare)
+            {
+                return prepare(packPath, cancellationToken);
+            }
+
             var root = Path.Combine(Path.GetTempPath(), "quill-tests", "ai-pack");
             var plan = AiPackDownloadPlan.Create(new AiPackCatalog([Llm]), AiPackStatus.NotInstalled, root);
-            return new AiPackDownloadOffer(new AiPackDestination(root, false), plan, free);
+            Offer = new AiPackDownloadOffer(new AiPackDestination(root, false), plan, free);
+            return Task.FromResult(Offer);
         }
 
         public Task DownloadAsync(AiPackDownloadOffer offer, IProgress<AiPackDownloadProgress> progress, CancellationToken cancellationToken)

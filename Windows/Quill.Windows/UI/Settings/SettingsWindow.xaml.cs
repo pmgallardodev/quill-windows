@@ -49,20 +49,20 @@ internal partial class SettingsWindow
     private void OnOpenConfigFolder(object sender, RoutedEventArgs e) =>
         OpenFolder(Path.GetDirectoryName(_viewModel.ConfigPath));
 
-    private void OnBrowsePackPath(object sender, RoutedEventArgs e)
+    private async void OnBrowsePackPath(object sender, RoutedEventArgs e)
     {
         if (PickFolder(_viewModel.PackPath) is { } folder)
         {
             _viewModel.PackPath = folder;
             _viewModel.RefreshPackStatus();
-            _aiPackDownload.Refresh();
+            await _aiPackDownload.RefreshAsync(_closing.Token);
         }
     }
 
-    private void OnCheckPack(object sender, RoutedEventArgs e)
+    private async void OnCheckPack(object sender, RoutedEventArgs e)
     {
         _viewModel.RefreshPackStatus();
-        _aiPackDownload.Refresh();
+        await _aiPackDownload.RefreshAsync(_closing.Token);
     }
 
     private void OnBrowseLlmModel(object sender, RoutedEventArgs e)

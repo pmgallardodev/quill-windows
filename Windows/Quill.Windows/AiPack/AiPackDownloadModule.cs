@@ -18,7 +18,7 @@ internal sealed record AiPackDownloadOffer(AiPackDestination Destination, AiPack
 internal interface IAiPackDownloader
 {
     /// <param name="packPath">"ai.pack_path" as typed in Settings (may be unsaved or empty).</param>
-    AiPackDownloadOffer Prepare(string? packPath);
+    Task<AiPackDownloadOffer> PrepareAsync(string? packPath, CancellationToken cancellationToken);
 
     /// <summary>Downloads the offer's plan. Throws <see cref="AiPackDownloadException"/>,
     /// <see cref="HttpRequestException"/>, <see cref="IOException"/> or
@@ -39,7 +39,7 @@ internal sealed class AiPackDownloadModule(Action<string> persistPackPath) : IAi
 
     private readonly Action<string> _persistPackPath = persistPackPath ?? throw new ArgumentNullException(nameof(persistPackPath));
 
-    public AiPackDownloadOffer Prepare(string? packPath)
+    public async Task<AiPackDownloadOffer> PrepareAsync(string? packPath, CancellationToken cancellationToken)
     {
         var configured = string.IsNullOrWhiteSpace(packPath) ? null : Environment.ExpandEnvironmentVariables(packPath);
         var destination = AiPackDestination.Resolve(
@@ -48,7 +48,7 @@ internal sealed class AiPackDownloadModule(Action<string> persistPackPath) : IAi
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             IsWritable);
         var status = new ManifestAiPackLocator(AppContext.BaseDirectory, destination.Root).Locate();
-        var plan = AiPackDownloadPlan.Create(AiPackCatalog.Default, status, destination.Root);
+        var plan = await AiPackDownloadPlan.CreateAsync(AiPackCatalog.Default, status, destination.Root, cancellationToken).ConfigureAwait(false);
         return new AiPackDownloadOffer(destination, plan, FreeSpace(destination.Root));
     }
 

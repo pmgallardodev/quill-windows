@@ -277,7 +277,7 @@ public sealed class AiPackInstaller
     private static AiPackDownloadException Stalled(AiPackCatalogEntry item, Exception inner) =>
         new(AiPackDownloadFailure.Stalled, item.Component, $"{item.Name}: no data received in time", inner: inner);
 
-    private static async Task<string> HashFileAsync(string path, CancellationToken cancellationToken)
+    internal static async Task<string> HashFileAsync(string path, CancellationToken cancellationToken)
     {
         await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, useAsync: true);
         return Convert.ToHexString(await SHA256.HashDataAsync(stream, cancellationToken).ConfigureAwait(false)).ToLowerInvariant();

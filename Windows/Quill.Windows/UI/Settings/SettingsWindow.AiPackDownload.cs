@@ -12,14 +12,14 @@ internal partial class SettingsWindow
 {
     private AiPackDownloadViewModel _aiPackDownload = null!;
 
-    private void InitializeAiPackDownload()
+    private async void InitializeAiPackDownload()
     {
         _aiPackDownload = new AiPackDownloadViewModel(
             new AiPackDownloadModule(SettingsModule.PersistAiPackPath),
             () => _viewModel.PackPath);
         _aiPackDownload.Ended += OnAiPackDownloadEnded;
         AiPackDownloadCard.DataContext = _aiPackDownload;
-        _aiPackDownload.Refresh();
+        await _aiPackDownload.RefreshAsync(_closing.Token);
     }
 
     private async void OnAiPackDownload(object sender, RoutedEventArgs e) =>
@@ -27,10 +27,10 @@ internal partial class SettingsWindow
 
     private void OnAiPackCancel(object sender, RoutedEventArgs e) => _aiPackDownload.Cancel();
 
-    private void OnAiPackCheckAgain(object sender, RoutedEventArgs e)
+    private async void OnAiPackCheckAgain(object sender, RoutedEventArgs e)
     {
         _viewModel.RefreshPackStatus();
-        _aiPackDownload.Refresh();
+        await _aiPackDownload.RefreshAsync(_closing.Token);
     }
 
     private void OnAiPackDownloadEnded(object? sender, AiPackDestination destination)
