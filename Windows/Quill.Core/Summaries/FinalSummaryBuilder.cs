@@ -19,18 +19,32 @@ public sealed class FinalSummaryBuilder
     private readonly IInferenceScheduler _scheduler;
     private readonly ISessionStore _store;
     private readonly IClock _clock;
+    private readonly ISummaryStateStore? _state;
 
-    public FinalSummaryBuilder(ILanguageModel model, IInferenceScheduler scheduler, ISessionStore store, IClock? clock = null)
+    /// <param name="state">
+    /// Backup + outdated sidecars. Defaults to <see cref="FileSummaryStateStore"/> when
+    /// <paramref name="store"/> is a <see cref="FileSessionStore"/>; otherwise no sidecars are written.
+    /// </param>
+    public FinalSummaryBuilder(
+        ILanguageModel model,
+        IInferenceScheduler scheduler,
+        ISessionStore store,
+        IClock? clock = null,
+        ISummaryStateStore? state = null)
     {
         _model = model ?? throw new ArgumentNullException(nameof(model));
         _scheduler = scheduler ?? throw new ArgumentNullException(nameof(scheduler));
         _store = store ?? throw new ArgumentNullException(nameof(store));
         _clock = clock ?? SystemClock.Instance;
+        _state = state ?? (store is FileSessionStore files ? new FileSummaryStateStore(files, _clock) : null);
     }
 
     /// <summary>
     /// Summarizes the session's final transcript (transcript.json) with its notes.md and saves
     /// summary.json. Never throws for a missing model or bad model output: see <see cref="SummaryOutcome.Status"/>.
+    /// Regenerating keeps the user's state: done flags are carried over by
+    /// <see cref="SummaryUserStateMerger"/>, the replaced summary is kept as summary.prev.json and the
+    /// "outdated" flag is cleared.
     /// </summary>
     /// <param name="progress">0..1, reported after each model call.</param>
     public async Task<SummaryOutcome> BuildAsync(
@@ -44,12 +58,40 @@ public sealed class FinalSummaryBuilder
         var notes = NotesDocument.Parse(await _store.LoadNotesAsync(sessionId, cancellationToken).ConfigureAwait(false));
 
         var outcome = await SummarizeAsync(transcript, notes, options, progress, cancellationToken).ConfigureAwait(false);
-        if (outcome.Status == SummaryStatus.Completed)
+        if (outcome.Status != SummaryStatus.Completed)
         {
-            await _store.SaveSummaryAsync(sessionId, outcome.Summary!, cancellationToken).ConfigureAwait(false);
+            return outcome;
         }
 
-        return outcome;
+        var summary = outcome.Summary!;
+        var previous = await _store.LoadSummaryAsync(sessionId, SummaryKind.Final, cancellationToken).ConfigureAwait(false);
+        if (previous is not null)
+        {
+            summary = SummaryUserStateMerger.Merge(previous, summary).Summary;
+            await TrySidecarAsync(() => _state!.BackupAsync(sessionId, previous, cancellationToken)).ConfigureAwait(false);
+        }
+
+        await _store.SaveSummaryAsync(sessionId, summary, cancellationToken).ConfigureAwait(false);
+        await TrySidecarAsync(() => _state!.ClearOutdatedAsync(sessionId, cancellationToken)).ConfigureAwait(false);
+        return outcome with { Summary = summary };
+    }
+
+    /// <summary>Sidecars are a safety net: an I/O failure there must not lose the new summary.</summary>
+    private async Task TrySidecarAsync(Func<Task> write)
+    {
+        if (_state is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await write().ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            System.Diagnostics.Trace.TraceWarning($"quill: summary sidecar write failed: {exception.Message}");
+        }
     }
 
     /// <summary>Same pipeline without storage, e.g. for an imported transcript or a preview.</summary>
