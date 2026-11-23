@@ -30,7 +30,7 @@ public sealed class SummariesModule : IDisposable
         _scheduler = scheduler ?? throw new ArgumentNullException(nameof(scheduler));
         _store = store ?? throw new ArgumentNullException(nameof(store));
         _clock = clock ?? SystemClock.Instance;
-        _model = new LlamaSharpLanguageModel(() => _aiPack.Locate().PathOf(AiPackComponent.LanguageModel), options);
+        _model = new LlamaSharpLanguageModel(_aiPack, options);
         FinalSummaries = new FinalSummaryBuilder(_model, _scheduler, _store, _clock);
         CatchUp = new CatchUpSummarizer(_model, _scheduler, _clock);
     }

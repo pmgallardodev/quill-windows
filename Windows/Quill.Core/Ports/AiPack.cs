@@ -38,11 +38,38 @@ public sealed record AiPackStatus(
         new Dictionary<AiPackComponent, string>(),
         Enum.GetValues<AiPackComponent>());
 
+    /// <summary>
+    /// Components shipped split in parts that Quill is joining (or failed to join). Each one is
+    /// also listed in <see cref="Missing"/> until its joined file is verified and in place.
+    /// </summary>
+    public IReadOnlyList<ModelPreparation> Preparing { get; init; } = [];
+
     public string? PathOf(AiPackComponent component) =>
         Paths.TryGetValue(component, out var path) ? path : null;
 
     public bool Has(AiPackComponent component) => Paths.ContainsKey(component);
+
+    /// <summary>The join state of a split component, or null when it is ready or not split.</summary>
+    public ModelPreparation? PreparationOf(AiPackComponent component) =>
+        Preparing.FirstOrDefault(preparation => preparation.Component == component);
 }
+
+public enum ModelPreparationState
+{
+    /// <summary>Parts are being joined and verified in the background ("Preparando el modelo de IA…").</summary>
+    Preparing,
+
+    /// <summary>The joined file is verified and in place.</summary>
+    Ready,
+
+    /// <summary>Joining failed; <see cref="ModelPreparation.Error"/> says why.</summary>
+    Failed,
+}
+
+/// <summary>Progress of joining one split AI pack component.</summary>
+/// <param name="Progress">Fraction of bytes joined, 0..1.</param>
+/// <param name="Error">Why joining failed (English, for logs and diagnostics); null otherwise.</param>
+public sealed record ModelPreparation(AiPackComponent Component, ModelPreparationState State, double Progress, string? Error);
 
 /// <summary>
 /// Finds the AI pack: an explicit path from Settings first, otherwise next to the

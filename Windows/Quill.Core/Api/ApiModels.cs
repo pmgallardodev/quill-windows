@@ -40,11 +40,17 @@ public interface IApiSearch
     Task<IReadOnlyList<ApiSearchHit>> SearchAsync(string query, int limit, CancellationToken cancellationToken);
 }
 
-/// <summary>Transport-agnostic request: method, raw request target (path + query) and body bytes.</summary>
-public sealed record ApiRequest(string Method, string Target, ReadOnlyMemory<byte> Body);
+/// <summary>
+/// Transport-agnostic request: method, raw request target (path + query), body bytes and the
+/// request headers (lower-case names; null when the caller has none).
+/// </summary>
+public sealed record ApiRequest(string Method, string Target, ReadOnlyMemory<byte> Body, IReadOnlyDictionary<string, string>? Headers = null)
+{
+    public string? Header(string name) => Headers?.GetValueOrDefault(name);
+}
 
-/// <summary>Status code and JSON body (null for bodiless answers such as 202).</summary>
-public sealed record ApiResponse(int Status, string? Json)
+/// <summary>Status code, JSON body (null for bodiless answers such as 202) and extra response headers.</summary>
+public sealed record ApiResponse(int Status, string? Json, IReadOnlyList<KeyValuePair<string, string>>? Headers = null)
 {
     internal static ApiResponse Ok(object value) => new(200, JsonSerializer.Serialize(value, ApiJson.Options));
 

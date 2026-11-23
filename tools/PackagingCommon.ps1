@@ -200,6 +200,71 @@ function New-QuillZip {
     }
 }
 
+function Get-QuillPartSizes {
+    # Mirrors Quill.Core.AiPack.SplitModelPlan.PartSizes: the fewest parts of at most
+    # $MaxPartBytes, balanced to differ by at most one byte, larger parts first.
+    param(
+        [Parameter(Mandatory)] [long]$TotalBytes,
+        [Parameter(Mandatory)] [long]$MaxPartBytes
+    )
+
+    if ($TotalBytes -le 0 -or $MaxPartBytes -le 0) {
+        throw "Part sizes need a positive total ($TotalBytes) and maximum ($MaxPartBytes)."
+    }
+
+    # Model sizes stay far below 2^53, so double arithmetic is exact here.
+    $count = [long][Math]::Ceiling([double]$TotalBytes / [double]$MaxPartBytes)
+    $size = [long][Math]::Floor([double]$TotalBytes / [double]$count)
+    $remainder = $TotalBytes - ($size * $count)
+    $sizes = New-Object 'System.Collections.Generic.List[long]'
+    for ($index = 0; $index -lt $count; $index++) {
+        if ($index -lt $remainder) { $sizes.Add($size + 1) } else { $sizes.Add($size) }
+    }
+
+    return , $sizes.ToArray()
+}
+
+function Split-QuillFile {
+    # Copies $Source into consecutive byte ranges, one file per entry of $Parts (objects with
+    # Path and Size). The sizes must add up to the source length exactly.
+    param(
+        [Parameter(Mandatory)] [string]$Source,
+        [Parameter(Mandatory)] [object[]]$Parts
+    )
+
+    $buffer = New-Object byte[] (4MB)
+    $reader = [System.IO.File]::OpenRead($Source)
+    try {
+        foreach ($part in $Parts) {
+            New-Item -ItemType Directory -Path (Split-Path -Parent $part.Path) -Force | Out-Null
+            $writer = [System.IO.File]::Open($part.Path, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write)
+            try {
+                $remaining = [long]$part.Size
+                while ($remaining -gt 0) {
+                    $want = [int][Math]::Min([long]$buffer.Length, $remaining)
+                    $read = $reader.Read($buffer, 0, $want)
+                    if ($read -le 0) {
+                        throw "$Source ended before part $($part.Path) was complete."
+                    }
+
+                    $writer.Write($buffer, 0, $read)
+                    $remaining -= $read
+                }
+            }
+            finally {
+                $writer.Dispose()
+            }
+        }
+
+        if ($reader.ReadByte() -ne -1) {
+            throw "$Source is longer than the sum of its parts."
+        }
+    }
+    finally {
+        $reader.Dispose()
+    }
+}
+
 function Assert-QuillAssetSize {
     param([Parameter(Mandatory)] [string]$Path)
 

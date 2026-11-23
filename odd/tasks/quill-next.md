@@ -138,10 +138,13 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       Evidence: 8bd3df5, e912231, 094721d, fabaa71, c593bcf, 1ea0ade, merged clean. Post-merge:
       Core 538/538, Windows 0/0, resx valid. TcpListener on 127.0.0.1 (no http.sys/Kestrel),
       hand-written MCP subset, API off by default. Wiring → I2.
-- [ ] I2 Final wiring: LocalApiModule (start/restart on ApiSettingsStore.Saved, Publish events
+- [x] I2 Final wiring: LocalApiModule (start/restart on ApiSettingsStore.Saved, Publish events
       at recording stop / transcript / summary, dispose), F10 AskModule + IApiSearch for API/MCP,
       "Regenerar" banner when summary.state.json outdated, Core README rows (Api, Search, Ask).
       Route D after F10 + F11/F13 merge.
+      Evidence: 71809e2, 28fc992, c7046be, cf03bbb, 855b88e, merged clean. Post-merge: Core
+      632/632, Windows 0/0, resx valid. MCP targets spec 2025-11-25 (negotiates 2025-06-18,
+      2025-03-26, 2024-11-05), stateless, 202 for notifications, 405 GET; handshake tests RED→GREEN.
 - [x] F13 Opt-in in-person mode (diarize mic track, recognize owner). Route D.
       Evidence: 3fe8acd + 5db2bba, merged. Per-meeting switch in Interlocutores panel; owner =
       saved voice → loudest (≥25% talk time) → most talk. Owner voice learned from first 5 online
@@ -152,9 +155,13 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       2 GiB GitHub asset cap → agent defaulted to UD-Q3_K_XL (1.98 GiB, unscored) in a separate
       `-llm.zip` (3 assets). No LICENSE in repo (owner's call).
       Owner decision 2026-11-23: option A — ship Qwen3-4B Q4_K_M split in two parts (3 assets).
-- [ ] P1b Split-model support: Q4_K_M as default, split into parts < 2 GiB at build time,
+- [x] P1b Split-model support: Q4_K_M as default, split into parts < 2 GiB at build time,
       reassembled/loaded by Quill with SHA-256 verification; locator + adapter + scripts + README.
       Route D.
+      Evidence: db3a3a4, 59421f8, 0e65027, merged clean; parent wired LlamaSharpLanguageModel
+      (IAiPackLocator) in SummariesModule + notice fix. Byte-split (no upstream shards), 2 parts of
+      1,248,640,560 B, joined on first use with per-part + full SHA-256. Core 656/656, Windows 0/0.
+      Release = 4 assets (app, pack, llm-part1, llm-part2). Scripts unexecuted (no pwsh).
 - [ ] P2 Hybrid AI-pack install (owner decision 2026-11-23, revises Q1): in-app "Descargar pack
       de IA" button (user-initiated only, never automatic) downloading pinned Hugging Face
       revisions with size cap + SHA-256 verification, resumable, progress, cancel, free-space
