@@ -155,9 +155,13 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       2 GiB GitHub asset cap → agent defaulted to UD-Q3_K_XL (1.98 GiB, unscored) in a separate
       `-llm.zip` (3 assets). No LICENSE in repo (owner's call).
       Owner decision 2026-11-23: option A — ship Qwen3-4B Q4_K_M split in two parts (3 assets).
-- [ ] P1b Split-model support: Q4_K_M as default, split into parts < 2 GiB at build time,
+- [x] P1b Split-model support: Q4_K_M as default, split into parts < 2 GiB at build time,
       reassembled/loaded by Quill with SHA-256 verification; locator + adapter + scripts + README.
       Route D.
+      Evidence: db3a3a4, 59421f8, 0e65027, merged clean; parent wired LlamaSharpLanguageModel
+      (IAiPackLocator) in SummariesModule + notice fix. Byte-split (no upstream shards), 2 parts of
+      1,248,640,560 B, joined on first use with per-part + full SHA-256. Core 656/656, Windows 0/0.
+      Release = 4 assets (app, pack, llm-part1, llm-part2). Scripts unexecuted (no pwsh).
 - [ ] P2 Hybrid AI-pack install (owner decision 2026-11-23, revises Q1): in-app "Descargar pack
       de IA" button (user-initiated only, never automatic) downloading pinned Hugging Face
       revisions with size cap + SHA-256 verification, resumable, progress, cancel, free-space
