@@ -46,7 +46,10 @@ internal sealed partial class MainWindow : FluentWindow
     }
 
     /// <summary>"Importar grabación": pick one or two files, then the import dialog.</summary>
-    private void OnImportClick(object sender, RoutedEventArgs e)
+    private void OnImportClick(object sender, RoutedEventArgs e) => PickAndImport();
+
+    /// <summary>Same as the window's "Importar grabación" button (also used by the tray menu).</summary>
+    public void PickAndImport()
     {
         var extensions = string.Join(";", ImportPlan.SupportedExtensions.Select(extension => $"*{extension}"));
         var picker = new Microsoft.Win32.OpenFileDialog

@@ -88,6 +88,21 @@ internal sealed class CompanionPanelModule
         }
     }
 
+    /// <summary>
+    /// Shows a notification inside the open panel (the panel is excluded from screen capture,
+    /// unlike OS balloons). Returns false when no panel is open. UI thread.
+    /// </summary>
+    public bool ShowNotice(string message, TimeSpan duration)
+    {
+        if (!_dispatcher.CheckAccess() || _viewModel is not { } viewModel)
+        {
+            return false;
+        }
+
+        viewModel.ShowNotice(message, duration);
+        return true;
+    }
+
     /// <summary>Closes the panel; pending notes are written in the background.</summary>
     public void Close() => _ = CloseAsync();
 
