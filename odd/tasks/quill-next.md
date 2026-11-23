@@ -85,6 +85,14 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       XML valid). Core 260/260, Windows projects build 0/0. Pending: wiring (I1), level meters
       need per-track peak/RMS from RecordingSession, Windows checks.
 
+### Discreet mode (owner request 2026-11-23, default ON)
+- [ ] F14 Discreet mode: all Quill windows excluded from screen capture
+      (SetWindowDisplayAffinity WDA_EXCLUDEFROMCAPTURE, fallback WDA_MONITOR) via
+      ThemeBootstrapper.Attach; no taskbar buttons / Alt+Tab while recording; neutral tray icon
+      option (no red recording dot); all balloon/toast notifications suppressed (shown in the
+      excluded panel instead); global hotkey to show/hide the companion panel; setting
+      `privacy.discreet_mode` (default true). Route D (parallel with F8).
+
 ### Integration (after Wave B)
 - [ ] I1 Composition root: real ISessionActions (F4 summaries, F5 speakers, F8 playback), one
       app-wide InferenceScheduler, start LiveSummaryLoop + forward LiveTranscriptBuffer segments,
