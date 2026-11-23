@@ -216,6 +216,7 @@ public static class HttpWire
         403 => "Forbidden",
         404 => "Not Found",
         405 => "Method Not Allowed",
+        406 => "Not Acceptable",
         408 => "Request Timeout",
         413 => "Content Too Large",
         415 => "Unsupported Media Type",
