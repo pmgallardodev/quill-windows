@@ -23,14 +23,15 @@
 | B3 | P3 | windows-latency.ps1:48–52,156 | Child failures can end in apparent success. Return a failed final status for failed required measurements. |
 
 ## Work units
-- [ ] N1/N2/S1/S2 — notes, search and index lifecycle. `daf7766` — 719/719 Core; Windows cross-build clean. UI and post-install backfill runtime not exercised.
-- [ ] U1/U2/U3 — capture and playback UI. `69fef66`; 719/719 Core and Windows cross-build clean; UI tests not executed on Windows.
-- [ ] P2/P3/P4 — portable split-model lifecycle.
-- [ ] P1/P5/B1/B2/B3 — release scripts and shareable benchmark output.
+- [x] N1/N2/S1/S2 — notes, search and index lifecycle. `daf7766` — 719/719 Core; Windows cross-build clean. UI and post-install backfill runtime not exercised. `0b05e67` and final companion close guard: independent review confirmed navigation retains conflicted drafts, search captures the session once, and shutdown requires Saved. Windows runtime pending.
+- [x] U1/U2/U3 — capture and playback UI. `69fef66`; 719/719 Core and Windows cross-build clean; UI tests not executed on Windows. `0b05e67` normalizes selected values and refuses ambiguous same-track mutations; independent source review confirmed. Core regression executed.
+- [x] P2/P3/P4 — portable split-model lifecycle. `c37f9da` — exclusive staging truncation precedes free-space admission; independent Core run passed.
+- [x] P1/P5/B1/B2/B3 — release scripts and shareable benchmark output. `cfa15bb`, `5878a27` — version-specific inventory, pinned cache, allowlisted measurements, native failure propagation. PowerShell tests authored but not run.
 
 Checks: test-first with local synthetic data; full Core xUnit and Windows framework-dependent cross-build with cached .NET 10 SDK. Build/test bench where supported. PowerShell/Windows runtime checks cannot be claimed without their runners. No model or package downloads.
 
-## Independent verification / recovery
+## Final verification
 
-- N1/S2 and U1/U3: source wiring checked. N2/S1: independent review found actual navigation/companion close could discard a refused draft, a legacy save adapter forwarded the wrong argument, and search looked up a session twice. Follow-up edits exist but have not yet been verified or committed.
-- U2: normalize stored text/speaker identity consistently with the UI; downstream same-track/equal-start mutation must not silently target the first match. Pending.
+- 15/15 findings addressed in source. Follow-up review corrected actual notes close/navigation paths, speaker ambiguity, disappearing hits, stale staging on low disk, and failed LLM metrics. Companion's final save admission fix is in `af11021`.
+- Fresh independent checks on the integrated production changes: 726 Core tests passed; Windows test project and benchmark project cross-built for win-x64 with zero warnings/errors. CRLF-aware Git diff check passed.
+- PowerShell and Windows runtime unavailable: the release/benchmark PowerShell tests, WPF interaction, real audio/inference and packaging were not executed. The final test-fixture quoting correction was inspected only. No remote operations or deployments.
