@@ -39,6 +39,9 @@ internal sealed class AiPackDownloadModule(Action<string> persistPackPath) : IAi
 
     private readonly Action<string> _persistPackPath = persistPackPath ?? throw new ArgumentNullException(nameof(persistPackPath));
 
+    /// <summary>Raised after an install leaves a manifest on disk, including the default destination.</summary>
+    internal static event EventHandler? PackAvailabilityChanged;
+
     public async Task<AiPackDownloadOffer> PrepareAsync(string? packPath, CancellationToken cancellationToken)
     {
         var configured = string.IsNullOrWhiteSpace(packPath) ? null : Environment.ExpandEnvironmentVariables(packPath);
@@ -69,6 +72,11 @@ internal sealed class AiPackDownloadModule(Action<string> persistPackPath) : IAi
                 File.Exists(Path.Combine(offer.Destination.Root, ManifestAiPackLocator.ManifestFileName)))
             {
                 _persistPackPath(offer.Destination.Root);
+            }
+
+            if (File.Exists(Path.Combine(offer.Destination.Root, ManifestAiPackLocator.ManifestFileName)))
+            {
+                PackAvailabilityChanged?.Invoke(this, EventArgs.Empty);
             }
         }
     }

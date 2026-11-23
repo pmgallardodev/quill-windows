@@ -26,20 +26,38 @@ internal sealed class NotesAutosaver
 {
     public static readonly TimeSpan DefaultDelay = TimeSpan.FromSeconds(1);
 
-    private readonly Func<string, CancellationToken, Task> _save;
+    private readonly Func<string, string, CancellationToken, Task> _save;
     private readonly TimeSpan _delay;
     private readonly object _lock = new();
     private readonly SemaphoreSlim _saving = new(1, 1);
     private CancellationTokenSource? _debounce;
     private string _latest = string.Empty;
+    private string _baseline = string.Empty;
     private long _version;
     private long _savedVersion;
     private NotesSaveState _state = NotesSaveState.Saved;
 
     public NotesAutosaver(Func<string, CancellationToken, Task> save, TimeSpan? delay = null)
     {
+        ArgumentNullException.ThrowIfNull(save);
+        _save = (text, _, token) => save(text, token);
+        _delay = delay ?? DefaultDelay;
+    }
+
+    public NotesAutosaver(Func<string, string, CancellationToken, Task> save, TimeSpan? delay = null)
+    {
         _save = save ?? throw new ArgumentNullException(nameof(save));
         _delay = delay ?? DefaultDelay;
+    }
+
+    public void SetBaseline(string markdown)
+    {
+        lock (_lock)
+        {
+            _baseline = markdown ?? string.Empty;
+            _latest = _baseline;
+            _savedVersion = _version;
+        }
     }
 
     public event EventHandler<NotesSaveState>? StateChanged;
@@ -103,6 +121,7 @@ internal sealed class NotesAutosaver
         try
         {
             string text;
+            string baseline;
             long version;
             lock (_lock)
             {
@@ -112,13 +131,14 @@ internal sealed class NotesAutosaver
                 }
 
                 text = _latest;
+                baseline = _baseline;
                 version = _version;
             }
 
             SetState(NotesSaveState.Saving);
             try
             {
-                await _save(text, CancellationToken.None).ConfigureAwait(false);
+                await _save(baseline, text, CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception exception) when (exception is not OutOfMemoryException)
             {
@@ -131,6 +151,7 @@ internal sealed class NotesAutosaver
             lock (_lock)
             {
                 _savedVersion = version;
+                _baseline = text;
                 upToDate = _version == version;
             }
 

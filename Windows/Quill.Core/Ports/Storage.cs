@@ -8,8 +8,8 @@ public sealed record TranscriptInfo(string Engine, string Model);
 /// <summary>
 /// Session folder persistence (format v2, additive over v1). Sessions are keyed by
 /// <see cref="Session.Id"/> (folder name). Missing optional files read as empty /
-/// null; corrupt files read as empty / null too (reading never throws for bad
-/// content, only for an unknown or unsafe session id). Writes are atomic per file.
+/// null; corrupt files read as empty / null too. Unreadable notes throw so an editor
+/// cannot mistake them for a new empty document. Writes are atomic per file.
 /// Default implementation: <see cref="Storage.FileSessionStore"/>.
 /// </summary>
 public interface ISessionStore
@@ -52,7 +52,23 @@ public interface ISessionStore
     Task<string> LoadNotesAsync(string sessionId, CancellationToken cancellationToken);
 
     Task SaveNotesAsync(string sessionId, string markdown, CancellationToken cancellationToken);
+
+    /// <summary>Saves only if the current notes still equal the editor's loaded baseline.</summary>
+    async Task SaveNotesAsync(string sessionId, string expectedMarkdown, string markdown, CancellationToken cancellationToken)
+    {
+        var current = await LoadNotesAsync(sessionId, cancellationToken).ConfigureAwait(false);
+        if (!string.Equals(current, expectedMarkdown, StringComparison.Ordinal))
+        {
+            throw new NotesConflictException(sessionId);
+        }
+
+        await SaveNotesAsync(sessionId, markdown, cancellationToken).ConfigureAwait(false);
+    }
 }
+
+/// <summary>Raised when another editor changed the note since this draft was loaded.</summary>
+public sealed class NotesConflictException(string sessionId)
+    : IOException($"Notes for session '{sessionId}' changed after this draft was loaded. The draft was kept; reload or copy it before continuing.");
 
 /// <summary>A stored vector with the text it came from.</summary>
 /// <param name="Id">Unique id, e.g. "{sessionId}:seg:{index}".</param>

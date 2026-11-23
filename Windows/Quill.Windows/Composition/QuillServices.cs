@@ -3,6 +3,7 @@ using Quill.Core.Api;
 using Quill.Core.Live;
 using Quill.Core.Search;
 using Quill.Windows.Adapters.Embeddings;
+using Quill.Windows.AiPack;
 using Quill.Windows.Ask;
 using Quill.Windows.LocalApi;
 using Quill.Core.Pipeline;
@@ -89,6 +90,7 @@ internal sealed class QuillServices : IDisposable
         SessionActions = new AppSessionActions(AiServices) { Voices = new SpeakersVoiceActions(Speakers) };
         PostTranscription = new PostTranscriptionPipeline(new AppPostTranscriptionSteps(AiServices), summaryState);
         SettingsModule.Saved += OnSettingsSaved;
+        AiPackDownloadModule.PackAvailabilityChanged += OnAiPackAvailabilityChanged;
         ApiSettingsStore.Saved += OnApiSettingsSaved;
     }
 
@@ -231,6 +233,7 @@ internal sealed class QuillServices : IDisposable
         }
 
         SettingsModule.Saved -= OnSettingsSaved;
+        AiPackDownloadModule.PackAvailabilityChanged -= OnAiPackAvailabilityChanged;
         ApiSettingsStore.Saved -= OnApiSettingsSaved;
         _lifetime.Cancel();
         try
@@ -269,7 +272,25 @@ internal sealed class QuillServices : IDisposable
         }
     }
 
-    private void OnSettingsSaved(object? sender, QuillSettings saved) => _settings = saved;
+    private void OnSettingsSaved(object? sender, QuillSettings saved)
+    {
+        var previousPackPath = _settings.Ai.PackPath;
+        _settings = saved;
+        if (!string.Equals(previousPackPath, saved.Ai.PackPath, StringComparison.OrdinalIgnoreCase))
+        {
+            BackfillEmbeddingIndexIfAvailable();
+        }
+    }
+
+    private void OnAiPackAvailabilityChanged(object? sender, EventArgs e) => BackfillEmbeddingIndexIfAvailable();
+
+    private void BackfillEmbeddingIndexIfAvailable()
+    {
+        if (AiPack.Locate().Has(AiPackComponent.TextEmbedding))
+        {
+            _ = RunQuietlyAsync(() => Ask.IndexAllAsync(Lifetime), "backfilling semantic search vectors");
+        }
+    }
 
     private async void OnApiSettingsSaved(object? sender, ApiSettings saved)
     {

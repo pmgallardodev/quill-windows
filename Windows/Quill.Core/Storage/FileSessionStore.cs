@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -37,6 +38,7 @@ public sealed class FileSessionStore : ISessionStore
 
     private readonly string _root;
     private readonly IClock _clock;
+    private static readonly ConcurrentDictionary<string, SemaphoreSlim> NotesLocks = new(StringComparer.Ordinal);
 
     public FileSessionStore(string recordingsRoot, IClock? clock = null)
     {
@@ -285,9 +287,39 @@ public sealed class FileSessionStore : ISessionStore
         return Task.CompletedTask;
     }
 
-    public async Task<string> LoadNotesAsync(string sessionId, CancellationToken cancellationToken) =>
-        await ReadAsync(Path.Combine(FolderOf(sessionId), NotesFile), cancellationToken).ConfigureAwait(false)
-            ?? string.Empty;
+    public async Task<string> LoadNotesAsync(string sessionId, CancellationToken cancellationToken)
+    {
+        var path = Path.Combine(FolderOf(sessionId), NotesFile);
+        try
+        {
+            var parent = Path.GetDirectoryName(path)!;
+            if (IsLink(parent))
+            {
+                throw new IOException("notes folder is a link");
+            }
+
+            var attributes = File.GetAttributes(path);
+            if ((attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                throw new IOException("notes file is a link");
+            }
+
+            if ((attributes & FileAttributes.Directory) != 0)
+            {
+                throw new IOException("notes path is not a file");
+            }
+
+            return await File.ReadAllTextAsync(path, cancellationToken).ConfigureAwait(false);
+        }
+        catch (FileNotFoundException)
+        {
+            return string.Empty;
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return string.Empty;
+        }
+    }
 
     public Task SaveNotesAsync(string sessionId, string markdown, CancellationToken cancellationToken)
     {
@@ -295,6 +327,30 @@ public sealed class FileSessionStore : ISessionStore
         cancellationToken.ThrowIfCancellationRequested();
         AtomicFile.Write(Path.Combine(ExistingFolder(sessionId), NotesFile), markdown);
         return Task.CompletedTask;
+    }
+
+    public async Task SaveNotesAsync(string sessionId, string expectedMarkdown, string markdown, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(expectedMarkdown);
+        ArgumentNullException.ThrowIfNull(markdown);
+        cancellationToken.ThrowIfCancellationRequested();
+        var path = Path.Combine(ExistingFolder(sessionId), NotesFile);
+        var gate = NotesLocks.GetOrAdd(Path.GetFullPath(path), static _ => new SemaphoreSlim(1, 1));
+        await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var current = await LoadNotesAsync(sessionId, cancellationToken).ConfigureAwait(false);
+            if (!string.Equals(current, expectedMarkdown, StringComparison.Ordinal))
+            {
+                throw new NotesConflictException(sessionId);
+            }
+
+            AtomicFile.Write(path, markdown);
+        }
+        finally
+        {
+            gate.Release();
+        }
     }
 
     private string TranscriptPath(string sessionId, TranscriptPass pass) => pass == TranscriptPass.Live

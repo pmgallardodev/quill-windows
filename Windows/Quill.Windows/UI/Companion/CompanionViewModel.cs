@@ -75,7 +75,7 @@ internal sealed class CompanionViewModel : INotifyPropertyChanged
         _copyText = copyText ?? throw new ArgumentNullException(nameof(copyText));
         _now = now ?? (() => DateTimeOffset.UtcNow);
         _notes = new NotesAutosaver(
-            (markdown, token) => _context.Store.SaveNotesAsync(_context.SessionId, markdown, token),
+            (baseline, markdown, token) => _context.Store.SaveNotesAsync(_context.SessionId, baseline, markdown, token),
             notesDelay);
 
         TogglePauseCommand = new CompanionCommand(TogglePause, () => !_closed);
@@ -378,6 +378,7 @@ internal sealed class CompanionViewModel : INotifyPropertyChanged
         {
             var markdown = await _context.Store.LoadNotesAsync(_context.SessionId, CancellationToken.None);
             _notesText = markdown ?? string.Empty;
+            _notes.SetBaseline(_notesText);
             _notesLoaded = true;
         }
         catch (Exception exception) when (exception is not OutOfMemoryException)

@@ -660,6 +660,23 @@ public class NotesViewModelTests
         Assert.Equal(("a", "- de a"), Assert.Single(_store.SavedNotes));
         Assert.Equal(string.Empty, notes.Text);
     }
+
+    [Fact]
+    public async Task ConflictedDraftIsKeptAndMeetingSwitchIsBlocked()
+    {
+        _store.Notes["a"] = "baseline";
+        var notes = Notes();
+        await notes.LoadAsync("a", CancellationToken.None);
+        notes.Text = "my draft";
+        _store.Notes["a"] = "another editor's notes";
+
+        await notes.LoadAsync("b", CancellationToken.None);
+
+        Assert.Empty(_store.SavedNotes);
+        Assert.Equal("another editor's notes", _store.Notes["a"]);
+        Assert.Equal("my draft", notes.Text);
+        Assert.True(notes.IsDirty);
+    }
 }
 
 public class MyTasksViewModelTests

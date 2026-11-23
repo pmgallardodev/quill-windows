@@ -65,4 +65,10 @@ internal sealed class NotifyingSessionStore(ISessionStore inner, Action<string> 
         await _inner.SaveNotesAsync(sessionId, markdown, cancellationToken).ConfigureAwait(false);
         _contentChanged(sessionId);
     }
+
+    public async Task SaveNotesAsync(string sessionId, string expectedMarkdown, string markdown, CancellationToken cancellationToken)
+    {
+        await _inner.SaveNotesAsync(sessionId, expectedMarkdown, markdown, cancellationToken).ConfigureAwait(false);
+        _contentChanged(sessionId);
+    }
 }

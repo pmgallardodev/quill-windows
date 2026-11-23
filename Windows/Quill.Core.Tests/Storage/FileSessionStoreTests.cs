@@ -176,4 +176,40 @@ public sealed class FileSessionStoreTests
 
         Assert.Null(await Store(temp).LoadSessionAsync("nope", CancellationToken.None));
     }
+
+    [Fact]
+    public async Task MissingNotesFileLoadsAsEmpty()
+    {
+        using var temp = new TempDirectory();
+        V1Session(temp);
+
+        Assert.Equal(string.Empty, await Store(temp).LoadNotesAsync("2026-11-20_09-00-00", CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task NotesPathThatIsADirectoryFailsInsteadOfLookingLikeMissingNotes()
+    {
+        using var temp = new TempDirectory();
+        var folder = V1Session(temp);
+        Directory.CreateDirectory(Path.Combine(folder, FileSessionStore.NotesFile));
+
+        await Assert.ThrowsAsync<IOException>(() => Store(temp).LoadNotesAsync("2026-11-20_09-00-00", CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task StaleNotesDraftIsRejectedWithoutReplacingTheNewerDocument()
+    {
+        using var temp = new TempDirectory();
+        var folder = V1Session(temp);
+        temp.Write(folder, FileSessionStore.NotesFile, "base");
+        var store = Store(temp);
+        var loadedByFirstEditor = await store.LoadNotesAsync("2026-11-20_09-00-00", CancellationToken.None);
+        var loadedBySecondEditor = await store.LoadNotesAsync("2026-11-20_09-00-00", CancellationToken.None);
+
+        await store.SaveNotesAsync("2026-11-20_09-00-00", loadedByFirstEditor, "first edit", CancellationToken.None);
+
+        await Assert.ThrowsAsync<NotesConflictException>(() => store.SaveNotesAsync(
+            "2026-11-20_09-00-00", loadedBySecondEditor, "stale edit", CancellationToken.None));
+        Assert.Equal("first edit", await store.LoadNotesAsync("2026-11-20_09-00-00", CancellationToken.None));
+    }
 }

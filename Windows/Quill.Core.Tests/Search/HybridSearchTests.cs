@@ -107,6 +107,39 @@ public sealed class HybridSearchTests
     }
 
     [Fact]
+    public async Task Search_skips_catalog_entries_removed_while_embedding_is_pending()
+    {
+        await IndexAsync();
+        var model = new DeferredEmbeddingModel(_model);
+        var search = new HybridSearch(_catalog, _index, model, _scheduler);
+        var pending = search.SearchAsync(new SearchQuery("presupuesto"), CancellationToken.None);
+        await model.Started.Task;
+
+        _catalog.Remove("lunes");
+        model.Release.TrySetResult(true);
+
+        var response = await pending;
+
+        Assert.DoesNotContain(response.Results, result => result.Passage.SessionId == "lunes");
+        Assert.All(response.Results, result => Assert.NotNull(_catalog.Get(result.Passage.SessionId)));
+    }
+
+    private sealed class DeferredEmbeddingModel(IEmbeddingModel inner) : IEmbeddingModel
+    {
+        public TaskCompletionSource<bool> Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource<bool> Release { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public string ModelName => inner.ModelName;
+        public int Dimensions => inner.Dimensions;
+
+        public async Task<IReadOnlyList<float[]>> EmbedAsync(IReadOnlyList<string> texts, CancellationToken cancellationToken)
+        {
+            Started.TrySetResult(true);
+            await Release.Task.WaitAsync(cancellationToken);
+            return await inner.EmbedAsync(texts, cancellationToken);
+        }
+    }
+
+    [Fact]
     public void Reciprocal_rank_fusion_rewards_items_in_both_lists()
     {
         var fused = HybridSearch.Fuse(["a", "b", "c"], ["c", "d"], k: 60);

@@ -60,6 +60,12 @@ internal sealed class NotesViewModel : ObservableObject
     public async Task LoadAsync(string sessionId, CancellationToken cancellationToken)
     {
         await FlushAsync().ConfigureAwait(true);
+        if (IsDirty)
+        {
+            // A conflict or failed save must not be hidden by switching to another meeting.
+            return;
+        }
+
         _sessionId = sessionId;
         IsLoaded = false;
         Status = string.Empty;
@@ -132,7 +138,7 @@ internal sealed class NotesViewModel : ObservableObject
         Status = Loc.Get("Notes_Saving");
         try
         {
-            await _store.SaveNotesAsync(_sessionId, text, CancellationToken.None).ConfigureAwait(true);
+            await _store.SaveNotesAsync(_sessionId, _savedText, text, CancellationToken.None).ConfigureAwait(true);
             _savedText = text;
             Status = Loc.Get("Notes_Saved");
         }
