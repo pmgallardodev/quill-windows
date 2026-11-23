@@ -101,11 +101,17 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       dialogs/MessageBox. I1: set TrayController.CompanionPanel, show Notifier events in panel.
 
 ### Integration (after Wave B)
-- [ ] I1 Composition root: real ISessionActions (F4 summaries, F5 speakers, F8 playback), one
+- [x] I1 Composition root: real ISessionActions (F4 summaries, F5 speakers, F8 playback), one
       app-wide InferenceScheduler, start LiveSummaryLoop + forward LiveTranscriptBuffer segments,
       show/close CompanionPanelModule around recording (CloseAsync before final summary),
       final pipeline after transcription (speakers → final summary → optional auto-export),
       tray menu items (Ajustes, Importar), per-track audio levels, Core README update. Route D.
+      Evidence: 6e6ac21, 0953eca, 44f21a4, merged clean. Post-merge: Core 372/372 (net10),
+      Windows 0/0, resx valid. Gaps: GPU/model change needs restart; Recent notifications not
+      replayed; GPU probe = vulkan-1.dll present.
+- [ ] R1 Regenerating a summary must preserve user state (action-item done flags) by matching
+      items; also avoid re-running the full pipeline on transcription retry when a summary
+      exists unless the user asks. Route D.
 - [x] F8 Audio playback from transcript, transcript editing + re-summarize, import. Route D.
       Evidence: 0c16ae0, a099b55, 3038aa8, 1fc82a3, e8f5443, merged clean. Post-merge: Core
       330/330, Windows projects 0/0, resx valid. Custom WSOLA time-stretch (NAudio has none).
