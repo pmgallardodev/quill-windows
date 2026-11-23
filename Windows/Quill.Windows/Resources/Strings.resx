@@ -228,4 +228,191 @@
     <value>vence {0}</value>
     <comment>{0} = due date as written by the model, e.g. "viernes".</comment>
   </data>
+  <data name="Format_Time" xml:space="preserve">
+    <value>HH:mm</value>
+    <comment>.NET time format for a meeting start in the list.</comment>
+  </data>
+  <data name="Format_MeetingDate" xml:space="preserve">
+    <value>dddd, d 'de' MMMM 'de' yyyy · HH:mm</value>
+    <comment>.NET date format for the meeting header.</comment>
+  </data>
+  <data name="Common_Loading" xml:space="preserve">
+    <value>Cargando...</value>
+  </data>
+  <data name="Meeting_Queued" xml:space="preserve">
+    <value>En cola</value>
+  </data>
+  <data name="Meeting_TranscribingPercent" xml:space="preserve">
+    <value>Transcribiendo {0} %</value>
+    <comment>{0} = percentage 0-100.</comment>
+  </data>
+  <data name="Meeting_IssueFailed" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Meeting_IssueAbandoned" xml:space="preserve">
+    <value>Incompleta</value>
+  </data>
+  <data name="Meeting_IssueDisabled" xml:space="preserve">
+    <value>Sin transcripción</value>
+  </data>
+  <data name="Meeting_TranscribedIn" xml:space="preserve">
+    <value>Transcrito en {0}</value>
+    <comment>{0} = duration.</comment>
+  </data>
+  <data name="Meeting_Remaining" xml:space="preserve">
+    <value>~{0} restantes</value>
+    <comment>{0} = duration.</comment>
+  </data>
+  <data name="Meeting_DeleteBusy" xml:space="preserve">
+    <value>No se puede borrar una reunión en curso.</value>
+  </data>
+  <data name="Meeting_DeleteTitle" xml:space="preserve">
+    <value>Borrar reunión</value>
+  </data>
+  <data name="Meeting_DeleteMessage" xml:space="preserve">
+    <value>Se borrará la carpeta de {0} con el audio, el transcript, el resumen y las notas.
+
+Esto no se puede deshacer.</value>
+    <comment>{0} = meeting title.</comment>
+  </data>
+  <data name="Meeting_DeleteFailed" xml:space="preserve">
+    <value>No se pudo borrar la reunión.</value>
+  </data>
+  <data name="Meeting_DeleteFailedReason" xml:space="preserve">
+    <value>No se pudo borrar: {0}</value>
+  </data>
+  <data name="Meeting_Deleted" xml:space="preserve">
+    <value>{0} borrada.</value>
+  </data>
+  <data name="Meeting_NothingToCopy" xml:space="preserve">
+    <value>No hay transcript que copiar.</value>
+  </data>
+  <data name="Meeting_Copied" xml:space="preserve">
+    <value>Transcript de {0} copiado al portapapeles.</value>
+  </data>
+  <data name="Meeting_NothingToExport" xml:space="preserve">
+    <value>No hay transcript que exportar.</value>
+  </data>
+  <data name="Meeting_Exported" xml:space="preserve">
+    <value>{0} guardado en la carpeta de la reunión.</value>
+  </data>
+  <data name="Meeting_ExportFailed" xml:space="preserve">
+    <value>No se pudo escribir {0}.</value>
+  </data>
+  <data name="Meeting_ExportFailedReason" xml:space="preserve">
+    <value>No se pudo escribir {0}: {1}</value>
+  </data>
+  <data name="Meeting_PathMissing" xml:space="preserve">
+    <value>La ruta ya no existe.</value>
+  </data>
+  <data name="Meeting_PathLinked" xml:space="preserve">
+    <value>No se puede abrir una ruta enlazada.</value>
+  </data>
+  <data name="Meeting_OpenFailed" xml:space="preserve">
+    <value>No se pudo abrir: {0}</value>
+  </data>
+  <data name="Meetings_ReadFailed" xml:space="preserve">
+    <value>No se pudieron leer las reuniones: {0}</value>
+  </data>
+  <data name="Search_Searching" xml:space="preserve">
+    <value>Buscando...</value>
+  </data>
+  <data name="Search_Failed" xml:space="preserve">
+    <value>No se pudo completar la búsqueda.</value>
+  </data>
+  <data name="Search_NoResults" xml:space="preserve">
+    <value>Sin resultados</value>
+  </data>
+  <data name="Search_OneResult" xml:space="preserve">
+    <value>1 resultado</value>
+  </data>
+  <data name="Search_Results" xml:space="preserve">
+    <value>{0} resultados</value>
+  </data>
+  <data name="Search_MoreThan" xml:space="preserve">
+    <value>Más de {0} resultados</value>
+  </data>
+  <data name="Search_MatchPosition" xml:space="preserve">
+    <value>{0} de {1}</value>
+    <comment>{0} = current match, {1} = total.</comment>
+  </data>
+  <data name="Transcript_Marker" xml:space="preserve">
+    <value>Marca {0}</value>
+  </data>
+  <data name="Transcript_InProgress" xml:space="preserve">
+    <value>El transcript aparecerá cuando termine la transcripción.</value>
+  </data>
+  <data name="Transcript_NotYet" xml:space="preserve">
+    <value>Esta reunión todavía no tiene transcript.</value>
+  </data>
+  <data name="Transcript_Missing" xml:space="preserve">
+    <value>No hay transcript para esta reunión.</value>
+  </data>
+  <data name="Transcript_ReadFailed" xml:space="preserve">
+    <value>No se pudo leer el transcript de esta reunión.</value>
+  </data>
+  <data name="Transcript_Empty" xml:space="preserve">
+    <value>El transcript no tiene segmentos.</value>
+  </data>
+  <data name="Transcript_NoVisibleLines" xml:space="preserve">
+    <value>El transcript no tiene líneas con texto.</value>
+  </data>
+  <data name="Summary_LoadFailed" xml:space="preserve">
+    <value>No se pudo leer el resumen.</value>
+  </data>
+  <data name="Summary_GenerateFailed" xml:space="preserve">
+    <value>No se pudo generar el resumen: {0}</value>
+  </data>
+  <data name="Summary_SaveFailed" xml:space="preserve">
+    <value>No se pudo guardar el cambio en el resumen.</value>
+  </data>
+  <data name="Status_Copied" xml:space="preserve">
+    <value>Copiado al portapapeles.</value>
+  </data>
+  <data name="Status_ClipboardBusy" xml:space="preserve">
+    <value>No se pudo copiar: el portapapeles está ocupado.</value>
+  </data>
+  <data name="Notes_LoadFailed" xml:space="preserve">
+    <value>No se pudieron leer las notas.</value>
+  </data>
+  <data name="Notes_Saving" xml:space="preserve">
+    <value>Guardando...</value>
+  </data>
+  <data name="Notes_Saved" xml:space="preserve">
+    <value>Guardado</value>
+  </data>
+  <data name="Notes_SaveFailed" xml:space="preserve">
+    <value>No se pudieron guardar las notas: {0}</value>
+  </data>
+  <data name="Participation_Text" xml:space="preserve">
+    <value>Yo {0} ({1}) · Otros {2} ({3})</value>
+    <comment>{0}/{2} = share, {1}/{3} = speaking time.</comment>
+  </data>
+  <data name="Participation_SlotBoth" xml:space="preserve">
+    <value>{0}: ambos</value>
+  </data>
+  <data name="Participation_SlotMe" xml:space="preserve">
+    <value>{0}: yo</value>
+  </data>
+  <data name="Participation_SlotOthers" xml:space="preserve">
+    <value>{0}: otros</value>
+  </data>
+  <data name="Participation_SlotSilence" xml:space="preserve">
+    <value>{0}: silencio</value>
+  </data>
+  <data name="Warning_MicrophoneSilent" xml:space="preserve">
+    <value>El micrófono no captó nada.</value>
+  </data>
+  <data name="Warning_SystemSilent" xml:space="preserve">
+    <value>El audio del sistema no captó nada.</value>
+  </data>
+  <data name="Speakers_Identifying" xml:space="preserve">
+    <value>Identificando hablantes...</value>
+  </data>
+  <data name="Speakers_Failed" xml:space="preserve">
+    <value>No se pudieron identificar los hablantes: {0}</value>
+  </data>
+  <data name="MyTasks_Changed" xml:space="preserve">
+    <value>El resumen cambió desde que se cargó la lista. Vuelve a abrir Mis tareas.</value>
+  </data>
 </root>
