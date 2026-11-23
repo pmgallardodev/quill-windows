@@ -52,8 +52,11 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
 
 ### Wave A (parallel, after F1)
 - [ ] F3 Live transcription pipeline (ring buffer → VAD → Whisper small chunks). Route D.
-- [ ] F4 LLM engine + summary use cases (live loop, final, catch-up, templates, level, language,
+- [x] F4 LLM engine + summary use cases (live loop, final, catch-up, templates, level, language,
       map-reduce, citation validation). Route D.
+      Evidence: d381a20, 48289c7, 9cc799d, merged. Core 170/170 green (post-merge, macOS);
+      win-x64 builds 0 errors (agent). LLamaSharp pinned 0.27.0 (last net8; M1 upgrades).
+      Pending: real-model grammar smoke test; Windows tests run; Vulkan/CPU fallback on hardware.
 - [ ] F5 Speaker separation (echo classifier, diarization on any track, rename, correction). Route D.
 - [ ] F6 Main window redesign (meetings by day, Summary/Transcript/Notes tabs, My tasks). Route D.
 
