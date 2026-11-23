@@ -1,0 +1,2413 @@
+{
+ "engine": "synthetic",
+ "model": "quill-bench-corpus-v1",
+ "created_at": "2026-11-23T09:00:00+00:00",
+ "segments": [
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2000,
+   "end_ms": 6342,
+   "text": "Ya, el último sprint cerramos casi todo lo comprometido vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 6651,
+   "end_ms": 11223,
+   "text": "Los formularios dinámicos funcionan mejor desde el cambio de librería."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 12093,
+   "end_ms": 18043,
+   "text": "Pues es curioso porque al principio pensaba lo contrario por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 18443,
+   "end_ms": 23475,
+   "text": "Ya, los informes con fotos son lo que más valor aporta."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 23918,
+   "end_ms": 29537,
+   "text": "Sí, el backlog está bastante refinado después de la sesión del jueves en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 30492,
+   "end_ms": 34671,
+   "text": "Total, el cliente interno está contento con la última versión."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 35450,
+   "end_ms": 40688,
+   "text": "Es un tema que da para mucho pero no quiero alargarme en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 41611,
+   "end_ms": 46279,
+   "text": "Exacto, el cliente interno está contento con la última versión ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 47519,
+   "end_ms": 53003,
+   "text": "O sea, el diseño de las pantallas nuevas está validado con usuarios ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 53575,
+   "end_ms": 59524,
+   "text": "Fíjate que los inspectores trabajan muchas veces en naves sin cobertura o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 60181,
+   "end_ms": 65617,
+   "text": "Eh, el backlog está bastante refinado después de la sesión del jueves."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 65988,
+   "end_ms": 70986,
+   "text": "Total, es un tema que da para mucho pero no quiero alargarme."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 71247,
+   "end_ms": 76068,
+   "text": "Eso encaja con lo que vimos en los números del trimestre ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 77209,
+   "end_ms": 82855,
+   "text": "Y nada, el diseño de las pantallas nuevas está validado con usuarios en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 83677,
+   "end_ms": 89436,
+   "text": "Los informes con fotos son lo que más valor aporta o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 90684,
+   "end_ms": 96719,
+   "text": "Bueno, empezamos la planificación. Lo que más piden los inspectores es poder trabajar sin conexión."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 97550,
+   "end_ms": 103459,
+   "text": "Fíjate que los informes con fotos son lo que más valor aporta digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 104225,
+   "end_ms": 108291,
+   "text": "Vale, la velocidad del equipo se ha mantenido estable."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 109247,
+   "end_ms": 113193,
+   "text": "Bueno, creo que en lo general estamos alineados ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 114535,
+   "end_ms": 119923,
+   "text": "Mira, el backlog está bastante refinado después de la sesión del jueves."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 121171,
+   "end_ms": 127987,
+   "text": "Hmm, los informes con fotos son lo que más valor aporta por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 128749,
+   "end_ms": 135044,
+   "text": "O sea, los formularios dinámicos funcionan mejor desde el cambio de librería o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 135960,
+   "end_ms": 142194,
+   "text": "Me acuerdo de cuando lo montamos la primera vez y era mucho más lento."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 143268,
+   "end_ms": 149077,
+   "text": "Y nada, hay bastante deuda técnica en la parte de sincronización antigua digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 149647,
+   "end_ms": 155010,
+   "text": "Eh, yo lo veo bastante parecido a lo que comentabas antes ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 155693,
+   "end_ms": 160972,
+   "text": "A ver, ahí hay matices pero en el fondo coincido o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 161469,
+   "end_ms": 165542,
+   "text": "Y nada, la arquitectura actual aguanta bien la carga."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 166054,
+   "end_ms": 171583,
+   "text": "Ya, hay bastante deuda técnica en la parte de sincronización antigua en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 172942,
+   "end_ms": 178736,
+   "text": "Claro, lo he estado pensando durante el fin de semana y sigo opinando igual."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 179225,
+   "end_ms": 182662,
+   "text": "La velocidad del equipo se ha mantenido estable."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 183790,
+   "end_ms": 188819,
+   "text": "Pues cuando lo explicas así se entiende mucho mejor la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 189631,
+   "end_ms": 195121,
+   "text": "Bueno, tampoco es que haya una única forma correcta de hacerlo vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 195723,
+   "end_ms": 202952,
+   "text": "Pues propongo que el objetivo del sprint sea el modo sin conexión de la app de inspecciones."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 203568,
+   "end_ms": 206666,
+   "text": "Total, te sigo, te sigo ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 207827,
+   "end_ms": 213696,
+   "text": "Total, las métricas de uso muestran picos los lunes por la mañana digo yo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 214341,
+   "end_ms": 219509,
+   "text": "Total, la app de inspecciones tiene unos trescientos usuarios activos en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 219843,
+   "end_ms": 225322,
+   "text": "Hmm, las métricas de uso muestran picos los lunes por la mañana ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 226675,
+   "end_ms": 230501,
+   "text": "Sí, ya sabemos cómo suelen ir estas cosas."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 231368,
+   "end_ms": 237626,
+   "text": "A ver, hay bastante deuda técnica en la parte de sincronización antigua en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 238571,
+   "end_ms": 243285,
+   "text": "Los inspectores trabajan muchas veces en naves sin cobertura ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 243990,
+   "end_ms": 248097,
+   "text": "Me gusta que lo estemos hablando con calma la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 249324,
+   "end_ms": 253877,
+   "text": "El diseño de las pantallas nuevas está validado con usuarios ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 254459,
+   "end_ms": 260025,
+   "text": "Mira, los inspectores trabajan muchas veces en naves sin cobertura o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 260433,
+   "end_ms": 265533,
+   "text": "Es un tema que da para mucho pero no quiero alargarme."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 266799,
+   "end_ms": 271391,
+   "text": "Eh, la arquitectura actual aguanta bien la carga digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 272638,
+   "end_ms": 276799,
+   "text": "Pues los inspectores trabajan muchas veces en naves sin cobertura."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 277498,
+   "end_ms": 279634,
+   "text": "Fíjate que correcto vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 280873,
+   "end_ms": 284753,
+   "text": "De acuerdo, objetivo del sprint: modo sin conexión."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 286069,
+   "end_ms": 291546,
+   "text": "Fíjate que lo importante es que todos tengamos el mismo contexto vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 292871,
+   "end_ms": 299121,
+   "text": "A ver, eso lo hablamos en su momento y la idea sigue siendo la misma."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 299942,
+   "end_ms": 303779,
+   "text": "Eh, la arquitectura actual aguanta bien la carga."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 304083,
+   "end_ms": 310845,
+   "text": "Las métricas de uso muestran picos los lunes por la mañana por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 311375,
+   "end_ms": 316242,
+   "text": "A ver, la app de inspecciones tiene unos trescientos usuarios activos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 317178,
+   "end_ms": 322472,
+   "text": "El backlog está bastante refinado después de la sesión del jueves vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 323855,
+   "end_ms": 329164,
+   "text": "O sea, los formularios dinámicos funcionan mejor desde el cambio de librería."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 330414,
+   "end_ms": 334755,
+   "text": "Bueno, a mí me cuadra lo que estáis contando ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 336092,
+   "end_ms": 339560,
+   "text": "En resumen es lo que estábamos comentando ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 340813,
+   "end_ms": 345140,
+   "text": "Mira, la arquitectura actual aguanta bien la carga la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 345405,
+   "end_ms": 350455,
+   "text": "Hmm, el último sprint cerramos casi todo lo comprometido digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 351182,
+   "end_ms": 356529,
+   "text": "Total, lo veo como una evolución natural de lo que ya teníamos ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 357589,
+   "end_ms": 362016,
+   "text": "Pues la arquitectura actual aguanta bien la carga la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 362825,
+   "end_ms": 368173,
+   "text": "Los inspectores trabajan muchas veces en naves sin cobertura o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 368469,
+   "end_ms": 370218,
+   "text": "Total, ajá la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 370792,
+   "end_ms": 375781,
+   "text": "Hmm, el diseño de las pantallas nuevas está validado con usuarios."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 376170,
+   "end_ms": 381089,
+   "text": "Bueno, las métricas de uso muestran picos los lunes por la mañana."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 382281,
+   "end_ms": 387514,
+   "text": "A ver, es más una cuestión de costumbre que de otra cosa ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 388128,
+   "end_ms": 393634,
+   "text": "Claro, las métricas de uso muestran picos los lunes por la mañana vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 393915,
+   "end_ms": 399118,
+   "text": "Sí, la app de inspecciones tiene unos trescientos usuarios activos en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 400285,
+   "end_ms": 405236,
+   "text": "¿Y el modo oscuro? Estaba en el backlog para este sprint."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 405983,
+   "end_ms": 411118,
+   "text": "Pues a veces nos complicamos más de la cuenta con estas cosas."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 412427,
+   "end_ms": 416312,
+   "text": "Pues la arquitectura actual aguanta bien la carga."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 417433,
+   "end_ms": 422982,
+   "text": "Y nada, el diseño de las pantallas nuevas está validado con usuarios vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 423591,
+   "end_ms": 428171,
+   "text": "Claro, es verdad que el último mes ha sido bastante intenso."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 428581,
+   "end_ms": 431989,
+   "text": "El último sprint cerramos casi todo lo comprometido."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 432760,
+   "end_ms": 436943,
+   "text": "Eh, es curioso porque al principio pensaba lo contrario."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 437256,
+   "end_ms": 438645,
+   "text": "Mira, ajá vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 439246,
+   "end_ms": 445585,
+   "text": "Exacto, el backlog está bastante refinado después de la sesión del jueves o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 446597,
+   "end_ms": 451461,
+   "text": "El diseño de las pantallas nuevas está validado con usuarios digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 452534,
+   "end_ms": 458432,
+   "text": "O sea, los informes con fotos son lo que más valor aporta vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 459591,
+   "end_ms": 460715,
+   "text": "Claro, ajá."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 461713,
+   "end_ms": 468098,
+   "text": "Vale, lo he estado pensando durante el fin de semana y sigo opinando igual la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 468777,
+   "end_ms": 473891,
+   "text": "Hay bastante deuda técnica en la parte de sincronización antigua en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 474973,
+   "end_ms": 479847,
+   "text": "El modo oscuro lo aplazamos al próximo trimestre, no da tiempo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 480175,
+   "end_ms": 484383,
+   "text": "Mira, yo no le daría más vueltas de las necesarias."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 485057,
+   "end_ms": 490154,
+   "text": "Los formularios dinámicos funcionan mejor desde el cambio de librería ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 491269,
+   "end_ms": 497092,
+   "text": "O sea, es verdad que el último mes ha sido bastante intenso en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 497636,
+   "end_ms": 502613,
+   "text": "Hmm, hay bastante deuda técnica en la parte de sincronización antigua ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 503095,
+   "end_ms": 509683,
+   "text": "Claro, es más una cuestión de costumbre que de otra cosa por lo que he visto."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 510216,
+   "end_ms": 511675,
+   "text": "Hmm, vale, entendido."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 512507,
+   "end_ms": 514304,
+   "text": "Tiene sentido en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 515143,
+   "end_ms": 520132,
+   "text": "O sea, los formularios dinámicos funcionan mejor desde el cambio de librería."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 521028,
+   "end_ms": 528190,
+   "text": "Bueno, es un tema que da para mucho pero no quiero alargarme por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 528889,
+   "end_ms": 533953,
+   "text": "Eh, es un tema que da para mucho pero no quiero alargarme."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 534275,
+   "end_ms": 539535,
+   "text": "O sea, los informes con fotos son lo que más valor aporta."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 540657,
+   "end_ms": 546228,
+   "text": "Fíjate que eso me recuerda a una conversación que tuvimos hace meses ¿sabes?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 547534,
+   "end_ms": 552997,
+   "text": "Las métricas de uso muestran picos los lunes por la mañana vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 554244,
+   "end_ms": 558148,
+   "text": "Hmm, ya sabemos cómo suelen ir estas cosas vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 559248,
+   "end_ms": 563037,
+   "text": "Total, ahí hay matices pero en el fondo coincido."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 563641,
+   "end_ms": 570140,
+   "text": "Yo actualizo la hoja de ruta y aviso a los interesados del retraso del modo oscuro."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 571468,
+   "end_ms": 576091,
+   "text": "Total, lo importante es que todos tengamos el mismo contexto."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 577318,
+   "end_ms": 583369,
+   "text": "O sea, yo lo veo bastante parecido a lo que comentabas antes o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 583744,
+   "end_ms": 589679,
+   "text": "O sea, la gente con la que he hablado tiene una impresión parecida vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 590302,
+   "end_ms": 595675,
+   "text": "El último sprint cerramos casi todo lo comprometido por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 596501,
+   "end_ms": 600746,
+   "text": "Pues la arquitectura actual aguanta bien la carga en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 601461,
+   "end_ms": 606767,
+   "text": "Pues el backlog está bastante refinado después de la sesión del jueves vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 607959,
+   "end_ms": 613849,
+   "text": "Vale, los formularios dinámicos funcionan mejor desde el cambio de librería digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 614492,
+   "end_ms": 617101,
+   "text": "Eh, vale, entendido en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 617396,
+   "end_ms": 622533,
+   "text": "Los informes con fotos son lo que más valor aporta digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 623739,
+   "end_ms": 628385,
+   "text": "A ver, ahí hay matices pero en el fondo coincido vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 628953,
+   "end_ms": 633931,
+   "text": "Las métricas de uso muestran picos los lunes por la mañana ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 635026,
+   "end_ms": 639164,
+   "text": "Fíjate que ya sabemos cómo suelen ir estas cosas."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 639564,
+   "end_ms": 644941,
+   "text": "Y nada, me gusta que lo estemos hablando con calma o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 645679,
+   "end_ms": 650794,
+   "text": "Ya, el contexto ha cambiado un poco desde la última vez."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 651520,
+   "end_ms": 656370,
+   "text": "Eh, la gente con la que he hablado tiene una impresión parecida."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 657034,
+   "end_ms": 661978,
+   "text": "Total, la velocidad del equipo se ha mantenido estable o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 662972,
+   "end_ms": 668185,
+   "text": "Lo veo como una evolución natural de lo que ya teníamos en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 669108,
+   "end_ms": 675600,
+   "text": "Para el almacenamiento local había dos opciones: CRDT completo o SQLite con una cola de sincronización."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 676458,
+   "end_ms": 678241,
+   "text": "Bueno, vale, entendido."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 679175,
+   "end_ms": 684486,
+   "text": "Vale, los informes con fotos son lo que más valor aporta vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 685726,
+   "end_ms": 691129,
+   "text": "Eh, el backlog está bastante refinado después de la sesión del jueves."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 691541,
+   "end_ms": 696537,
+   "text": "Claro, los formularios dinámicos funcionan mejor desde el cambio de librería ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 697597,
+   "end_ms": 702148,
+   "text": "Mira, la velocidad del equipo se ha mantenido estable ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 702412,
+   "end_ms": 707558,
+   "text": "Las métricas de uso muestran picos los lunes por la mañana ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 708132,
+   "end_ms": 711324,
+   "text": "Pues sí, sí, eso está claro ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 712567,
+   "end_ms": 716821,
+   "text": "Me gusta que lo estemos hablando con calma en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 717451,
+   "end_ms": 722661,
+   "text": "Y nada, el diseño de las pantallas nuevas está validado con usuarios vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 723330,
+   "end_ms": 727684,
+   "text": "Sí, yo no le daría más vueltas de las necesarias."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 728062,
+   "end_ms": 732672,
+   "text": "Eh, la velocidad del equipo se ha mantenido estable ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 732932,
+   "end_ms": 736457,
+   "text": "CRDT es demasiado complejo para lo que necesitamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 737657,
+   "end_ms": 742571,
+   "text": "Ya, la app de inspecciones tiene unos trescientos usuarios activos ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 743099,
+   "end_ms": 747772,
+   "text": "O sea, es curioso porque al principio pensaba lo contrario."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 748584,
+   "end_ms": 754315,
+   "text": "Fíjate que el backlog está bastante refinado después de la sesión del jueves."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 754943,
+   "end_ms": 759593,
+   "text": "Sí, cuando lo explicas así se entiende mucho mejor en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 760862,
+   "end_ms": 764802,
+   "text": "Hmm, en resumen es lo que estábamos comentando ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 765193,
+   "end_ms": 771089,
+   "text": "A ver, el diseño de las pantallas nuevas está validado con usuarios vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 771501,
+   "end_ms": 776972,
+   "text": "El backlog está bastante refinado después de la sesión del jueves ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 778298,
+   "end_ms": 783354,
+   "text": "Me parece razonable el enfoque tal y como está planteado ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 783693,
+   "end_ms": 788031,
+   "text": "Bueno, los inspectores trabajan muchas veces en naves sin cobertura."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 788970,
+   "end_ms": 793512,
+   "text": "A ver, ya sabemos cómo suelen ir estas cosas en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 793811,
+   "end_ms": 799007,
+   "text": "Coincido. Vamos con SQLite y una cola de sincronización, nada de CRDT."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 800278,
+   "end_ms": 801663,
+   "text": "Pues correcto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 802255,
+   "end_ms": 807699,
+   "text": "Ya, eso encaja con lo que vimos en los números del trimestre."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 808888,
+   "end_ms": 813790,
+   "text": "Fíjate que los inspectores trabajan muchas veces en naves sin cobertura vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 814267,
+   "end_ms": 819833,
+   "text": "Fíjate que el feedback que nos llegó fue bastante positivo en general ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 820519,
+   "end_ms": 824538,
+   "text": "Y nada, sí, sí, eso está claro en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 825825,
+   "end_ms": 831181,
+   "text": "Exacto, lo importante es que todos tengamos el mismo contexto digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 831833,
+   "end_ms": 835748,
+   "text": "En resumen es lo que estábamos comentando ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 836114,
+   "end_ms": 840201,
+   "text": "Eh, cuando lo explicas así se entiende mucho mejor ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 840496,
+   "end_ms": 845370,
+   "text": "Total, perdona que vuelva un momento sobre lo de antes ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 846098,
+   "end_ms": 851921,
+   "text": "Ya, eso encaja con lo que vimos en los números del trimestre ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 852426,
+   "end_ms": 857397,
+   "text": "A ver, el último sprint cerramos casi todo lo comprometido vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 858007,
+   "end_ms": 863157,
+   "text": "Y nada, el cliente interno está contento con la última versión ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 863649,
+   "end_ms": 868677,
+   "text": "Eh, hay bastante deuda técnica en la parte de sincronización antigua."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 869560,
+   "end_ms": 874184,
+   "text": "Yo lo veo bastante parecido a lo que comentabas antes."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 874822,
+   "end_ms": 879957,
+   "text": "Ya, la app de inspecciones tiene unos trescientos usuarios activos digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 880665,
+   "end_ms": 885185,
+   "text": "Sí, tampoco es que haya una única forma correcta de hacerlo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 886373,
+   "end_ms": 891601,
+   "text": "Eh, los inspectores trabajan muchas veces en naves sin cobertura o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 892994,
+   "end_ms": 899621,
+   "text": "Claro, eso lo hablamos en su momento y la idea sigue siendo la misma la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 900973,
+   "end_ms": 906860,
+   "text": "Vale, la gente con la que he hablado tiene una impresión parecida vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 907791,
+   "end_ms": 914147,
+   "text": "El backlog está bastante refinado después de la sesión del jueves por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 915388,
+   "end_ms": 919971,
+   "text": "A ver, la arquitectura actual aguanta bien la carga ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 921140,
+   "end_ms": 928529,
+   "text": "Entonces yo diseño los endpoints de sincronización y escribo el documento de política de conflictos para el miércoles."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 929621,
+   "end_ms": 931458,
+   "text": "O sea, ya veo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 932809,
+   "end_ms": 935138,
+   "text": "Total, ya veo en general."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 935791,
+   "end_ms": 940523,
+   "text": "Bueno, en resumen es lo que estábamos comentando o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 940900,
+   "end_ms": 943094,
+   "text": "Vale, entendido o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 943709,
+   "end_ms": 949391,
+   "text": "Bueno, es un tema que da para mucho pero no quiero alargarme ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 950531,
+   "end_ms": 955557,
+   "text": "Ya, a mí me cuadra lo que estáis contando en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 956533,
+   "end_ms": 961256,
+   "text": "Ya, cuando lo explicas así se entiende mucho mejor en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 962398,
+   "end_ms": 967640,
+   "text": "Mira, la app de inspecciones tiene unos trescientos usuarios activos o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 968609,
+   "end_ms": 974450,
+   "text": "Vale, a veces nos complicamos más de la cuenta con estas cosas vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 974998,
+   "end_ms": 978722,
+   "text": "Me gusta que lo estemos hablando con calma."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 979540,
+   "end_ms": 984350,
+   "text": "Y nada, me gusta que lo estemos hablando con calma vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 985503,
+   "end_ms": 990367,
+   "text": "O sea, es más una cuestión de costumbre que de otra cosa."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 991480,
+   "end_ms": 996186,
+   "text": "Hay que reconocer que el equipo ha respondido muy bien."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 997021,
+   "end_ms": 1003132,
+   "text": "Bueno, los informes con fotos son lo que más valor aporta o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1003800,
+   "end_ms": 1008765,
+   "text": "Sí, el cliente interno está contento con la última versión la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1009496,
+   "end_ms": 1013099,
+   "text": "Eh, la arquitectura actual aguanta bien la carga."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1014200,
+   "end_ms": 1019966,
+   "text": "Exacto, cuando lo explicas así se entiende mucho mejor por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1020546,
+   "end_ms": 1025173,
+   "text": "Hmm, la app de inspecciones tiene unos trescientos usuarios activos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1025772,
+   "end_ms": 1031799,
+   "text": "Mira, es más una cuestión de costumbre que de otra cosa o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1032703,
+   "end_ms": 1037709,
+   "text": "Los formularios dinámicos funcionan mejor desde el cambio de librería ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1038768,
+   "end_ms": 1041595,
+   "text": "Eh, perfecto, me sirve en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1041992,
+   "end_ms": 1046286,
+   "text": "Eh, el último sprint cerramos casi todo lo comprometido."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1047584,
+   "end_ms": 1052411,
+   "text": "Claro, el cliente interno está contento con la última versión digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1052901,
+   "end_ms": 1059700,
+   "text": "Eso lo hablamos en su momento y la idea sigue siendo la misma o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1060686,
+   "end_ms": 1066447,
+   "text": "Pues a veces nos complicamos más de la cuenta con estas cosas ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1067513,
+   "end_ms": 1075711,
+   "text": "Hablando de conflictos: ¿qué pasa cuando dos inspectores editan el mismo informe? ¿Gana el último o se resuelve a mano?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1075973,
+   "end_ms": 1080995,
+   "text": "Sí, hay que reconocer que el equipo ha respondido muy bien ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1082395,
+   "end_ms": 1085811,
+   "text": "Sí, sí, eso está claro o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1086715,
+   "end_ms": 1091570,
+   "text": "O sea, los formularios dinámicos funcionan mejor desde el cambio de librería."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1092705,
+   "end_ms": 1096877,
+   "text": "Eh, en resumen es lo que estábamos comentando en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1097582,
+   "end_ms": 1103708,
+   "text": "O sea, los informes con fotos son lo que más valor aporta digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1104472,
+   "end_ms": 1106006,
+   "text": "Ya, eso es."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1106686,
+   "end_ms": 1111694,
+   "text": "Pues la velocidad del equipo se ha mantenido estable o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1112816,
+   "end_ms": 1117254,
+   "text": "Ya, en otros equipos lo han resuelto de forma similar."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1118626,
+   "end_ms": 1123452,
+   "text": "Claro, el diseño de las pantallas nuevas está validado con usuarios vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1124010,
+   "end_ms": 1128104,
+   "text": "Claro, la arquitectura actual aguanta bien la carga digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1129462,
+   "end_ms": 1133659,
+   "text": "Sí, la velocidad del equipo se ha mantenido estable vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1133939,
+   "end_ms": 1138490,
+   "text": "Hay bastante deuda técnica en la parte de sincronización antigua ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1138783,
+   "end_ms": 1143251,
+   "text": "Sí, la app de inspecciones tiene unos trescientos usuarios activos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1143669,
+   "end_ms": 1149429,
+   "text": "Fíjate que el feedback que nos llegó fue bastante positivo en general en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1150125,
+   "end_ms": 1155351,
+   "text": "Sí, el backlog está bastante refinado después de la sesión del jueves."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1156015,
+   "end_ms": 1162656,
+   "text": "Eso es justo lo que tengo que proponer en el documento, ahora mismo no está decidido."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1163732,
+   "end_ms": 1170102,
+   "text": "Ya, la app de inspecciones tiene unos trescientos usuarios activos por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1171454,
+   "end_ms": 1177239,
+   "text": "Ya, la app de inspecciones tiene unos trescientos usuarios activos o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1178359,
+   "end_ms": 1182360,
+   "text": "Mira, ya sabemos cómo suelen ir estas cosas ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1182813,
+   "end_ms": 1187086,
+   "text": "Hmm, cuando lo explicas así se entiende mucho mejor."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1187484,
+   "end_ms": 1189354,
+   "text": "Eh, tiene sentido."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1190317,
+   "end_ms": 1194659,
+   "text": "El contexto ha cambiado un poco desde la última vez."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1195771,
+   "end_ms": 1201465,
+   "text": "Eso encaja con lo que vimos en los números del trimestre o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1202719,
+   "end_ms": 1207005,
+   "text": "El último sprint cerramos casi todo lo comprometido digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1207668,
+   "end_ms": 1212207,
+   "text": "A ver, la arquitectura actual aguanta bien la carga vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1212664,
+   "end_ms": 1217691,
+   "text": "Claro, el diseño de las pantallas nuevas está validado con usuarios ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1218334,
+   "end_ms": 1224494,
+   "text": "Hmm, hay bastante deuda técnica en la parte de sincronización antigua o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1225713,
+   "end_ms": 1231599,
+   "text": "Los informes con fotos son lo que más valor aporta o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1232133,
+   "end_ms": 1237574,
+   "text": "Eh, los informes con fotos son lo que más valor aporta ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1238528,
+   "end_ms": 1244297,
+   "text": "Fíjate que yo lo veo bastante parecido a lo que comentabas antes ¿sabes?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1245248,
+   "end_ms": 1250893,
+   "text": "Total, el contexto ha cambiado un poco desde la última vez o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1251848,
+   "end_ms": 1253821,
+   "text": "Total, ya veo ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1255010,
+   "end_ms": 1256835,
+   "text": "Correcto en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1257097,
+   "end_ms": 1261961,
+   "text": "No es algo nuevo pero sí conviene tenerlo presente en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1263061,
+   "end_ms": 1268266,
+   "text": "Yo me encargo de implementar la capa de almacenamiento local en la app."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1269049,
+   "end_ms": 1274807,
+   "text": "Hmm, la gente con la que he hablado tiene una impresión parecida en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1275649,
+   "end_ms": 1280748,
+   "text": "Pues hay bastante deuda técnica en la parte de sincronización antigua."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1281441,
+   "end_ms": 1286160,
+   "text": "Eh, los inspectores trabajan muchas veces en naves sin cobertura vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1287337,
+   "end_ms": 1291816,
+   "text": "Sí, el último sprint cerramos casi todo lo comprometido digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1293028,
+   "end_ms": 1297322,
+   "text": "Sí, cuando lo explicas así se entiende mucho mejor ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1298706,
+   "end_ms": 1303811,
+   "text": "Sí, hay bastante deuda técnica en la parte de sincronización antigua."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1304863,
+   "end_ms": 1309489,
+   "text": "Vale, el último sprint cerramos casi todo lo comprometido en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1310873,
+   "end_ms": 1315913,
+   "text": "Mira, el contexto ha cambiado un poco desde la última vez."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1316539,
+   "end_ms": 1321653,
+   "text": "Bueno, el último sprint cerramos casi todo lo comprometido en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1322739,
+   "end_ms": 1327869,
+   "text": "Es verdad que el último mes ha sido bastante intenso ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1328536,
+   "end_ms": 1333550,
+   "text": "El backlog está bastante refinado después de la sesión del jueves."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1334006,
+   "end_ms": 1338508,
+   "text": "La velocidad del equipo se ha mantenido estable digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1339081,
+   "end_ms": 1345244,
+   "text": "Y nada, es un tema que da para mucho pero no quiero alargarme digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1346394,
+   "end_ms": 1351892,
+   "text": "Me preocupa el espacio: ¿cuánto ocupan las fotos sin conexión? ¿Ponemos un límite?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1352240,
+   "end_ms": 1356798,
+   "text": "Claro, ahí hay matices pero en el fondo coincido vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1358101,
+   "end_ms": 1362683,
+   "text": "Vale, la app de inspecciones tiene unos trescientos usuarios activos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1363190,
+   "end_ms": 1368601,
+   "text": "Sí, los inspectores trabajan muchas veces en naves sin cobertura la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1369241,
+   "end_ms": 1374736,
+   "text": "Y nada, me gusta que lo estemos hablando con calma o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1375307,
+   "end_ms": 1379844,
+   "text": "Bueno, la velocidad del equipo se ha mantenido estable en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1380949,
+   "end_ms": 1385398,
+   "text": "Los inspectores trabajan muchas veces en naves sin cobertura digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1386302,
+   "end_ms": 1387458,
+   "text": "Mira, ajá."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1388761,
+   "end_ms": 1394194,
+   "text": "Total, hay que reconocer que el equipo ha respondido muy bien digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1394963,
+   "end_ms": 1401148,
+   "text": "Fíjate que el diseño de las pantallas nuevas está validado con usuarios en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1401719,
+   "end_ms": 1406416,
+   "text": "Exacto, la app de inspecciones tiene unos trescientos usuarios activos ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1407812,
+   "end_ms": 1412890,
+   "text": "Y con conexiones lentas la sincronización de fotos puede dar timeout."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1413693,
+   "end_ms": 1416314,
+   "text": "Pues te sigo, te sigo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1416863,
+   "end_ms": 1418763,
+   "text": "Ya, correcto la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1420030,
+   "end_ms": 1424531,
+   "text": "Hmm, es más una cuestión de costumbre que de otra cosa."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1425198,
+   "end_ms": 1430362,
+   "text": "Total, el backlog está bastante refinado después de la sesión del jueves."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1431022,
+   "end_ms": 1435770,
+   "text": "La gente con la que he hablado tiene una impresión parecida."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1437065,
+   "end_ms": 1442074,
+   "text": "Bueno, el feedback que nos llegó fue bastante positivo en general vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1443274,
+   "end_ms": 1447596,
+   "text": "Es curioso porque al principio pensaba lo contrario ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1448014,
+   "end_ms": 1451509,
+   "text": "La arquitectura actual aguanta bien la carga."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1452187,
+   "end_ms": 1457891,
+   "text": "Exacto, los formularios dinámicos funcionan mejor desde el cambio de librería o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1458656,
+   "end_ms": 1462545,
+   "text": "Claro, la arquitectura actual aguanta bien la carga ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1463730,
+   "end_ms": 1469233,
+   "text": "Sí, la gente con la que he hablado tiene una impresión parecida."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1469558,
+   "end_ms": 1475744,
+   "text": "Y nada, eso me recuerda a una conversación que tuvimos hace meses la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1476856,
+   "end_ms": 1481537,
+   "text": "Yo preparo el plan de pruebas con escenarios en modo avión."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1482302,
+   "end_ms": 1486747,
+   "text": "La gente con la que he hablado tiene una impresión parecida."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1488103,
+   "end_ms": 1493880,
+   "text": "A ver, la app de inspecciones tiene unos trescientos usuarios activos digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1494441,
+   "end_ms": 1499504,
+   "text": "Exacto, la app de inspecciones tiene unos trescientos usuarios activos ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1500309,
+   "end_ms": 1506013,
+   "text": "Esto ya nos pasó en el proyecto anterior y al final salió bien."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1506455,
+   "end_ms": 1511963,
+   "text": "O sea, el feedback que nos llegó fue bastante positivo en general ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1512881,
+   "end_ms": 1518391,
+   "text": "Exacto, el último sprint cerramos casi todo lo comprometido o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1518785,
+   "end_ms": 1522558,
+   "text": "Exacto, la arquitectura actual aguanta bien la carga ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1523766,
+   "end_ms": 1526174,
+   "text": "Ya, eso es ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1526654,
+   "end_ms": 1531379,
+   "text": "A ver, lo importante es que todos tengamos el mismo contexto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1531969,
+   "end_ms": 1537058,
+   "text": "Pues los informes con fotos son lo que más valor aporta."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1537470,
+   "end_ms": 1542743,
+   "text": "Fíjate que yo lo veo bastante parecido a lo que comentabas antes ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1543566,
+   "end_ms": 1549351,
+   "text": "Total, en resumen es lo que estábamos comentando por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1550515,
+   "end_ms": 1555528,
+   "text": "Mira, la app de inspecciones tiene unos trescientos usuarios activos ¿sabes?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1556534,
+   "end_ms": 1559380,
+   "text": "Para eso necesitaríamos tablets de prueba."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1560147,
+   "end_ms": 1565103,
+   "text": "Vale, los informes con fotos son lo que más valor aporta."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1566009,
+   "end_ms": 1569674,
+   "text": "Fíjate que creo que en lo general estamos alineados."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1570657,
+   "end_ms": 1576333,
+   "text": "Claro, el backlog está bastante refinado después de la sesión del jueves la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1577235,
+   "end_ms": 1581147,
+   "text": "Pues la arquitectura actual aguanta bien la carga."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1582008,
+   "end_ms": 1588217,
+   "text": "Hmm, a veces nos complicamos más de la cuenta con estas cosas o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1588571,
+   "end_ms": 1592398,
+   "text": "Total, a mí me cuadra lo que estáis contando."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1593287,
+   "end_ms": 1599733,
+   "text": "A ver, esto ya nos pasó en el proyecto anterior y al final salió bien."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1600873,
+   "end_ms": 1602496,
+   "text": "Hmm, ya veo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1603032,
+   "end_ms": 1607996,
+   "text": "Bueno, los inspectores trabajan muchas veces en naves sin cobertura en general."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1609325,
+   "end_ms": 1614958,
+   "text": "Eh, hay bastante deuda técnica en la parte de sincronización antigua o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1615898,
+   "end_ms": 1621219,
+   "text": "El diseño de las pantallas nuevas está validado con usuarios la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1622340,
+   "end_ms": 1627064,
+   "text": "Vale, el diseño de las pantallas nuevas está validado con usuarios."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1627891,
+   "end_ms": 1632532,
+   "text": "Total, los informes con fotos son lo que más valor aporta."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1633002,
+   "end_ms": 1634757,
+   "text": "Claro, tiene sentido ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1635208,
+   "end_ms": 1640255,
+   "text": "Claro, es verdad que el último mes ha sido bastante intenso."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1640814,
+   "end_ms": 1646218,
+   "text": "Bueno, la app de inspecciones tiene unos trescientos usuarios activos digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1646579,
+   "end_ms": 1651413,
+   "text": "Hmm, el cliente interno está contento con la última versión en general."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1652330,
+   "end_ms": 1658041,
+   "text": "Exacto, el backlog está bastante refinado después de la sesión del jueves ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1659228,
+   "end_ms": 1664674,
+   "text": "Hmm, en otros equipos lo han resuelto de forma similar digo yo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1665022,
+   "end_ms": 1672179,
+   "text": "Y nada, los informes con fotos son lo que más valor aporta por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1672985,
+   "end_ms": 1679606,
+   "text": "O sea, el diseño de las pantallas nuevas está validado con usuarios o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1680965,
+   "end_ms": 1685229,
+   "text": "Yo pido dos tablets de prueba al departamento de IT."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1685553,
+   "end_ms": 1690267,
+   "text": "Vale, me gusta que lo estemos hablando con calma la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1690692,
+   "end_ms": 1696099,
+   "text": "Hmm, cuando lo explicas así se entiende mucho mejor o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1697451,
+   "end_ms": 1702664,
+   "text": "Eh, yo no le daría más vueltas de las necesarias en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1703250,
+   "end_ms": 1710457,
+   "text": "Y nada, lo he estado pensando durante el fin de semana y sigo opinando igual la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1711248,
+   "end_ms": 1717729,
+   "text": "Y nada, esto ya nos pasó en el proyecto anterior y al final salió bien vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1718498,
+   "end_ms": 1723145,
+   "text": "Pues el último sprint cerramos casi todo lo comprometido digo yo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1724055,
+   "end_ms": 1726196,
+   "text": "Bueno, te sigo, te sigo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1727129,
+   "end_ms": 1733279,
+   "text": "Total, el diseño de las pantallas nuevas está validado con usuarios o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1734338,
+   "end_ms": 1739440,
+   "text": "Eh, a mí me cuadra lo que estáis contando la verdad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1739696,
+   "end_ms": 1741825,
+   "text": "Vale, vale, entendido digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1742387,
+   "end_ms": 1750127,
+   "text": "Pues eso lo hablamos en su momento y la idea sigue siendo la misma por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1751260,
+   "end_ms": 1756630,
+   "text": "Fíjate que hay que reconocer que el equipo ha respondido muy bien."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1757363,
+   "end_ms": 1761494,
+   "text": "La velocidad del equipo se ha mantenido estable en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1762699,
+   "end_ms": 1766778,
+   "text": "Mira, es curioso porque al principio pensaba lo contrario ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1768083,
+   "end_ms": 1773795,
+   "text": "Pues los inspectores trabajan muchas veces en naves sin cobertura o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1774131,
+   "end_ms": 1776545,
+   "text": "Vale, entendido en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1777170,
+   "end_ms": 1782682,
+   "text": "Eh, las métricas de uso muestran picos los lunes por la mañana."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1784058,
+   "end_ms": 1788193,
+   "text": "Vale, creo que en lo general estamos alineados en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1789292,
+   "end_ms": 1796655,
+   "text": "Claro, lo he estado pensando durante el fin de semana y sigo opinando igual o eso creo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1797334,
+   "end_ms": 1802700,
+   "text": "Ya, la velocidad del equipo se ha mantenido estable o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1803604,
+   "end_ms": 1808603,
+   "text": "La gente con la que he hablado tiene una impresión parecida."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1809570,
+   "end_ms": 1814677,
+   "text": "O sea, ya sabemos cómo suelen ir estas cosas en general."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1815483,
+   "end_ms": 1819752,
+   "text": "¿Tenemos que seguir soportando Android 9? Complica bastante las pruebas."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1820283,
+   "end_ms": 1823442,
+   "text": "Fíjate que tiene sentido o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1823985,
+   "end_ms": 1829466,
+   "text": "El cliente interno está contento con la última versión o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1829950,
+   "end_ms": 1834381,
+   "text": "Bueno, la app de inspecciones tiene unos trescientos usuarios activos ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1835039,
+   "end_ms": 1839675,
+   "text": "Bueno, el cliente interno está contento con la última versión."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1840995,
+   "end_ms": 1845148,
+   "text": "Ya, el último sprint cerramos casi todo lo comprometido ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1845720,
+   "end_ms": 1847249,
+   "text": "Exacto, tiene sentido."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1847827,
+   "end_ms": 1850132,
+   "text": "Vale, ajá en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1850629,
+   "end_ms": 1854305,
+   "text": "Vale, la arquitectura actual aguanta bien la carga."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1855452,
+   "end_ms": 1861487,
+   "text": "Vale, a veces nos complicamos más de la cuenta con estas cosas en general."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1861871,
+   "end_ms": 1866751,
+   "text": "Hay bastante deuda técnica en la parte de sincronización antigua en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1867783,
+   "end_ms": 1869694,
+   "text": "Exacto, ya veo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1870875,
+   "end_ms": 1876598,
+   "text": "Exacto, yo lo veo bastante parecido a lo que comentabas antes digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1877179,
+   "end_ms": 1882089,
+   "text": "Eh, el backlog está bastante refinado después de la sesión del jueves."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1883077,
+   "end_ms": 1888564,
+   "text": "Mira, lo veo como una evolución natural de lo que ya teníamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1889758,
+   "end_ms": 1895398,
+   "text": "Y nada, los inspectores trabajan muchas veces en naves sin cobertura o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1896742,
+   "end_ms": 1902146,
+   "text": "O sea, el diseño de las pantallas nuevas está validado con usuarios vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1902743,
+   "end_ms": 1908539,
+   "text": "Y nada, los informes con fotos son lo que más valor aporta vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1909075,
+   "end_ms": 1913163,
+   "text": "Claro, la app de inspecciones tiene unos trescientos usuarios activos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1914340,
+   "end_ms": 1920201,
+   "text": "Eso lo tengo que mirar con los datos de uso, no lo sé todavía."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1921247,
+   "end_ms": 1925320,
+   "text": "Hmm, cuando lo explicas así se entiende mucho mejor."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1926606,
+   "end_ms": 1931490,
+   "text": "A ver, el cliente interno está contento con la última versión ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1932243,
+   "end_ms": 1937373,
+   "text": "Ya, tampoco es que haya una única forma correcta de hacerlo."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 1938282,
+   "end_ms": 1942878,
+   "text": "Claro, yo lo veo bastante parecido a lo que comentabas antes."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1943447,
+   "end_ms": 1948145,
+   "text": "Sí, yo no le daría más vueltas de las necesarias."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1948916,
+   "end_ms": 1954668,
+   "text": "A ver, las métricas de uso muestran picos los lunes por la mañana ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1955175,
+   "end_ms": 1959903,
+   "text": "Eh, a mí me cuadra lo que estáis contando ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1960846,
+   "end_ms": 1964715,
+   "text": "Sí, la velocidad del equipo se ha mantenido estable."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1965663,
+   "end_ms": 1970514,
+   "text": "Vale, eso encaja con lo que vimos en los números del trimestre."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1971028,
+   "end_ms": 1975968,
+   "text": "Los inspectores trabajan muchas veces en naves sin cobertura en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1977024,
+   "end_ms": 1981876,
+   "text": "Yo lo veo bastante parecido a lo que comentabas antes ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1982923,
+   "end_ms": 1987477,
+   "text": "Vale, en resumen es lo que estábamos comentando o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1987903,
+   "end_ms": 1993733,
+   "text": "Ya, las métricas de uso muestran picos los lunes por la mañana vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1994664,
+   "end_ms": 1999787,
+   "text": "Sí, es un tema que da para mucho pero no quiero alargarme."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2000118,
+   "end_ms": 2006193,
+   "text": "Exacto, el backlog está bastante refinado después de la sesión del jueves o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2006465,
+   "end_ms": 2008811,
+   "text": "Bueno, tiene sentido ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2009285,
+   "end_ms": 2014353,
+   "text": "Ya, los formularios dinámicos funcionan mejor desde el cambio de librería."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2014877,
+   "end_ms": 2020976,
+   "text": "Lo he estado pensando durante el fin de semana y sigo opinando igual en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2022213,
+   "end_ms": 2028360,
+   "text": "Aviso también que la semana que viene estoy de guardia, así que tendré menos capacidad."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2029043,
+   "end_ms": 2034172,
+   "text": "Vale, la velocidad del equipo se ha mantenido estable en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2035290,
+   "end_ms": 2040325,
+   "text": "Tampoco es que haya una única forma correcta de hacerlo vamos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2040948,
+   "end_ms": 2045132,
+   "text": "Creo que en lo general estamos alineados digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2046040,
+   "end_ms": 2050705,
+   "text": "Lo importante es que todos tengamos el mismo contexto ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2051191,
+   "end_ms": 2056058,
+   "text": "Eh, hay bastante deuda técnica en la parte de sincronización antigua."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2056519,
+   "end_ms": 2060294,
+   "text": "Hmm, la arquitectura actual aguanta bien la carga."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2060719,
+   "end_ms": 2066268,
+   "text": "A ver, lo veo como una evolución natural de lo que ya teníamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2067144,
+   "end_ms": 2072986,
+   "text": "Ya, lo he estado pensando durante el fin de semana y sigo opinando igual."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2074153,
+   "end_ms": 2080514,
+   "text": "Fíjate que el diseño de las pantallas nuevas está validado con usuarios o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2081733,
+   "end_ms": 2086578,
+   "text": "Ya, la app de inspecciones tiene unos trescientos usuarios activos vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2087892,
+   "end_ms": 2094482,
+   "text": "Vale, lo he estado pensando durante el fin de semana y sigo opinando igual ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2095293,
+   "end_ms": 2100860,
+   "text": "Hmm, a veces nos complicamos más de la cuenta con estas cosas vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2101327,
+   "end_ms": 2106905,
+   "text": "Exacto, el backlog está bastante refinado después de la sesión del jueves ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2107811,
+   "end_ms": 2111742,
+   "text": "Total, el último sprint cerramos casi todo lo comprometido."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2112842,
+   "end_ms": 2119501,
+   "text": "Fíjate que eso lo hablamos en su momento y la idea sigue siendo la misma."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2119846,
+   "end_ms": 2125824,
+   "text": "Por último, el sprint sigue siendo de dos semanas y la planificación los lunes."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2126463,
+   "end_ms": 2132361,
+   "text": "Vale, a veces nos complicamos más de la cuenta con estas cosas ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2133319,
+   "end_ms": 2138794,
+   "text": "O sea, los informes con fotos son lo que más valor aporta."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2139433,
+   "end_ms": 2145756,
+   "text": "Bueno, el backlog está bastante refinado después de la sesión del jueves o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2146467,
+   "end_ms": 2149844,
+   "text": "La arquitectura actual aguanta bien la carga."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2150374,
+   "end_ms": 2154800,
+   "text": "El contexto ha cambiado un poco desde la última vez."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2155716,
+   "end_ms": 2160778,
+   "text": "Sí, perdona que vuelva un momento sobre lo de antes digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2161935,
+   "end_ms": 2167992,
+   "text": "A ver, las métricas de uso muestran picos los lunes por la mañana en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2169299,
+   "end_ms": 2173104,
+   "text": "La app de inspecciones tiene unos trescientos usuarios activos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2174056,
+   "end_ms": 2180294,
+   "text": "O sea, es un tema que da para mucho pero no quiero alargarme en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2181050,
+   "end_ms": 2183336,
+   "text": "Perfecto, gracias a todos."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2184521,
+   "end_ms": 2190356,
+   "text": "Eh, el feedback que nos llegó fue bastante positivo en general o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2190972,
+   "end_ms": 2195116,
+   "text": "Hmm, los inspectores trabajan muchas veces en naves sin cobertura."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2195671,
+   "end_ms": 2202381,
+   "text": "Fíjate que lo he estado pensando durante el fin de semana y sigo opinando igual ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2203018,
+   "end_ms": 2205053,
+   "text": "Y nada, correcto ¿no?"
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2205804,
+   "end_ms": 2210290,
+   "text": "Los informes con fotos son lo que más valor aporta vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2210697,
+   "end_ms": 2215953,
+   "text": "Hay bastante deuda técnica en la parte de sincronización antigua o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2216612,
+   "end_ms": 2221744,
+   "text": "Fíjate que el diseño de las pantallas nuevas está validado con usuarios."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2222518,
+   "end_ms": 2228103,
+   "text": "A ver, perdona que vuelva un momento sobre lo de antes o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2229063,
+   "end_ms": 2233948,
+   "text": "Vale, perdona que vuelva un momento sobre lo de antes la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2235221,
+   "end_ms": 2240088,
+   "text": "Sí, los formularios dinámicos funcionan mejor desde el cambio de librería."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2241446,
+   "end_ms": 2248724,
+   "text": "Sí, el backlog está bastante refinado después de la sesión del jueves por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 2249419,
+   "end_ms": 2254481,
+   "text": "Sí, hay bastante deuda técnica en la parte de sincronización antigua."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2255375,
+   "end_ms": 2259496,
+   "text": "Pues a mí me cuadra lo que estáis contando ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 2260588,
+   "end_ms": 2266203,
+   "text": "Eh, el último sprint cerramos casi todo lo comprometido por lo que he visto."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2266842,
+   "end_ms": 2272142,
+   "text": "Mira, el backlog está bastante refinado después de la sesión del jueves."
+  },
+  {
+   "speaker": "speaker-4",
+   "start_ms": 2273532,
+   "end_ms": 2275678,
+   "text": "Sí, tiene sentido la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 2276392,
+   "end_ms": 2281554,
+   "text": "Claro, los informes con fotos son lo que más valor aporta ¿sabes?"
+  }
+ ]
+}

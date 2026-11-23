@@ -1,0 +1,109 @@
+{
+ "meeting": "m1-one-on-one",
+ "title": "1:1 Pablo / Lucía",
+ "speakers": {
+  "me": "Pablo (usuario)",
+  "them": "Lucía"
+ },
+ "duration_ms": 706721,
+ "notes": "",
+ "decisions": [
+  {
+   "id": "D1",
+   "text": "Lucía lidera la migración del módulo de pagos a la API nueva",
+   "keywords": [
+    "lider",
+    "migracion",
+    "pagos"
+   ],
+   "at_ms": 109939,
+   "speaker": "me"
+  },
+  {
+   "id": "D2",
+   "text": "El uno a uno pasa del jueves al martes, cada dos semanas",
+   "keywords": [
+    "martes",
+    "dos semanas"
+   ],
+   "at_ms": 634907,
+   "speaker": "them"
+  }
+ ],
+ "actionItems": [
+  {
+   "id": "A1",
+   "text": "Preparar el plan técnico de la migración de pagos (para el viernes que viene)",
+   "keywords": [
+    "plan tecnico",
+    "migracion"
+   ],
+   "at_ms": 189408,
+   "speaker": "me",
+   "owner": "them",
+   "isMine": false
+  },
+  {
+   "id": "A2",
+   "text": "Hacer pair programming con Marcos dos tardes a la semana",
+   "keywords": [
+    "pair",
+    "marcos",
+    "tardes"
+   ],
+   "at_ms": 332978,
+   "speaker": "me",
+   "owner": "them",
+   "isMine": false
+  },
+  {
+   "id": "A3",
+   "text": "Hablar con recursos humanos sobre el presupuesto de formación para la certificación de AWS",
+   "keywords": [
+    "recursos humanos",
+    "presupuesto",
+    "aws"
+   ],
+   "at_ms": 479114,
+   "speaker": "me",
+   "owner": "me",
+   "isMine": true
+  }
+ ],
+ "openQuestions": [
+  {
+   "id": "Q1",
+   "text": "¿Marcos se asigna a pagos o se queda en soporte?",
+   "keywords": [
+    "marcos",
+    "soporte"
+   ],
+   "at_ms": 365942,
+   "speaker": "them"
+  },
+  {
+   "id": "Q2",
+   "text": "¿El presupuesto de formación cubre la tasa del examen o solo el curso?",
+   "keywords": [
+    "examen",
+    "curso"
+   ],
+   "at_ms": 527321,
+   "speaker": "them"
+  }
+ ],
+ "risks": [
+  {
+   "id": "R1",
+   "text": "Las vacaciones de Lucía en agosto coinciden con la fecha límite de la migración",
+   "keywords": [
+    "vacaciones",
+    "agosto"
+   ],
+   "at_ms": 262679,
+   "speaker": "them"
+  }
+ ],
+ "superseded": [],
+ "acceptable": []
+}

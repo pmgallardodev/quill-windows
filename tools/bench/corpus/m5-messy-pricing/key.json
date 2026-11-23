@@ -1,0 +1,202 @@
+{
+ "meeting": "m5-messy-pricing",
+ "title": "Reunión de lanzamiento de precios (caótica)",
+ "speakers": {
+  "me": "Pablo (usuario)",
+  "speaker-1": "Carmen (marketing)",
+  "speaker-2": "Iván (ventas)",
+  "speaker-3": "Nuria (producto)",
+  "speaker-4": "Óscar (datos)"
+ },
+ "duration_ms": 3698778,
+ "notes": "Crosstalk, ASR-like noise, digressions. Launch date decided as 1 March, later reversed to 15 March. Billing-team action has an ambiguous owner (correct owner: null).",
+ "decisions": [
+  {
+   "id": "D1",
+   "text": "Se mantiene el plan gratuito limitado a tres proyectos",
+   "keywords": [
+    "gratuito",
+    "tres proyectos"
+   ],
+   "at_ms": 755750,
+   "speaker": "speaker-1"
+  },
+  {
+   "id": "D2",
+   "text": "Descuento del veinte por ciento en el plan anual",
+   "keywords": [
+    "veinte por ciento",
+    "anual"
+   ],
+   "at_ms": 1541555,
+   "speaker": "speaker-1"
+  },
+  {
+   "id": "D3",
+   "text": "Los clientes actuales mantienen el precio antiguo durante seis meses",
+   "keywords": [
+    "seis meses",
+    "precio antiguo"
+   ],
+   "at_ms": 2685369,
+   "speaker": "speaker-1"
+  },
+  {
+   "id": "D4",
+   "text": "El lanzamiento se mueve al quince de marzo (antes uno de marzo) por la facturación",
+   "keywords": [
+    "quince de marzo"
+   ],
+   "at_ms": 3407552,
+   "speaker": "speaker-1"
+  }
+ ],
+ "actionItems": [
+  {
+   "id": "A1",
+   "text": "Preparar el análisis de bajas por segmento para el martes que viene",
+   "keywords": [
+    "analisis de bajas",
+    "segmento"
+   ],
+   "at_ms": 1023144,
+   "speaker": "speaker-4",
+   "owner": "speaker-4",
+   "isMine": false
+  },
+  {
+   "id": "A2",
+   "text": "Escribir las preguntas frecuentes y los textos de la página de precios",
+   "keywords": [
+    "preguntas frecuentes",
+    "pagina de precios"
+   ],
+   "at_ms": 1658357,
+   "speaker": "speaker-3",
+   "owner": "speaker-3",
+   "isMine": false
+  },
+  {
+   "id": "A3",
+   "text": "Hablar con el equipo de facturación sobre el cambio de planes en la integración",
+   "keywords": [
+    "facturacion"
+   ],
+   "at_ms": 2151141,
+   "speaker": "me",
+   "owner": null,
+   "isMine": false
+  },
+  {
+   "id": "A4",
+   "text": "Enviar el email a los clientes actuales anunciando el cambio",
+   "keywords": [
+    "email",
+    "clientes actuales"
+   ],
+   "at_ms": 2795762,
+   "speaker": "me",
+   "owner": "me",
+   "isMine": true
+  },
+  {
+   "id": "A5",
+   "text": "Formar al equipo de ventas en los planes nuevos antes del lanzamiento",
+   "keywords": [
+    "form",
+    "equipo de ventas"
+   ],
+   "at_ms": 3095142,
+   "speaker": "speaker-2",
+   "owner": "speaker-2",
+   "isMine": false
+  },
+  {
+   "id": "A6",
+   "text": "Preparar la campaña de lanzamiento (email y LinkedIn)",
+   "keywords": [
+    "campana",
+    "linkedin"
+   ],
+   "at_ms": 3192636,
+   "speaker": "speaker-1",
+   "owner": "speaker-1",
+   "isMine": false
+  }
+ ],
+ "openQuestions": [
+  {
+   "id": "Q1",
+   "text": "¿El plan enterprise muestra precio público o 'contacte con nosotros'?",
+   "keywords": [
+    "enterprise",
+    "contact"
+   ],
+   "at_ms": 1733888,
+   "speaker": "speaker-2"
+  },
+  {
+   "id": "Q2",
+   "text": "¿Qué pasa con los clientes mensuales a mitad de ciclo (prorrateo)?",
+   "keywords": [
+    "prorrat",
+    "mensuales"
+   ],
+   "at_ms": 2412855,
+   "speaker": "speaker-4"
+  },
+  {
+   "id": "Q3",
+   "text": "¿Hace falta revisión legal del cambio en los términos y condiciones?",
+   "keywords": [
+    "legal",
+    "terminos"
+   ],
+   "at_ms": 2889979,
+   "speaker": "speaker-3"
+  }
+ ],
+ "risks": [
+  {
+   "id": "R1",
+   "text": "El límite del plan gratuito puede provocar bajas de clientes pequeños",
+   "keywords": [
+    "clientes pequenos",
+    "limite"
+   ],
+   "at_ms": 901340,
+   "speaker": "speaker-2"
+  },
+  {
+   "id": "R2",
+   "text": "La migración a Stripe de facturación puede no estar lista para el lanzamiento",
+   "keywords": [
+    "stripe"
+   ],
+   "at_ms": 2249009,
+   "speaker": "speaker-3"
+  },
+  {
+   "id": "R3",
+   "text": "La competencia lanza un plan parecido en marzo",
+   "keywords": [
+    "competencia",
+    "marzo"
+   ],
+   "at_ms": 2988450,
+   "speaker": "speaker-2"
+  }
+ ],
+ "superseded": [
+  {
+   "id": "S1",
+   "text": "Lanzamiento el uno de marzo (revertido más tarde)",
+   "keywords": [
+    "uno de marzo"
+   ],
+   "at_ms": 365003,
+   "speaker": "speaker-1"
+  }
+ ],
+ "acceptable": []
+}
