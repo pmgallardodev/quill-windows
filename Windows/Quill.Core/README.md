@@ -1,6 +1,6 @@
 # Quill.Core
 
-Platform-free core of Quill (`net8.0`). Domain model, ports (interfaces the
+Platform-free core of Quill (`net10.0`). Domain model, ports (interfaces the
 Windows adapters implement) and pure logic. It must never reference WPF, NAudio,
 Whisper.net, LLamaSharp, sherpa-onnx or any Windows API, so its tests run on macOS:
 
