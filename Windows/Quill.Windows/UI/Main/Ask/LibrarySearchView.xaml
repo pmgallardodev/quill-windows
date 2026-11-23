@@ -1,0 +1,78 @@
+<UserControl x:Class="Quill.Windows.UI.LibrarySearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:loc="clr-namespace:Quill.Windows.Resources"
+             xmlns:local="clr-namespace:Quill.Windows.UI"
+             x:ClassModifier="internal">
+    <!-- "Buscar en todas las reuniones". The view model comes from AskModule.Current (code-behind). -->
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
+
+    <Grid Margin="{StaticResource Quill.Padding.Window}">
+        <TextBlock x:Name="Unavailable" Visibility="Collapsed" TextWrapping="Wrap"
+                   Text="{loc:Str Ask_Unavailable}" Style="{StaticResource Quill.Text.Secondary}" />
+
+        <DockPanel x:Name="Root">
+            <TextBlock DockPanel.Dock="Top" Text="{loc:Str Search_LibraryTitle}" Style="{StaticResource Quill.Text.Title}" />
+
+            <DockPanel DockPanel.Dock="Top" Margin="0,12,0,0">
+                <ui:Button DockPanel.Dock="Right" Margin="6,0,0,0" Appearance="Primary"
+                           Content="{loc:Str Search_LibraryButton}" Command="{Binding SearchCommand}">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="Search24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+                <ui:TextBox Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
+                            PlaceholderText="{loc:Str Search_LibraryPlaceholder}"
+                            AutomationProperties.Name="{loc:Str Search_LibraryPlaceholder}">
+                    <ui:TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
+                    </ui:TextBox.InputBindings>
+                </ui:TextBox>
+            </DockPanel>
+
+            <TextBlock DockPanel.Dock="Top" Margin="2,6,0,0" Text="{Binding Status}" TextWrapping="Wrap"
+                       Style="{StaticResource Quill.Text.Caption}"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                       Visibility="{Binding HasStatus, Converter={StaticResource BoolToVisibility}}" />
+
+            <!-- Ask every meeting -->
+            <Expander DockPanel.Dock="Bottom" Margin="0,12,0,0" Header="{loc:Str Search_LibraryAskAll}">
+                <local:AskPanelView MaxHeight="420" DataContext="{Binding Ask}" />
+            </Expander>
+
+            <ScrollViewer Margin="0,10,0,0" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Results}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type local:SearchResultViewModel}">
+                            <ui:Button Margin="0,0,0,6" Appearance="Transparent"
+                                       HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                       Command="{Binding OpenCommand}"
+                                       AutomationProperties.Name="{Binding Title}"
+                                       AutomationProperties.HelpText="{Binding Snippet}">
+                                <StackPanel>
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Right" Margin="8,0,0,0"
+                                                   Style="{StaticResource Quill.Text.Caption}"
+                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                            <Run Text="{Binding KindText, Mode=OneWay}" />
+                                            <Run Text=" · " />
+                                            <Run Text="{Binding TimeText, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    </DockPanel>
+                                    <TextBlock Text="{Binding DateText}" Style="{StaticResource Quill.Text.Caption}"
+                                               Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                    <TextBlock Margin="0,4,0,0" Text="{Binding Snippet}" TextWrapping="Wrap"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                            </ui:Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+    </Grid>
+</UserControl>
