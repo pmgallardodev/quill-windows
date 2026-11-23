@@ -48,12 +48,15 @@ public sealed class MeetingExportService
     }
 
     /// <summary>Call after a final summary is saved. Null when auto-export is off or no folder is set.</summary>
-    public Task<MarkdownExportResult?> ExportIfEnabledAsync(string sessionId, ExportSettings settings, CancellationToken cancellationToken)
+    public async Task<MarkdownExportResult?> ExportIfEnabledAsync(string sessionId, ExportSettings settings, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        return settings.AutoExport && settings.IsConfigured
-            ? ExportAsync(sessionId, settings, cancellationToken)!
-            : Task.FromResult<MarkdownExportResult?>(null);
+        if (!settings.AutoExport || !settings.IsConfigured)
+        {
+            return null;
+        }
+
+        return await ExportAsync(sessionId, settings, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>Exports every session. One failing meeting is reported, never fatal for the rest.</summary>
