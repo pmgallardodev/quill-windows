@@ -66,7 +66,11 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       sherpa-onnx 2.0.3. Extra file speakers.resolution.json (color slot, embeddings, edit log).
       Pending: wiring SpeakersModule into app/UI; Windows audio checks; diarization timing.
       Follow-ups: ISessionStore.LoadTranscriptInfo port; Core README for Speakers/Live/Scheduling.
-- [ ] F6 Main window redesign (meetings by day, Summary/Transcript/Notes tabs, My tasks). Route D.
+- [x] F6 Main window redesign (meetings by day, Summary/Transcript/Notes tabs, My tasks). Route D.
+      Evidence: dad414e, af66741, e74fed4, b185f71, merged. Post-merge: Core 260/260, Windows
+      projects build 0/0. 70 VM/helper tests run green in a macOS net8.0 harness (agent).
+      Old SessionsWindow deleted. ISessionActions default = AI pack missing; real actions wired
+      in the integration task. Pending: Windows runtime check (Mica, theme, virtualization).
 
 ### Migration (after Wave A merges, no agent touching csproj)
 - [ ] M1 Retarget all projects to net10.0 / net10.0-windows (owner decision 2026-11-23: .NET 8
