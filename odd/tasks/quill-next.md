@@ -151,6 +151,10 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       Scripts unexecuted (no pwsh on Mac). OPEN owner decision: Qwen3-4B Q4_K_M is 2.33 GiB >
       2 GiB GitHub asset cap → agent defaulted to UD-Q3_K_XL (1.98 GiB, unscored) in a separate
       `-llm.zip` (3 assets). No LICENSE in repo (owner's call).
+      Owner decision 2026-11-23: option A — ship Qwen3-4B Q4_K_M split in two parts (3 assets).
+- [ ] P1b Split-model support: Q4_K_M as default, split into parts < 2 GiB at build time,
+      reassembled/loaded by Quill with SHA-256 verification; locator + adapter + scripts + README.
+      Route D.
 
 ## Acceptance criteria
 - Summary JSON has all sections; empty sections render "None"; every item's timestamp exists.
