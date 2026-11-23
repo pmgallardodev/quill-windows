@@ -1,5 +1,6 @@
 using Quill.Core.Ports;
 using Quill.Core.Speakers;
+using Quill.Core.Speakers.VoiceMemory;
 using Quill.Windows.Adapters.Speakers;
 
 namespace Quill.Windows.Speakers;
@@ -33,14 +34,22 @@ public sealed class SpeakersModule
     private readonly IAiPackLocator _aiPack;
     private readonly SpeakerResolutionService _service;
 
+    /// <param name="recordingsRoot">
+    /// Enables speaker-naming memory (F11) and owner-voice learning (F13) with voices.json in
+    /// this folder. Null: no voice memory.
+    /// </param>
     public SpeakersModule(
         ISessionStore sessions,
         IAiPackLocator aiPack,
         IInferenceScheduler scheduler,
-        SpeakerResolutionOptions? options = null)
+        SpeakerResolutionOptions? options = null,
+        string? recordingsRoot = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         _aiPack = aiPack ?? throw new ArgumentNullException(nameof(aiPack));
+        Voices = string.IsNullOrWhiteSpace(recordingsRoot)
+            ? null
+            : new VoiceMemoryService(new FileVoiceLibraryStore(recordingsRoot));
         _service = new SpeakerResolutionService(
             sessions,
             new FileSpeakerResolutionStore(sessions),
@@ -48,8 +57,12 @@ public sealed class SpeakersModule
             new AiPackDiarizer(aiPack),
             scheduler ?? throw new ArgumentNullException(nameof(scheduler)),
             new NAudioEnergyEnvelopeReader(),
-            options);
+            options,
+            Voices);
     }
+
+    /// <summary>Saved voices ("Voces guardadas"), or null when the module has no recordings root.</summary>
+    public VoiceMemoryService? Voices { get; }
 
     /// <summary>True when the AI pack provides both diarization models.</summary>
     public bool IsAvailable => AiPackDiarizer.Models(_aiPack.Locate()) is not null;
@@ -97,6 +110,37 @@ public sealed class SpeakersModule
     /// <summary>Gives final-transcript segment <paramref name="segmentIndex"/> to "me" or "speaker-N".</summary>
     public Task ReassignAsync(string sessionId, int segmentIndex, string speakerId, CancellationToken cancellationToken = default) =>
         _service.ReassignAsync(sessionId, segmentIndex, speakerId, cancellationToken);
+
+    /// <summary>In-person flag and pending voice suggestions of a session.</summary>
+    public Task<SpeakerResolutionState> LoadStateAsync(string sessionId, CancellationToken cancellationToken = default) =>
+        _service.LoadStateAsync(sessionId, cancellationToken);
+
+    /// <summary>"Confirmar" on "¿Es Juan?": names the speaker and reinforces the saved voice.</summary>
+    public Task ConfirmSuggestionAsync(string sessionId, string speakerId, CancellationToken cancellationToken = default) =>
+        _service.ConfirmSuggestionAsync(sessionId, speakerId, cancellationToken);
+
+    /// <summary>"No es": remembered for this meeting only.</summary>
+    public Task RejectSuggestionAsync(string sessionId, string speakerId, CancellationToken cancellationToken = default) =>
+        _service.RejectSuggestionAsync(sessionId, speakerId, cancellationToken);
+
+    /// <summary>
+    /// "Reunión presencial" (F13): stores the flag and resolves the speakers again, diarizing the
+    /// mic track when on. Nothing changes when the AI pack is missing.
+    /// </summary>
+    public async Task<SpeakersResolveResult> SetInPersonAsync(
+        string sessionId,
+        bool inPerson,
+        IProgress<double>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!IsAvailable)
+        {
+            return new SpeakersResolveResult(SpeakersResolveState.Unavailable, Message: "AI pack diarization models not installed");
+        }
+
+        await _service.SetInPersonAsync(sessionId, inPerson, cancellationToken).ConfigureAwait(false);
+        return await ResolveSpeakersAsync(sessionId, progress, cancellationToken).ConfigureAwait(false);
+    }
 
     private sealed class AiPackMissingException(string message) : Exception(message);
 

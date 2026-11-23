@@ -122,6 +122,9 @@ internal sealed class MeetingDetailViewModel : ObservableObject
         };
         Notes = new NotesViewModel(store, delay);
         DateText = row.Started == default ? string.Empty : UiFormat.Date(row.Started, "Format_MeetingDate");
+        Speakers = actions.Voices is { } voices
+            ? new SpeakersPanelViewModel(voices, () => _actions.IsAiAvailable, LoadAsync)
+            : null;
         IdentifySpeakersCommand = new RelayCommand(
             _ => _ = IdentifySpeakersAsync(),
             _ => _actions.IsAiAvailable && !_isIdentifyingSpeakers && Row.IsDone);
@@ -157,6 +160,11 @@ internal sealed class MeetingDetailViewModel : ObservableObject
     public TranscriptViewModel Transcript { get; }
 
     public NotesViewModel Notes { get; }
+
+    /// <summary>Optional speaker naming and in-person mode (F11/F13); null when not wired.</summary>
+    public SpeakersPanelViewModel? Speakers { get; }
+
+    public bool HasSpeakersPanel => Speakers is not null;
 
     public ICommand IdentifySpeakersCommand { get; }
 
@@ -253,8 +261,9 @@ internal sealed class MeetingDetailViewModel : ObservableObject
         var labels = new SpeakerLabels(speakers);
         var summaryLoad = Summary.LoadAsync(sessionId, Title, labels, token);
         var notesLoad = Notes.IsLoaded ? Task.CompletedTask : Notes.LoadAsync(sessionId, token);
+        var speakersLoad = Speakers?.LoadAsync(sessionId, token) ?? Task.CompletedTask;
         await LoadTranscriptAsync(generation, labels, token).ConfigureAwait(true);
-        await Task.WhenAll(summaryLoad, notesLoad).ConfigureAwait(true);
+        await Task.WhenAll(summaryLoad, notesLoad, speakersLoad).ConfigureAwait(true);
     }
 
     /// <summary>Saves the notes and stops pending loads. The detail is not used afterwards.</summary>

@@ -306,6 +306,8 @@ internal sealed class PlaybackSessionActions(ISessionActions inner, PlayerViewMo
 
     public bool CanReassignSpeakers => inner.CanReassignSpeakers;
 
+    public IVoiceActions? Voices => inner.Voices;
+
     public Task GenerateSummaryAsync(string sessionId, string template, Core.Domain.SummaryLevel level, CancellationToken cancellationToken) =>
         inner.GenerateSummaryAsync(sessionId, template, level, cancellationToken);
 

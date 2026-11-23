@@ -86,6 +86,9 @@ internal sealed class AppSessionActions(SessionAiServices services) : ISessionAc
 
     public bool CanReassignSpeakers => true;
 
+    /// <summary>Speaker naming memory and in-person mode (F11/F13); set by the composition root.</summary>
+    public IVoiceActions? Voices { get; init; }
+
     public async Task GenerateSummaryAsync(string sessionId, string template, SummaryLevel level, CancellationToken cancellationToken)
     {
         if (!_services.IsLanguageModelInstalled())

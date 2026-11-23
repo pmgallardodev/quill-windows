@@ -39,7 +39,7 @@ internal sealed class QuillServices : IDisposable
         AiPack = new SettingsAiPackLocator(() => _settings);
         Store = new FileSessionStore(recordingsRoot);
         Summaries = new SummariesModule(AiPack, Scheduler, Store, LlamaOptions(settings.Ai));
-        Speakers = new SpeakersModule(Store, AiPack, Scheduler);
+        Speakers = new SpeakersModule(Store, AiPack, Scheduler, recordingsRoot: recordingsRoot);
         Companion = new CompanionPanelModule(dispatcher);
 
         AiServices = new SessionAiServices
@@ -54,7 +54,7 @@ internal sealed class QuillServices : IDisposable
             ReassignSegment = Speakers.ReassignAsync,
             AutoExport = (sessionId, token) => SettingsModule.AutoExportAsync(Store, sessionId, token),
         };
-        SessionActions = new AppSessionActions(AiServices);
+        SessionActions = new AppSessionActions(AiServices) { Voices = new SpeakersVoiceActions(Speakers) };
         PostTranscription = new PostTranscriptionPipeline(new AppPostTranscriptionSteps(AiServices));
         SettingsModule.Saved += OnSettingsSaved;
     }
