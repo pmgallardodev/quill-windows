@@ -25,10 +25,13 @@ Microphone --------+--> mic.wav ----+                         +--> transcript.js
 Windows audio -----+--> system.wav -+--> large-v3-turbo ------+--> transcript.md
 ```
 
-> Quill is a local recording tool. It visibly indicates when a recording is active. Use it only where recording is lawful and all required notice or consent has been given.
+> Quill is a local recording tool. Its tray icon stays in the notification area while it runs, but discreet mode (on by default) hides its windows from screen capture and removes the red recording dot. Use it only where recording is lawful and all required notice or consent has been given.
+
+With the optional AI pack, Quill also writes a live summary while you talk, separates and names speakers, answers questions about your meetings, and searches them by meaning. Everything runs on the device.
 
 ## Table of Contents
 
+- [Install](#install)
 - [Status](#status)
 - [Features](#features)
 - [Architecture](#architecture)
@@ -45,6 +48,39 @@ Windows audio -----+--> system.wav -+--> large-v3-turbo ------+--> transcript.md
 - [Verification](#verification)
 - [Troubleshooting](#troubleshooting)
 - [Third-party notices](#third-party-notices)
+
+## Install
+
+Each release has two kinds of asset. Both are plain ZIP files under 2 GiB, and neither downloads anything after extraction.
+
+| Asset | Contents | Needed for |
+| --- | --- | --- |
+| `quill-<version>-win-x64.zip` | Quill, the .NET runtime, native runtimes, Whisper `large-v3-turbo` | Recording and final transcription |
+| `quill-ai-pack-<version>.zip` | `ai-pack.json`, live Whisper `small`, speaker models, search embeddings | Live text, speakers, voice memory, semantic search |
+| `quill-ai-pack-<version>-llm.zip` | The local language model (Qwen3-4B Instruct, GGUF) | Summaries, live summary, "What did I miss?", Ask |
+
+The language model gets its own ZIP because GitHub limits each asset to 2 GiB.
+
+1. Extract `quill-<version>-win-x64.zip` to a folder you do not intend to move, for example `%LOCALAPPDATA%\Programs\Quill`.
+2. Extract every `quill-ai-pack-<version>*.zip` **into that same folder**. In Explorer, choose `Extract All...` and point the destination at the Quill folder, not at a new subfolder. The result must be:
+
+   ```text
+   Quill\quill.exe
+   Quill\ai-pack\ai-pack.json
+   Quill\ai-pack\llm\...
+   ```
+
+3. Run `quill.exe`. Settings shows whether the AI pack was found.
+
+To keep the AI pack somewhere else (another disk, for instance), extract it there and choose that `ai-pack` folder in Settings, or set it in `config.json`:
+
+```json
+{
+  "ai": { "pack_path": "D:\\Quill\\ai-pack" }
+}
+```
+
+Without the AI pack, recording, final transcription, playback, transcript editing, export and keyword search keep working; AI features show an "install the AI pack" state instead. A partial pack works per component: for example, without the `-llm` ZIP, live text and speakers work but summaries do not. Release notes list the SHA-256 of every asset; compare with `Get-FileHash <file> -Algorithm SHA256` before extracting.
 
 ## Status
 
@@ -74,6 +110,19 @@ The Windows application lives in `Windows/Quill.Windows`.
 | Windows 11 hardware smoke test | Pending | Requires a Windows device with audio hardware |
 
 ## Features
+
+New with the AI pack:
+
+- Live summary while recording, in a floating companion panel that collapses into a small pill.
+- "What did I miss?" catch-up, live markers and notes during the call.
+- Final summary with decisions, action items and open questions, each linked to its moment in the transcript.
+- Speaker separation: your microphone is you; remote voices are diarized and can be renamed, with optional local voice memory that suggests names in later meetings.
+- Ask questions about one meeting or across all of them, plus semantic search.
+- Discreet mode (on by default): Quill windows are excluded from screen capture and the recording dot is replaced by a neutral icon.
+- Markdown and Obsidian export, editable templates, playback from any transcript line.
+- Local API on `127.0.0.1` with a token, off by default.
+
+Core recorder:
 
 - Separate microphone and Windows playback capture.
 - Fully local Spanish transcription using Whisper `large-v3-turbo` Q5_0.
@@ -106,7 +155,7 @@ The Windows application lives in `Windows/Quill.Windows`.
 | Transcription | `Windows/Quill.Windows/Transcription/` | Serial queue, 16 kHz conversion, and Whisper |
 | Tests | `Windows/Quill.Windows.Tests/` | State recovery, transcription options, exports, insights, and audio normalization |
 | Model | `models/` | `large-v3-turbo` Q5_0 included at publish time |
-| Packaging | `tools/` | Controlled model download and portable ZIP build |
+| Packaging | `tools/` | Pinned model downloads, app ZIP, AI pack ZIPs and release checksums |
 
 ### Session flow
 
@@ -152,6 +201,9 @@ System audio uses global loopback. It captures everything Windows plays through 
 ### To run the portable ZIP
 
 - Windows 11 x64.
+- No .NET installation: the runtime is bundled in the ZIP.
+- A Vulkan-capable GPU is optional. Whisper and the language model use it when present and fall back to the CPU otherwise.
+- About 2.8 GB of disk for the AI pack, and 8 GB of RAM or more for summaries with the local language model.
 - A CPU with AVX, AVX2, FMA, and F16C support.
 - Enough free storage for the package and recordings. The bundled model is about 547 MB, and an hour of meeting is about 230 MB of audio.
 - A default microphone and default audio-output device.
@@ -170,7 +222,7 @@ The published ZIP is self-contained: it does not require the .NET SDK or runtime
 
 ### Use a portable build
 
-1. Extract `quill-win-x64.zip` to a folder you do not intend to move.
+1. Extract `quill-<version>-win-x64.zip` (and, optionally, the AI pack, see [Install](#install)) to a folder you do not intend to move.
 2. Run `quill.exe`.
 3. Right-click the Quill tray icon and select `Iniciar grabacion`.
 4. Select `Detener grabacion` when the meeting ends.
@@ -186,11 +238,13 @@ cd quill-windows
 .\tools\Publish-Portable.ps1
 ```
 
-The script downloads the model only when it is absent, publishes `quill.exe` for `win-x64`, and includes the model plus native runtime in:
+The script downloads the model only when it is absent (and checks its pinned SHA-256), publishes `quill.exe` for `win-x64`, verifies that the LLamaSharp (CPU variants and Vulkan), Whisper.net and sherpa-onnx native runtimes are present, and includes the model, the runtimes and `THIRD_PARTY_NOTICES.md` in:
 
 ```text
-artifacts\quill-win-x64.zip
+artifacts\quill-dev-win-x64.zip
 ```
+
+Pass `-Version 1.4.0` to name it `quill-1.4.0-win-x64.zip`.
 
 Build without allowing the script to download the model:
 
@@ -205,6 +259,16 @@ Bundle the Silero VAD model too, so `"vad": true` can be enabled later:
 ```powershell
 .\tools\Publish-Portable.ps1 -IncludeVad
 ```
+
+### Build a release (app ZIP + AI pack)
+
+```powershell
+.\tools\release.ps1 -Version 1.4.0
+```
+
+It runs `Publish-Portable.ps1` and `build-ai-pack.ps1`, then prints each asset's size and SHA-256 as a Markdown table and writes `artifacts\SHA256SUMS-1.4.0.txt`. Upload the ZIPs and the checksum file to the GitHub release.
+
+`build-ai-pack.ps1` reads `tools\ai-pack.models.json`: one entry per model with its pinned URL, size, SHA-256, license and destination volume. It downloads each model once into `artifacts\ai-pack-cache\` (HTTPS only, size bounded, hash checked, never executed), writes `ai-pack\ai-pack.json` and `ai-pack\THIRD-PARTY-NOTICES.md`, and zips every volume, failing if one reaches 2 GiB. To try another model, edit its entry and set `"sha256": "TO_FILL_ON_FIRST_BUILD"`: the next build downloads it, prints its hash and size, and refuses to package until you pin those values or pass `-AcceptNewHashes`. The models need about 3 GB in the cache plus the same again for the ZIPs.
 
 ## Commands
 
@@ -499,8 +563,12 @@ quill-windows/
 |-- models/
 |   `-- MANIFEST.md
 |-- tools/
+|   |-- ai-pack.models.json
+|   |-- build-ai-pack.ps1
 |   |-- Get-WhisperModel.ps1
-|   `-- Publish-Portable.ps1
+|   |-- PackagingCommon.ps1
+|   |-- Publish-Portable.ps1
+|   `-- release.ps1
 `-- README.md
 ```
 
@@ -510,8 +578,12 @@ Quill for Windows is designed to remain local:
 
 - Audio is written only to the selected session folder.
 - Whisper loads the bundled model from disk and processes audio on the device.
-- There are no accounts, API keys, telemetry, sync, or network requests while recording or transcribing.
-- The model is downloaded only while preparing a development release, never on first use of a published ZIP.
+- Summaries, Ask, search, speaker separation and voice memory run on the device from the AI pack's model files. Voice embeddings never leave the device.
+- There are no accounts, API keys, telemetry, sync, calendar access, or network requests while recording, transcribing or summarizing.
+- Models are downloaded only while preparing a release, never by a published ZIP.
+- The local API is off by default. When enabled it listens on `127.0.0.1` only and requires a token.
+
+Discreet mode limits: it excludes Quill's windows from screen capture and sharing, hides them from the taskbar and `Alt+Tab` while recording, and suppresses notifications. It cannot hide the tray icon (it switches to a neutral one), so a full-screen share that shows the taskbar or notification area still shows Quill's icon. Common dialogs such as file pickers are not excluded from capture.
 - Start at login is optional, visible, and limited to the current user's `HKCU` key.
 
 The model and recordings may contain sensitive information. Protect the extracted package and sessions folder with Windows access controls.
@@ -598,4 +670,4 @@ Quill can run from its new location, but the start-at-login entry keeps the old 
 
 ## Third-party notices
 
-See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the licenses of the runtime and model dependencies included by a portable build.
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the licenses of the runtimes, libraries (LLamaSharp, llama.cpp, Whisper.net, whisper.cpp, sherpa-onnx, ONNX Runtime, WPF-UI, NAudio) and models included in the app ZIP and the AI pack. Each AI pack also carries its own `ai-pack\THIRD-PARTY-NOTICES.md` generated from [tools/ai-pack.models.json](tools/ai-pack.models.json).
