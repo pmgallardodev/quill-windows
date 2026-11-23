@@ -55,7 +55,7 @@ internal sealed class QuillServices : IDisposable
             AutoExport = (sessionId, token) => SettingsModule.AutoExportAsync(Store, sessionId, token),
         };
         SessionActions = new AppSessionActions(AiServices);
-        PostTranscription = new PostTranscriptionPipeline(new AppPostTranscriptionSteps(AiServices));
+        PostTranscription = new PostTranscriptionPipeline(new AppPostTranscriptionSteps(AiServices), new FileSummaryStateStore(Store));
         SettingsModule.Saved += OnSettingsSaved;
     }
 

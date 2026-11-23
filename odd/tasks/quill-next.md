@@ -109,9 +109,12 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       Evidence: 6e6ac21, 0953eca, 44f21a4, merged clean. Post-merge: Core 372/372 (net10),
       Windows 0/0, resx valid. Gaps: GPU/model change needs restart; Recent notifications not
       replayed; GPU probe = vulkan-1.dll present.
-- [ ] R1 Regenerating a summary must preserve user state (action-item done flags) by matching
+- [x] R1 Regenerating a summary must preserve user state (action-item done flags) by matching
       items; also avoid re-running the full pipeline on transcription retry when a summary
       exists unless the user asks. Route D.
+      Evidence: 83d1988, 1ea6fb2, merged; parent wired FileSummaryStateStore into
+      PostTranscriptionPipeline (QuillServices.cs:58). Core 390/390, Windows 0/0.
+      Pending (polish): show "Regenerar" when summary.state.json outdated=true in SummaryViewModel.
 - [x] F8 Audio playback from transcript, transcript editing + re-summarize, import. Route D.
       Evidence: 0c16ae0, a099b55, 3038aa8, 1fc82a3, e8f5443, merged clean. Post-merge: Core
       330/330, Windows projects 0/0, resx valid. Custom WSOLA time-stretch (NAudio has none).
