@@ -415,4 +415,115 @@ Esto no se puede deshacer.</value>
   <data name="MyTasks_Changed" xml:space="preserve">
     <value>El resumen cambió desde que se cargó la lista. Vuelve a abrir Mis tareas.</value>
   </data>
+  <data name="Nav_Meetings" xml:space="preserve">
+    <value>Reuniones</value>
+  </data>
+  <data name="Action_Refresh" xml:space="preserve">
+    <value>Refrescar</value>
+  </data>
+  <data name="Action_More" xml:space="preserve">
+    <value>Más acciones</value>
+  </data>
+  <data name="Action_Delete" xml:space="preserve">
+    <value>Borrar</value>
+  </data>
+  <data name="Action_CopyTranscript" xml:space="preserve">
+    <value>Copiar transcript</value>
+  </data>
+  <data name="Action_ExportSrt" xml:space="preserve">
+    <value>Exportar SRT</value>
+  </data>
+  <data name="Action_ExportVtt" xml:space="preserve">
+    <value>Exportar VTT</value>
+  </data>
+  <data name="Action_OpenTranscript" xml:space="preserve">
+    <value>Abrir transcript.md</value>
+  </data>
+  <data name="Action_OpenLog" xml:space="preserve">
+    <value>Abrir registro de transcripción</value>
+  </data>
+  <data name="Action_CopyMarkdown" xml:space="preserve">
+    <value>Copiar como Markdown</value>
+  </data>
+  <data name="Action_CopyEmail" xml:space="preserve">
+    <value>Copiar como email</value>
+  </data>
+  <data name="Action_PreviousMatch" xml:space="preserve">
+    <value>Coincidencia anterior</value>
+  </data>
+  <data name="Action_NextMatch" xml:space="preserve">
+    <value>Coincidencia siguiente</value>
+  </data>
+  <data name="Action_ClearSearch" xml:space="preserve">
+    <value>Limpiar búsqueda</value>
+  </data>
+  <data name="Search_Placeholder" xml:space="preserve">
+    <value>Buscar en todas las reuniones</value>
+  </data>
+  <data name="Transcript_SearchPlaceholder" xml:space="preserve">
+    <value>Buscar en esta reunión</value>
+  </data>
+  <data name="Meetings_Empty" xml:space="preserve">
+    <value>Todavía no hay reuniones</value>
+  </data>
+  <data name="Meetings_EmptyDescription" xml:space="preserve">
+    <value>Empieza a grabar desde el icono de Quill en la bandeja.</value>
+  </data>
+  <data name="Meeting_HasSummary" xml:space="preserve">
+    <value>Tiene resumen</value>
+  </data>
+  <data name="Meeting_RenameFailed" xml:space="preserve">
+    <value>No se pudo guardar el nombre. Comprueba que la carpeta de la reunión sigue accesible.</value>
+  </data>
+  <data name="Detail_Empty" xml:space="preserve">
+    <value>Selecciona una reunión</value>
+  </data>
+  <data name="Tab_Summary" xml:space="preserve">
+    <value>Resumen</value>
+  </data>
+  <data name="Tab_Transcript" xml:space="preserve">
+    <value>Transcript</value>
+  </data>
+  <data name="Tab_Notes" xml:space="preserve">
+    <value>Notas</value>
+  </data>
+  <data name="Notes_Placeholder" xml:space="preserve">
+    <value>Escribe tus notas. Se guardan solas.</value>
+  </data>
+  <data name="Summary_Template" xml:space="preserve">
+    <value>Plantilla</value>
+  </data>
+  <data name="Summary_Level" xml:space="preserve">
+    <value>Nivel</value>
+  </data>
+  <data name="Summary_LevelBrief" xml:space="preserve">
+    <value>Breve</value>
+  </data>
+  <data name="Summary_LevelDetailed" xml:space="preserve">
+    <value>Detallado</value>
+  </data>
+  <data name="Summary_Generating" xml:space="preserve">
+    <value>Generando resumen...</value>
+  </data>
+  <data name="Summary_None" xml:space="preserve">
+    <value>Aún no hay resumen</value>
+  </data>
+  <data name="Summary_NoneDescription" xml:space="preserve">
+    <value>Elige plantilla y nivel y pulsa Generar resumen.</value>
+  </data>
+  <data name="Summary_AiPackMissingDescription" xml:space="preserve">
+    <value>Instala el paquete de IA para generar resúmenes de tus reuniones.</value>
+  </data>
+  <data name="Summary_LiveBanner" xml:space="preserve">
+    <value>Resumen en vivo. El resumen final se genera al terminar la transcripción.</value>
+  </data>
+  <data name="MyTasks_Empty" xml:space="preserve">
+    <value>No tienes tareas</value>
+  </data>
+  <data name="MyTasks_EmptyDescription" xml:space="preserve">
+    <value>Las acciones que te asignen en los resúmenes aparecerán aquí.</value>
+  </data>
+  <data name="MyTasks_Done" xml:space="preserve">
+    <value>Hechas</value>
+  </data>
 </root>

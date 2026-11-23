@@ -1,0 +1,106 @@
+<UserControl x:Class="Quill.Windows.UI.TranscriptTabView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:qc="clr-namespace:Quill.Windows.UI.Theme.Controls"
+             xmlns:loc="clr-namespace:Quill.Windows.Resources"
+             xmlns:local="clr-namespace:Quill.Windows.UI"
+             x:ClassModifier="internal">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <local:InverseBooleanToVisibilityConverter x:Key="NotToVisibility" />
+    </UserControl.Resources>
+
+    <DockPanel Margin="0,8,0,0">
+        <!-- Search inside this meeting -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="8,0,0,0">
+                <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Text="{Binding MatchText}"
+                           Style="{StaticResource Quill.Text.Caption}" />
+                <ui:Button Appearance="Transparent" ToolTip="{loc:Str Action_PreviousMatch}"
+                           AutomationProperties.Name="{loc:Str Action_PreviousMatch}"
+                           Command="{Binding PreviousMatchCommand}"
+                           Visibility="{Binding IsSearching, Converter={StaticResource BoolToVisibility}}">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="ChevronUp24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+                <ui:Button Appearance="Transparent" ToolTip="{loc:Str Action_NextMatch}"
+                           AutomationProperties.Name="{loc:Str Action_NextMatch}"
+                           Command="{Binding NextMatchCommand}"
+                           Visibility="{Binding IsSearching, Converter={StaticResource BoolToVisibility}}">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="ChevronDown24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+                <ui:Button Appearance="Transparent" ToolTip="{loc:Str Action_ClearSearch}"
+                           AutomationProperties.Name="{loc:Str Action_ClearSearch}"
+                           Command="{Binding ClearSearchCommand}"
+                           Visibility="{Binding IsSearching, Converter={StaticResource BoolToVisibility}}">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="Dismiss24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+            </StackPanel>
+            <ui:TextBox x:Name="SearchBox"
+                        PlaceholderText="{loc:Str Transcript_SearchPlaceholder}"
+                        AutomationProperties.Name="{loc:Str Transcript_SearchPlaceholder}"
+                        Text="{Binding Query, UpdateSourceTrigger=PropertyChanged, Delay=200}"
+                        KeyDown="OnSearchKeyDown">
+                <ui:TextBox.Icon>
+                    <ui:SymbolIcon Symbol="Search24" />
+                </ui:TextBox.Icon>
+            </ui:TextBox>
+        </DockPanel>
+
+        <Grid>
+            <TextBlock Margin="0,16,0,0" HorizontalAlignment="Center" Text="{Binding Status}"
+                       Style="{StaticResource Quill.Text.Secondary}"
+                       Visibility="{Binding HasStatus, Converter={StaticResource BoolToVisibility}}" />
+
+            <ListBox x:Name="Lines" ItemsSource="{Binding Entries}"
+                     Grid.IsSharedSizeScope="True"
+                     Background="Transparent" BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     VirtualizingPanel.IsVirtualizing="True"
+                     VirtualizingPanel.VirtualizationMode="Recycling"
+                     VirtualizingPanel.ScrollUnit="Pixel"
+                     AutomationProperties.Name="{loc:Str Tab_Transcript}"
+                     Visibility="{Binding HasStatus, Converter={StaticResource NotToVisibility}}">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsCurrentMatch}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource Quill.Brush.InfoSubtle}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:TranscriptEntryViewModel}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Speaker" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <qc:TimestampLink Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Top"
+                                              Time="{Binding At}"
+                                              Command="{Binding DataContext.PlayAtCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                              CommandParameter="{Binding}" />
+                            <qc:SpeakerChip Grid.Column="1" Margin="0,0,8,0" VerticalAlignment="Top"
+                                            SpeakerId="{Binding SpeakerId}" Label="{Binding SpeakerLabel}"
+                                            Visibility="{Binding IsSegment, Converter={StaticResource BoolToVisibility}}" />
+                            <ui:SymbolIcon Grid.Column="1" Margin="0,0,8,0" Symbol="Bookmark24"
+                                           Foreground="{DynamicResource Quill.Brush.Info}"
+                                           Visibility="{Binding IsMarker, Converter={StaticResource BoolToVisibility}}" />
+                            <TextBlock Grid.Column="2" TextWrapping="Wrap" VerticalAlignment="Top"
+                                       local:HighlightedText.Runs="{Binding Runs}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+    </DockPanel>
+</UserControl>
