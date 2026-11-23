@@ -31,8 +31,12 @@ owner decisions. Review: RDD off (global) → ordinary checks only.
 Route legend: D = delegated writer in its own worktree (parallel). Parent integrates merges.
 
 ### Wave 0 — foundations (parallel)
-- [ ] F1 Quill.Core (net8.0) + Quill.Core.Tests: domain, ports, MeetingSummary schema + citation
+- [x] F1 Quill.Core (net8.0) + Quill.Core.Tests: domain, ports, MeetingSummary schema + citation
       validator, session format v2 (additive), solution file. Route D.
+      Evidence: ddd7197, 85759b7, b9f280d, a22bd7e, merge; parent added IInferenceScheduler port
+      61028a4. Core tests 127/127 green on macOS; win-x64 build 0 errors. API: Quill.Core/README.md.
+      Notes: legacy Sessions code lives in Quill.Core/Legacy (old namespaces); ai-pack.json manifest
+      layout proposed by F1 must be adopted by P1.
 - [ ] F0 Spike + benchmark harness: LLamaSharp/Vulkan, sherpa-onnx .NET, Whisper small live
       latency; 5 synthetic Spanish transcripts with answer keys; scoring tool. Route D.
 - [x] F2 Design system with WPF-UI: tokens, typography, light/dark, Mica, string resources. Route D.
