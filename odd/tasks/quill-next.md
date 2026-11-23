@@ -147,6 +147,10 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       saved voice → loudest (≥25% talk time) → most talk. Owner voice learned from first 5 online
       meetings. Gap: switch not in import dialog (settable after import).
 - [ ] P1 Packaging: app ZIP + AI-pack ZIP, AI-pack detection, README update. Route D.
+      Done: 8cfc387, 62d0237, d722434, merged; build 0/0; native runtimes verified in publish.
+      Scripts unexecuted (no pwsh on Mac). OPEN owner decision: Qwen3-4B Q4_K_M is 2.33 GiB >
+      2 GiB GitHub asset cap → agent defaulted to UD-Q3_K_XL (1.98 GiB, unscored) in a separate
+      `-llm.zip` (3 assets). No LICENSE in repo (owner's call).
 
 ## Acceptance criteria
 - Summary JSON has all sections; empty sections render "None"; every item's timestamp exists.
