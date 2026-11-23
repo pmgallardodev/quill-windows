@@ -158,4 +158,52 @@ public sealed class FinalSummaryBuilderTests
         Assert.NotNull(failed.Error);
         Assert.Equal(1, _store.SaveCount);
     }
+
+    [Fact]
+    public async Task RegeneratingKeepsDoneFlagsBacksUpThePreviousSummaryAndClearsOutdated()
+    {
+        GivenTranscript(Line(30, 40, "Yo preparo la demo.", "speaker-1"), Line(50, 60, "Y reservo la sala."));
+        var previous = new MeetingSummary
+        {
+            ExecutiveSummary = "Antes",
+            ActionItems = [new ActionItem("Preparar la demo", "speaker-1", null, false, S(30), Done: true)],
+        };
+        _store.Summaries[(SessionId, SummaryKind.Final)] = previous;
+        var state = new FakeSummaryStateStore();
+        state.States[SessionId] = new SummaryState { Outdated = true, Reason = "retry" };
+        var model = new FakeLanguageModel().Enqueue(Json(new MeetingSummary
+        {
+            ExecutiveSummary = "Después",
+            ActionItems =
+            [
+                new ActionItem("Preparar demo", "speaker-1", null, false, S(30)),
+                new ActionItem("Reservar sala", SpeakerIds.Me, null, true, S(50)),
+            ],
+        }));
+
+        var outcome = await new FinalSummaryBuilder(model, _scheduler, _store, _clock, state)
+            .BuildAsync(SessionId, new SummaryOptions());
+
+        Assert.Equal(SummaryStatus.Completed, outcome.Status);
+        var saved = _store.Summaries[(SessionId, SummaryKind.Final)];
+        Assert.Same(outcome.Summary, saved);
+        Assert.Equal("Después", saved.ExecutiveSummary);
+        Assert.Equal([true, false], saved.ActionItems.Select(a => a.Done));
+        Assert.Same(previous, state.Backups[SessionId]);
+        Assert.False((await state.LoadStateAsync(SessionId, CancellationToken.None)).Outdated);
+    }
+
+    [Fact]
+    public async Task FirstSummaryMakesNoBackup()
+    {
+        GivenTranscript(Line(10, 20, "Hola"));
+        var state = new FakeSummaryStateStore();
+        var model = new FakeLanguageModel().Enqueue(Json(new MeetingSummary { ExecutiveSummary = "ok" }));
+
+        var outcome = await new FinalSummaryBuilder(model, _scheduler, _store, _clock, state)
+            .BuildAsync(SessionId, new SummaryOptions());
+
+        Assert.Equal(SummaryStatus.Completed, outcome.Status);
+        Assert.Empty(state.Backups);
+    }
 }

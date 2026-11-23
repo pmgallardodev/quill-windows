@@ -171,3 +171,39 @@ internal static class Segments
     /// <summary>Summary JSON as a model would answer it.</summary>
     public static string Json(MeetingSummary summary) => MeetingSummaryJson.Serialize(summary);
 }
+
+/// <summary>In-memory <see cref="ISummaryStateStore"/> recording backups and the outdated flag.</summary>
+internal sealed class FakeSummaryStateStore : ISummaryStateStore
+{
+    public HashSet<string> ExistingSummaries { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public Dictionary<string, SummaryState> States { get; } = [];
+
+    public Dictionary<string, MeetingSummary> Backups { get; } = [];
+
+    public Exception? Throw { get; set; }
+
+    public Task<bool> HasFinalSummaryAsync(string sessionId, CancellationToken cancellationToken) =>
+        Throw is not null ? Task.FromException<bool>(Throw) : Task.FromResult(ExistingSummaries.Contains(sessionId));
+
+    public Task<SummaryState> LoadStateAsync(string sessionId, CancellationToken cancellationToken) =>
+        Task.FromResult(States.GetValueOrDefault(sessionId) ?? SummaryState.Current);
+
+    public Task MarkOutdatedAsync(string sessionId, string reason, CancellationToken cancellationToken)
+    {
+        States[sessionId] = new SummaryState { Outdated = true, Reason = reason };
+        return Task.CompletedTask;
+    }
+
+    public Task ClearOutdatedAsync(string sessionId, CancellationToken cancellationToken)
+    {
+        States.Remove(sessionId);
+        return Task.CompletedTask;
+    }
+
+    public Task BackupAsync(string sessionId, MeetingSummary previous, CancellationToken cancellationToken)
+    {
+        Backups[sessionId] = previous;
+        return Task.CompletedTask;
+    }
+}

@@ -141,6 +141,14 @@ with `JsonSchemaGbnf.Convert(schema)` (root rule `root`); it throws `NotSupporte
 schema features outside the subset `MeetingSummarySchema` uses. Windows wiring:
 `Quill.Windows.Summaries.SummariesModule` (adapter `LlamaSharpLanguageModel`).
 
+Regenerating keeps user state: `FinalSummaryBuilder.BuildAsync` runs `SummaryUserStateMerger`
+(action-item `done` carried to the best one-to-one match, char-bigram Dice ≥ 0.6 on normalized
+text, owners must agree when both are set), backs the replaced summary up as `summary.prev.json`
+and clears the outdated flag. `PostTranscriptionPipeline(steps, ISummaryStateStore)` keeps an
+existing final summary on transcription retry/resume (speakers still run; summary step `Skipped`
+with `SummaryKeptDetail`) and marks it outdated; read it with
+`ISummaryStateStore.LoadStateAsync(id).Outdated` (`FileSummaryStateStore`).
+
 ## Session folder format
 
 v1 (unchanged, still written by the current recorder): `meta.json`, `mic.wav`,
@@ -152,6 +160,8 @@ v2 adds only new files, so older Quill versions keep reading the folder:
 | File | Content |
 |---|---|
 | `summary.json` | Final `MeetingSummary` (design §7.1) |
+| `summary.prev.json` | The final summary replaced by the last regeneration (one generation) |
+| `summary.state.json` | `{ "outdated", "reason", "since" }`; absent = current (`FileSummaryStateStore`) |
 | `live/summary.json` | Latest live summary |
 | `live/transcript.json` | Live-pass transcript (same shape as `transcript.json`) |
 | `speakers.json` | `{ "version": 1, "speakers": [ { "id", "track": "mic"\|"system", "displayName"? } ] }` |
