@@ -1173,4 +1173,133 @@ Esto no se puede deshacer.</value>
   <data name="Search_LibraryKindNote" xml:space="preserve">
     <value>Nota</value>
   </data>
+  <data name="Api_Nav" xml:space="preserve">
+    <value>API local</value>
+  </data>
+  <data name="Api_Enabled" xml:space="preserve">
+    <value>Activar la API local</value>
+  </data>
+  <data name="Api_LocalOnlyNote" xml:space="preserve">
+    <value>Solo escucha en este equipo (127.0.0.1): ningún otro ordenador de la red puede conectarse y cada petición necesita el token. Está desactivada por defecto para que Quill siga siendo discreto.</value>
+  </data>
+  <data name="Api_Port" xml:space="preserve">
+    <value>Puerto</value>
+  </data>
+  <data name="Api_PortHint" xml:space="preserve">
+    <value>Déjalo vacío para que Quill elija un puerto libre la primera vez que la actives y lo recuerde.</value>
+  </data>
+  <data name="Api_Endpoint" xml:space="preserve">
+    <value>Dirección</value>
+  </data>
+  <data name="Api_EndpointPending" xml:space="preserve">
+    <value>Quill elegirá un puerto libre al activarla.</value>
+  </data>
+  <data name="Api_Token" xml:space="preserve">
+    <value>Token</value>
+  </data>
+  <data name="Api_TokenHint" xml:space="preserve">
+    <value>Envíalo en cada petición como «Authorization: Bearer &lt;token&gt;». Trátalo como una contraseña.</value>
+  </data>
+  <data name="Api_TokenPending" xml:space="preserve">
+    <value>Se generará al activar la API.</value>
+  </data>
+  <data name="Api_ShowToken" xml:space="preserve">
+    <value>Mostrar</value>
+  </data>
+  <data name="Api_CopyToken" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="Api_TokenCopied" xml:space="preserve">
+    <value>Token copiado al portapapeles.</value>
+  </data>
+  <data name="Api_RegenerateToken" xml:space="preserve">
+    <value>Generar uno nuevo</value>
+  </data>
+  <data name="Api_RegenerateHint" xml:space="preserve">
+    <value>Token nuevo generado. Al guardar, las herramientas que usen el anterior dejarán de tener acceso.</value>
+  </data>
+  <data name="Api_Webhooks" xml:space="preserve">
+    <value>Webhooks</value>
+  </data>
+  <data name="Api_WebhooksHint" xml:space="preserve">
+    <value>Quill avisa con un POST cuando termina una grabación, una transcripción o un resumen. Va firmado en la cabecera X-Quill-Signature (HMAC-SHA256 con el token) y solo lleva el identificador de la reunión. Solo se admiten direcciones http de este equipo: 127.0.0.1, localhost o [::1].</value>
+  </data>
+  <data name="Api_WebhookAdd" xml:space="preserve">
+    <value>Añadir</value>
+  </data>
+  <data name="Api_WebhookRemove" xml:space="preserve">
+    <value>Quitar</value>
+  </data>
+  <data name="Api_Error_WebhookEmpty" xml:space="preserve">
+    <value>Escribe una dirección.</value>
+  </data>
+  <data name="Api_Error_WebhookMalformed" xml:space="preserve">
+    <value>No es una dirección web válida. Por ejemplo: http://127.0.0.1:9000/quill</value>
+  </data>
+  <data name="Api_Error_WebhookScheme" xml:space="preserve">
+    <value>Usa http://. El destino es este mismo equipo.</value>
+  </data>
+  <data name="Api_Error_WebhookHost" xml:space="preserve">
+    <value>Solo se permiten 127.0.0.1, localhost o [::1]: Quill nunca envía datos fuera de este equipo.</value>
+  </data>
+  <data name="Api_Error_WebhookCredentials" xml:space="preserve">
+    <value>La dirección no puede llevar usuario ni contraseña.</value>
+  </data>
+  <data name="Api_Error_WebhookDuplicate" xml:space="preserve">
+    <value>Esa dirección ya está en la lista.</value>
+  </data>
+  <data name="Api_Error_WebhookLimit" xml:space="preserve">
+    <value>Como máximo {0} webhooks.</value>
+  </data>
+  <data name="Api_Error_Port" xml:space="preserve">
+    <value>El puerto debe ser un número entre 1024 y 65535, o quedar vacío.</value>
+  </data>
+  <data name="Api_Mcp" xml:space="preserve">
+    <value>Activar el servidor MCP</value>
+  </data>
+  <data name="Api_McpHint" xml:space="preserve">
+    <value>Permite que asistentes compatibles con MCP consulten tus reuniones en modo solo lectura, en la ruta /mcp de la misma dirección y con el mismo token.</value>
+  </data>
+  <data name="Tray_Settings" xml:space="preserve">
+    <value>Ajustes</value>
+  </data>
+  <data name="Tray_Import" xml:space="preserve">
+    <value>Importar grabación…</value>
+  </data>
+  <data name="Tray_NoticeStatus" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Pipeline_Running" xml:space="preserve">
+    <value>{0}: identificando interlocutores y generando el resumen…</value>
+  </data>
+  <data name="Pipeline_Done" xml:space="preserve">
+    <value>{0}: reunión procesada.</value>
+  </data>
+  <data name="Pipeline_DoneWithIssues" xml:space="preserve">
+    <value>{0}: procesada con avisos ({1}).</value>
+  </data>
+  <data name="Pipeline_StepFailed" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Pipeline_Step_Speakers" xml:space="preserve">
+    <value>interlocutores</value>
+  </data>
+  <data name="Pipeline_Step_Summary" xml:space="preserve">
+    <value>resumen</value>
+  </data>
+  <data name="Pipeline_Step_Export" xml:space="preserve">
+    <value>exportación</value>
+  </data>
+  <data name="Pipeline_NoTranscript" xml:space="preserve">
+    <value>La reunión aún no tiene transcripción.</value>
+  </data>
+  <data name="Pipeline_SummaryFailed" xml:space="preserve">
+    <value>No se pudo generar el resumen.</value>
+  </data>
+  <data name="Pipeline_SessionNotFound" xml:space="preserve">
+    <value>No se encontró la reunión.</value>
+  </data>
+  <data name="Pipeline_SegmentNotFound" xml:space="preserve">
+    <value>No se encontró ese fragmento en la transcripción. Recarga la reunión e inténtalo de nuevo.</value>
+  </data>
 </root>

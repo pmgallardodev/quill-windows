@@ -54,6 +54,7 @@
                 <ListBoxItem Content="{loc:Str Settings_Nav_Templates}" />
                 <ListBoxItem Content="{loc:Str Settings_Nav_Export}" />
                 <ListBoxItem Content="{loc:Str Privacy_Nav}" />
+                <ListBoxItem x:Name="ApiNavigationItem" Content="{loc:Str Api_Nav}" />
             </ListBox>
 
             <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
@@ -267,6 +268,65 @@
                                          Text="{Binding CompanionHotkey, UpdateSourceTrigger=PropertyChanged}" />
                                 <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Privacy_CompanionHotkeyHint}" />
                                 <TextBlock Style="{StaticResource Hint}" Margin="0,16,0,0" Text="{loc:Str Privacy_DisclosureNote}" />
+                            </StackPanel>
+                        </qc:Card>
+                    </StackPanel>
+
+                    <!-- API local (DataContext: ApiSettingsViewModel, set in SettingsWindow.Api.cs) -->
+                    <StackPanel x:Name="ApiPage" Style="{StaticResource Page}" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Str Api_Nav}" />
+                        <qc:Card>
+                            <StackPanel>
+                                <CheckBox Content="{loc:Str Api_Enabled}" IsChecked="{Binding Enabled}" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Api_LocalOnlyNote}" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Api_Port}" />
+                                <TextBox MaxWidth="160" MinWidth="120" HorizontalAlignment="Left"
+                                         Text="{Binding PortText, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Api_PortHint}" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Api_Endpoint}" />
+                                <TextBox IsReadOnly="True" Text="{Binding EndpointText, Mode=OneWay}" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Str Api_Token}" />
+                                <DockPanel>
+                                    <ui:Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="{loc:Str Api_RegenerateToken}" Click="OnRegenerateApiToken" />
+                                    <ui:Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="{loc:Str Api_CopyToken}" Click="OnCopyApiToken"
+                                               IsEnabled="{Binding HasToken}" />
+                                    <CheckBox DockPanel.Dock="Right" Margin="8,0,0,0" Content="{loc:Str Api_ShowToken}" IsChecked="{Binding ShowToken}"
+                                              IsEnabled="{Binding HasToken}" />
+                                    <TextBox IsReadOnly="True" FontFamily="Consolas" Text="{Binding TokenDisplay, Mode=OneWay}" />
+                                </DockPanel>
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Api_TokenHint}" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{Binding Message}" />
+                            </StackPanel>
+                        </qc:Card>
+                        <qc:Card Margin="0,12,0,0">
+                            <StackPanel>
+                                <qc:SectionHeader Title="{loc:Str Api_Webhooks}" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Api_WebhooksHint}" />
+                                <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding Webhooks}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <DockPanel Margin="0,4,0,0">
+                                                <ui:Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="{loc:Str Api_WebhookRemove}"
+                                                           Click="OnRemoveApiWebhook" Tag="{Binding}" />
+                                                <TextBlock VerticalAlignment="Center" Style="{StaticResource Quill.Text.Body}"
+                                                           TextTrimming="CharacterEllipsis" Text="{Binding}" />
+                                            </DockPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <DockPanel Margin="0,8,0,0">
+                                    <ui:Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="{loc:Str Api_WebhookAdd}" Click="OnAddApiWebhook" />
+                                    <TextBox Text="{Binding NewWebhook, UpdateSourceTrigger=PropertyChanged}" />
+                                </DockPanel>
+                                <TextBlock Style="{StaticResource Hint}" Foreground="{DynamicResource Quill.Brush.Recording}"
+                                           Text="{Binding WebhookError}"
+                                           Visibility="{Binding HasWebhookError, Converter={StaticResource BoolToVisibility}}" />
+                            </StackPanel>
+                        </qc:Card>
+                        <qc:Card Margin="0,12,0,0">
+                            <StackPanel>
+                                <CheckBox Content="{loc:Str Api_Mcp}" IsChecked="{Binding McpEnabled}" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str Api_McpHint}" />
                             </StackPanel>
                         </qc:Card>
                     </StackPanel>

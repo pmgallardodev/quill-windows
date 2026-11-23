@@ -25,6 +25,7 @@ internal partial class SettingsWindow
         _save = save ?? throw new ArgumentNullException(nameof(save));
         InitializeComponent();
         DataContext = _viewModel;
+        InitializeApiPage();
         ThemeBootstrapper.Attach(this);
         Closed += (_, _) => _closing.Cancel();
     }
@@ -32,12 +33,12 @@ internal partial class SettingsWindow
     private void OnNavigationChanged(object sender, SelectionChangedEventArgs e)
     {
         // SelectionChanged fires during InitializeComponent, before the pages exist.
-        if (PrivacyPage is null)
+        if (ApiPage is null)
         {
             return;
         }
 
-        UIElement[] pages = [GeneralPage, AiPage, SummariesPage, TemplatesPage, ExportPage, PrivacyPage];
+        UIElement[] pages = [GeneralPage, AiPage, SummariesPage, TemplatesPage, ExportPage, PrivacyPage, ApiPage];
         for (var index = 0; index < pages.Length; index++)
         {
             pages[index].Visibility = index == Navigation.SelectedIndex ? Visibility.Visible : Visibility.Collapsed;
@@ -138,7 +139,7 @@ internal partial class SettingsWindow
 
     private void OnSave(object sender, RoutedEventArgs e)
     {
-        if (!_viewModel.TryBuild(out var settings))
+        if (!_viewModel.TryBuild(out var settings) || !TryBuildApi(out var api))
         {
             return;
         }
@@ -146,6 +147,7 @@ internal partial class SettingsWindow
         try
         {
             _save(settings);
+            SaveApi(api);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or FormatException)
         {

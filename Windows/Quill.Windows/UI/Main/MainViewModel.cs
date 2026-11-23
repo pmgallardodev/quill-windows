@@ -306,6 +306,41 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>
+    /// A message from the host (background pipeline, in-app notification) for the status line.
+    /// When <paramref name="changedSessionId"/> is the open meeting, its detail reloads so a new
+    /// summary or speaker list shows up. May be called from any thread.
+    /// </summary>
+    public void ShowHostStatus(string text, string? changedSessionId = null)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (!_dispatcher.CheckAccess())
+        {
+            try
+            {
+                _dispatcher.BeginInvoke(() => ShowHostStatus(text, changedSessionId));
+            }
+            catch (InvalidOperationException)
+            {
+                // Shutting down.
+            }
+
+            return;
+        }
+
+        StatusText = text;
+        if (changedSessionId is not null &&
+            _detail is { } detail &&
+            string.Equals(detail.Row.SessionId, changedSessionId, StringComparison.OrdinalIgnoreCase))
+        {
+            _ = detail.LoadAsync();
+        }
+    }
+
     public void SetActiveSession(string? sessionDirectory, bool isPaused = false)
     {
         _activeSessionDirectory = sessionDirectory;
