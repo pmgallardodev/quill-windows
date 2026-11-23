@@ -39,6 +39,12 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       layout proposed by F1 must be adopted by P1.
 - [ ] F0 Spike + benchmark harness: LLamaSharp/Vulkan, sherpa-onnx .NET, Whisper small live
       latency; 5 synthetic Spanish transcripts with answer keys; scoring tool. Route D.
+      Partial: 31a6903 corpus, c511963 harness, merge 2081eaf. Facts: LLamaSharp 0.30.0 (net10 +
+      netstandard2.0 only; 0.27.0 last net8 build), GBNF only; sherpa-onnx works (8/8 turns, ~9-10
+      min CPU per audio hour on M1); Whisper pads to 30 s → longer chunks. Qwen3-4B on 1:1: 100%
+      recall, 0 invented, 1 wrong owner. Remaining: full benchmark + RESULTS.md → run on owner's
+      Windows PC (Mac has ~3 GB free disk, 16 GB RAM: runs fill swap/disk).
+      Owner decision pending: .NET 8 support ended 2026-11-10 → migrate to net10.0?
 - [x] F2 Design system with WPF-UI: tokens, typography, light/dark, Mica, string resources. Route D.
       Evidence: 609ddc2, 38e6185, merge 8d0a84e, alias fix 148166c (WPF-UI root namespace `Wpf`
       collided with `using Wpf = System.Windows`). Build win-x64: 0 errors / 0 warnings.
@@ -79,5 +85,10 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
 ## Progress
 - 2026-11-23: design approved via conversation; branch created; Wave 0 dispatched.
 
+- 2026-11-23: Wave A dispatched (F3-F6). Disk full (ENOSPC) stopped all agents mid-task; owner
+  freed regenerable outputs (bin/obj, bench models). Resumed F3, F4, F6 with disk rules
+  (SelfContained=false builds, clean bin/obj, no model downloads, stop under 800 MB). F5 queued:
+  Core committed (d7b3a81, 93bd447; 157 tests green), sherpa adapter + SpeakersModule pending.
+
 ## Next step
-Merge Wave 0, then dispatch Wave A.
+Merge F3/F4/F6 when they return, resume F5, then Wave B.
