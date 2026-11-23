@@ -190,4 +190,120 @@
   <data name="A11y_AudioLevel" xml:space="preserve">
     <value>Nivel de audio</value>
   </data>
+
+  <!-- Companion panel (F7): floating window shown while recording -->
+  <data name="Companion_Title" xml:space="preserve">
+    <value>Quill en vivo</value>
+  </data>
+  <data name="Companion_Tab_Live" xml:space="preserve">
+    <value>En vivo</value>
+  </data>
+  <data name="Companion_Tab_Transcript" xml:space="preserve">
+    <value>Transcripción</value>
+  </data>
+  <data name="Companion_Tab_Notes" xml:space="preserve">
+    <value>Notas</value>
+  </data>
+  <data name="Companion_Microphone" xml:space="preserve">
+    <value>Micrófono</value>
+  </data>
+  <data name="Companion_SystemAudio" xml:space="preserve">
+    <value>Audio del sistema</value>
+  </data>
+  <data name="Companion_Mark" xml:space="preserve">
+    <value>Marcar</value>
+    <comment>Short label of the button that marks the current moment.</comment>
+  </data>
+  <data name="Companion_MarkerAdded" xml:space="preserve">
+    <value>Momento marcado en {0}</value>
+    <comment>{0}: recording time, e.g. 12:04.</comment>
+  </data>
+  <data name="Companion_Summary_Waiting" xml:space="preserve">
+    <value>El resumen aparecerá tras unos minutos de conversación.</value>
+  </data>
+  <data name="Companion_Summary_Updating" xml:space="preserve">
+    <value>Actualizando el resumen…</value>
+  </data>
+  <data name="Companion_Summary_Delayed" xml:space="preserve">
+    <value>Resumen con retraso: se actualizará cuando el equipo quede libre.</value>
+    <comment>Live summary skipped because inference fell behind (design §7.2).</comment>
+  </data>
+  <data name="Companion_Summary_Failed" xml:space="preserve">
+    <value>No se pudo actualizar el resumen. Se volverá a intentar con más conversación.</value>
+  </data>
+  <data name="Companion_Summary_AiPackMissing" xml:space="preserve">
+    <value>Instala el paquete de IA para ver el resumen en vivo. La grabación funciona igual.</value>
+  </data>
+  <data name="Companion_Summary_Off" xml:space="preserve">
+    <value>El resumen en vivo está desactivado en este equipo. El resumen final se generará al terminar.</value>
+  </data>
+  <data name="Companion_Due" xml:space="preserve">
+    <value>Para: {0}</value>
+    <comment>{0}: due date as said in the meeting, e.g. "el viernes".</comment>
+  </data>
+  <data name="Companion_CatchUp_Title" xml:space="preserve">
+    <value>Últimos {0} minutos</value>
+    <comment>{0}: catch-up window in minutes.</comment>
+  </data>
+  <data name="Companion_CatchUp_Loading" xml:space="preserve">
+    <value>Preparando el resumen de los últimos minutos…</value>
+  </data>
+  <data name="Companion_CatchUp_Empty" xml:space="preserve">
+    <value>No se dijo nada relevante en los últimos minutos.</value>
+  </data>
+  <data name="Companion_CatchUp_AiPackMissing" xml:space="preserve">
+    <value>Instala el paquete de IA para usar esta función.</value>
+  </data>
+  <data name="Companion_CatchUp_Failed" xml:space="preserve">
+    <value>No se pudo preparar el resumen. Inténtalo de nuevo en unos segundos.</value>
+  </data>
+  <data name="Companion_Transcript_Empty" xml:space="preserve">
+    <value>La transcripción en vivo aparecerá aquí.</value>
+  </data>
+  <data name="Companion_Transcript_Unavailable" xml:space="preserve">
+    <value>La transcripción en vivo no está disponible. La grabación continúa y se transcribirá al terminar.</value>
+  </data>
+  <data name="Companion_Transcript_JumpToEnd" xml:space="preserve">
+    <value>Ir al final</value>
+  </data>
+  <data name="Companion_Notes_Placeholder" xml:space="preserve">
+    <value>Escribe una nota…</value>
+  </data>
+  <data name="Companion_Notes_Hint" xml:space="preserve">
+    <value>Las notas se guardan en notes.md y se tienen en cuenta en el resumen final.</value>
+  </data>
+  <data name="Companion_Notes_Loading" xml:space="preserve">
+    <value>Cargando notas…</value>
+  </data>
+  <data name="Companion_Notes_LoadFailed" xml:space="preserve">
+    <value>No se pudieron cargar las notas. La edición está desactivada para no sobrescribirlas.</value>
+  </data>
+  <data name="Companion_Notes_Saved" xml:space="preserve">
+    <value>Guardado</value>
+  </data>
+  <data name="Companion_Notes_Pending" xml:space="preserve">
+    <value>Cambios sin guardar</value>
+  </data>
+  <data name="Companion_Notes_Saving" xml:space="preserve">
+    <value>Guardando…</value>
+  </data>
+  <data name="Companion_Notes_Failed" xml:space="preserve">
+    <value>No se pudieron guardar las notas. Se volverá a intentar.</value>
+  </data>
+  <data name="Companion_Notice_Button" xml:space="preserve">
+    <value>Aviso de grabación</value>
+  </data>
+  <data name="Companion_Notice_Tooltip" xml:space="preserve">
+    <value>Copia un aviso al portapapeles para pegarlo en el chat de la reunión. No se envía nada automáticamente.</value>
+  </data>
+  <data name="Companion_Notice_Text" xml:space="preserve">
+    <value>Aviso: estoy tomando notas de esta reunión con una herramienta local.</value>
+    <comment>Text copied to the clipboard; the user decides whether to paste it (design §16 Q3).</comment>
+  </data>
+  <data name="Companion_Notice_Copied" xml:space="preserve">
+    <value>Aviso copiado al portapapeles.</value>
+  </data>
+  <data name="Companion_Notice_CopyFailed" xml:space="preserve">
+    <value>No se pudo copiar el aviso. Inténtalo de nuevo.</value>
+  </data>
 </root>
