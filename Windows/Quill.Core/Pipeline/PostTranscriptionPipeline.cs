@@ -1,3 +1,5 @@
+using Quill.Core.Summaries;
+
 namespace Quill.Core.Pipeline;
 
 /// <summary>Work done for a session once its final transcript exists, in this order.</summary>
@@ -62,16 +64,34 @@ public interface IPostTranscriptionSteps
 /// summary (no language model) still exports the transcript. Sessions run one at a time, and a
 /// second request for a session already queued or running joins the first.
 /// Step exceptions become <see cref="PipelineStepStatus.Failed"/>; only cancellation propagates.
+/// <para>
+/// With a <see cref="ISummaryStateStore"/>, a session that already has a final summary (a
+/// transcription retry or resume) keeps it: speakers still run, the summary step is skipped with
+/// <see cref="SummaryKeptDetail"/> and the summary is marked outdated so the UI can offer to
+/// regenerate it. An explicit regenerate goes through <see cref="FinalSummaryBuilder"/> directly and
+/// always runs. If the summary state cannot be read the summary step runs as usual (the builder
+/// still carries the user's done flags over).
+/// </para>
 /// </summary>
 public sealed class PostTranscriptionPipeline
 {
+    /// <summary>Detail of the skipped summary step when an existing summary was kept.</summary>
+    public const string SummaryKeptDetail = "summary exists; kept and marked outdated";
+
+    /// <summary>Reason stored in summary.state.json when the pipeline keeps an existing summary.</summary>
+    public const string OutdatedReason = "transcript regenerated";
+
     private readonly IPostTranscriptionSteps _steps;
+    private readonly ISummaryStateStore? _summaryState;
     private readonly SemaphoreSlim _turn = new(1, 1);
     private readonly Dictionary<string, Task<PostTranscriptionReport>> _active = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _gate = new();
 
-    public PostTranscriptionPipeline(IPostTranscriptionSteps steps) =>
+    public PostTranscriptionPipeline(IPostTranscriptionSteps steps, ISummaryStateStore? summaryState = null)
+    {
         _steps = steps ?? throw new ArgumentNullException(nameof(steps));
+        _summaryState = summaryState;
+    }
 
     public Task<PostTranscriptionReport> RunAsync(string sessionId, CancellationToken cancellationToken)
     {
@@ -119,11 +139,53 @@ public sealed class PostTranscriptionPipeline
     private async Task<PostTranscriptionReport> RunStepsAsync(string sessionId, CancellationToken cancellationToken)
     {
         var speakers = await RunStepAsync(PostTranscriptionStep.Speakers, _steps.ResolveSpeakersAsync, sessionId, cancellationToken).ConfigureAwait(false);
-        var summary = await RunStepAsync(PostTranscriptionStep.Summary, _steps.SummarizeAsync, sessionId, cancellationToken).ConfigureAwait(false);
+        var summary = await KeepExistingSummaryAsync(sessionId, cancellationToken).ConfigureAwait(false)
+            ?? await RunStepAsync(PostTranscriptionStep.Summary, _steps.SummarizeAsync, sessionId, cancellationToken).ConfigureAwait(false);
         var export = summary.Status == PipelineStepStatus.Failed
             ? PipelineStepResult.Skipped(PostTranscriptionStep.Export, "summary failed")
             : await RunStepAsync(PostTranscriptionStep.Export, _steps.ExportAsync, sessionId, cancellationToken).ConfigureAwait(false);
         return new PostTranscriptionReport(sessionId, [speakers, summary, export]);
+    }
+
+    /// <returns>The skipped summary step when an existing summary was kept; null to summarize.</returns>
+    private async Task<PipelineStepResult?> KeepExistingSummaryAsync(string sessionId, CancellationToken cancellationToken)
+    {
+        if (_summaryState is null)
+        {
+            return null;
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        try
+        {
+            if (!await _summaryState.HasFinalSummaryAsync(sessionId, cancellationToken).ConfigureAwait(false))
+            {
+                return null;
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            return null;
+        }
+
+        try
+        {
+            await _summaryState.MarkOutdatedAsync(sessionId, OutdatedReason, cancellationToken).ConfigureAwait(false);
+            return PipelineStepResult.Skipped(PostTranscriptionStep.Summary, SummaryKeptDetail);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            // The summary is still kept; only the "outdated" hint is lost.
+            return PipelineStepResult.Skipped(PostTranscriptionStep.Summary, $"{SummaryKeptDetail} (flag not saved: {exception.Message})");
+        }
     }
 
     private static async Task<PipelineStepResult> RunStepAsync(
