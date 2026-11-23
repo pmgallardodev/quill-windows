@@ -48,6 +48,8 @@
     <!-- Fluent design system used by UI/Theme. Its root namespace is "Wpf", so no file may
          declare a using alias named Wpf. -->
     <PackageReference Include="WPF-UI" Version="4.3.0" />
+    <!-- Speaker diarization and embeddings (F5). Native runtime comes from the win-x64 runtime package. -->
+    <PackageReference Include="org.k2fsa.sherpa.onnx" Version="2.0.3" />
   </ItemGroup>
 
   <ItemGroup>

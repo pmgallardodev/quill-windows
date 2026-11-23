@@ -61,7 +61,11 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       Evidence: d381a20, 48289c7, 9cc799d, merged. Core 170/170 green (post-merge, macOS);
       win-x64 builds 0 errors (agent). LLamaSharp pinned 0.27.0 (last net8; M1 upgrades).
       Pending: real-model grammar smoke test; Windows tests run; Vulkan/CPU fallback on hardware.
-- [ ] F5 Speaker separation (echo classifier, diarization on any track, rename, correction). Route D.
+- [x] F5 Speaker separation (echo classifier, diarization on any track, rename, correction). Route D.
+      Evidence: d7b3a81, 93bd447, a7cfa0c, merged. Post-merge: Core 260/260 green, win-x64 0/0.
+      sherpa-onnx 2.0.3. Extra file speakers.resolution.json (color slot, embeddings, edit log).
+      Pending: wiring SpeakersModule into app/UI; Windows audio checks; diarization timing.
+      Follow-ups: ISessionStore.LoadTranscriptInfo port; Core README for Speakers/Live/Scheduling.
 - [ ] F6 Main window redesign (meetings by day, Summary/Transcript/Notes tabs, My tasks). Route D.
 
 ### Migration (after Wave A merges, no agent touching csproj)
