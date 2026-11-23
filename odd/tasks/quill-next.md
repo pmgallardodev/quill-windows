@@ -79,10 +79,31 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       Route: inline if mechanical, else D.
 
 ### Wave B (parallel)
-- [ ] F7 Companion panel (floating, pill, live tabs, What did I miss?, markers, notes, optional
+- [x] F7 Companion panel (floating, pill, live tabs, What did I miss?, markers, notes, optional
       recording-notice button). Route D.
+      Evidence: 86268c6, 5f514a4, merge c660536 (parent resolved Strings.resx append conflict;
+      XML valid). Core 260/260, Windows projects build 0/0. Pending: wiring (I1), level meters
+      need per-track peak/RMS from RecordingSession, Windows checks.
+
+### Discreet mode (owner request 2026-11-23, default ON)
+- [ ] F14 Discreet mode: all Quill windows excluded from screen capture
+      (SetWindowDisplayAffinity WDA_EXCLUDEFROMCAPTURE, fallback WDA_MONITOR) via
+      ThemeBootstrapper.Attach; no taskbar buttons / Alt+Tab while recording; neutral tray icon
+      option (no red recording dot); all balloon/toast notifications suppressed (shown in the
+      excluded panel instead); global hotkey to show/hide the companion panel; setting
+      `privacy.discreet_mode` (default true). Route D (parallel with F8).
+
+### Integration (after Wave B)
+- [ ] I1 Composition root: real ISessionActions (F4 summaries, F5 speakers, F8 playback), one
+      app-wide InferenceScheduler, start LiveSummaryLoop + forward LiveTranscriptBuffer segments,
+      show/close CompanionPanelModule around recording (CloseAsync before final summary),
+      final pipeline after transcription (speakers → final summary → optional auto-export),
+      tray menu items (Ajustes, Importar), per-track audio levels, Core README update. Route D.
 - [ ] F8 Audio playback from transcript, transcript editing + re-summarize, import. Route D.
-- [ ] F9 Templates editor, Markdown/Obsidian export, settings (models, AI pack path, GPU). Route D.
+- [x] F9 Templates editor, Markdown/Obsidian export, settings (models, AI pack path, GPU). Route D.
+      Evidence: 9de94b4, e35cd57, 3127981, 749ffd4, 89ac41e, merged clean. Post-merge: Core
+      309/309, Windows projects 0/0, resx valid. Wiring (tray item, AiPackLocator from settings,
+      TemplateCatalog, live cadence/GPU gate, auto-export, model/GPU overrides) → I1.
 
 ### Wave C (parallel)
 - [ ] F10 Ask (per meeting + across meetings) + local semantic search. Route D.
