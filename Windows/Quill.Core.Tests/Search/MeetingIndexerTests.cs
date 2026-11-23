@@ -62,6 +62,45 @@ public sealed class MeetingIndexerTests
     }
 
     [Fact]
+    public async Task Failed_session_replacement_preserves_catalog_and_committed_vectors_then_retry_replaces_them()
+    {
+        var sessions = new[] { SearchData.Session("s1"), SearchData.Session("s2") };
+        await Indexer().IndexAsync(sessions, CancellationToken.None);
+        var oldHash = _catalog.Get("s1")!.ContentHash;
+        var oldTexts = _index.Records.Values.Where(record => record.SessionId == "s1").Select(record => record.Text).ToHashSet();
+        _store.Transcripts[("s1", TranscriptPass.Final)] = [Line(0, 5, "nuevo contenido para reindexar")];
+        _index.ReplaceFailure = new IOException("synthetic persistence failure");
+
+        await Assert.ThrowsAsync<IOException>(() => Indexer().IndexAsync(sessions, CancellationToken.None));
+
+        Assert.Equal(oldHash, _catalog.Get("s1")!.ContentHash);
+        Assert.Equal(oldTexts, _index.Records.Values.Where(record => record.SessionId == "s1").Select(record => record.Text).ToHashSet());
+        Assert.Contains(_index.Records.Values, record => record.SessionId == "s2");
+
+        _index.ReplaceFailure = null;
+        await Indexer().IndexAsync(sessions, CancellationToken.None);
+        Assert.NotEqual(oldHash, _catalog.Get("s1")!.ContentHash);
+        var replaced = _index.Records.Values.Where(record => record.SessionId == "s1" && record.Kind == PassageKinds.Transcript).ToList();
+        Assert.Contains(replaced, record => record.Text.Contains("nuevo", StringComparison.Ordinal));
+        Assert.DoesNotContain(replaced, record => record.Text.Contains("presupuesto", StringComparison.Ordinal));
+        Assert.Contains(_index.Records.Values, record => record.SessionId == "s2");
+    }
+
+    [Fact]
+    public async Task Unchanged_catalog_session_is_reembedded_when_its_vector_rows_are_missing()
+    {
+        var sessions = new[] { SearchData.Session("s1") };
+        await Indexer().IndexAsync(sessions, CancellationToken.None);
+        await _index.DeleteSessionAsync("s1", CancellationToken.None);
+
+        var report = await Indexer().IndexAsync(sessions, CancellationToken.None);
+
+        Assert.Equal(1, report.Indexed);
+        Assert.NotEmpty(_index.Records);
+        Assert.All(_index.Records.Values, record => Assert.Equal("s1", record.SessionId));
+    }
+
+    [Fact]
     public async Task Missing_embedding_model_indexes_lexically_and_embeds_later_when_it_appears()
     {
         var missing = new FakeEmbeddingModel { Throw = new EmbeddingModelUnavailableException("no model") };

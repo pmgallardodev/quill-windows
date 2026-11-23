@@ -72,11 +72,16 @@ public sealed record EmbeddingHit(EmbeddingRecord Record, double Score);
 /// <summary>Optional restrictions for <see cref="IEmbeddingIndex.SearchAsync"/>.</summary>
 public sealed record EmbeddingFilter(string? SessionId = null, string? Kind = null);
 
-/// <summary>Local vector index (adapter: SQLite). Used for Ask, search and speaker-naming memory.</summary>
+/// <summary>Local vector index used for Ask, search and speaker-naming memory.</summary>
 public interface IEmbeddingIndex
 {
     /// <summary>Inserts or replaces by <see cref="EmbeddingRecord.Id"/>.</summary>
     Task UpsertAsync(IReadOnlyList<EmbeddingRecord> records, CancellationToken cancellationToken);
+
+    /// <summary>Atomically replaces every vector for one session with the supplied records.</summary>
+    Task ReplaceSessionAsync(string sessionId, IReadOnlyList<EmbeddingRecord> records, CancellationToken cancellationToken);
+
+    Task<bool> HasSessionAsync(string sessionId, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<EmbeddingHit>> SearchAsync(
         float[] query,

@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Quill.Core.Ports;
@@ -6,18 +7,9 @@ using Quill.Core.Ports;
 namespace Quill.Core.Search;
 
 /// <summary>
-/// <see cref="IEmbeddingIndex"/> in two files under the recordings root ".quill-index/":
-/// <list type="bullet">
-/// <item><c>manifest.json</c>: format version, dimensions and one entry per record (id, session,
-/// kind, text, offset), in row order.</item>
-/// <item><c>vectors.bin</c>: the vectors as little-endian float32 rows of <c>dimensions</c> values,
-/// in the manifest's order (about 4 KB per passage at 1024 dimensions).</item>
-/// </list>
-/// Everything is loaded into memory on first use and searched by brute-force cosine, which is
-/// fast enough for tens of thousands of passages. Each change rewrites both files atomically
-/// (temp file + rename, vectors first). Files that are corrupt or disagree in length load as an
-/// empty index; the indexer then rebuilds it. A record with a different dimension count (the
-/// embedding model changed) clears the index first. No native dependency. Thread-safe.
+/// <see cref="IEmbeddingIndex"/> stored under ".quill-index/" as a JSON manifest and little-endian
+/// float32 vector file. New manifests include a digest to reject mismatched generations; legacy
+/// manifests without a digest remain readable. Everything is loaded into memory on first use.
 /// </summary>
 public sealed class FileEmbeddingIndex : IEmbeddingIndex
 {
@@ -61,16 +53,64 @@ public sealed class FileEmbeddingIndex : IEmbeddingIndex
         try
         {
             var current = await LoadAsync(cancellationToken).ConfigureAwait(false);
-            if (_dimensions != dimensions)
+            var nextDimensions = _dimensions == dimensions ? _dimensions : dimensions;
+            var updated = nextDimensions == _dimensions ? current.ToList() : [];
+            var replaced = records.Select(record => record.Id).ToHashSet(StringComparer.Ordinal);
+            updated.RemoveAll(record => replaced.Contains(record.Id));
+            updated.AddRange(records.GroupBy(record => record.Id, StringComparer.Ordinal).Select(group => group.Last()));
+            await SaveAsync(updated, nextDimensions, cancellationToken).ConfigureAwait(false);
+            _records = updated;
+            _dimensions = nextDimensions;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task ReplaceSessionAsync(string sessionId, IReadOnlyList<EmbeddingRecord> records, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sessionId);
+        ArgumentNullException.ThrowIfNull(records);
+        if (records.Any(record => record.SessionId != sessionId))
+        {
+            throw new ArgumentException("all replacement records must belong to the requested session", nameof(records));
+        }
+
+        var dimensions = records.Count == 0 ? 0 : records[0].Vector.Length;
+        if (records.Any(record => record.Vector.Length != dimensions) || dimensions == 0 && records.Count > 0)
+        {
+            throw new ArgumentException("every vector must have the same, non-zero length", nameof(records));
+        }
+
+        await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var current = await LoadAsync(cancellationToken).ConfigureAwait(false);
+            var nextDimensions = dimensions == 0 ? _dimensions : dimensions;
+            var updated = dimensions != 0 && nextDimensions != _dimensions ? [] : current.ToList();
+            updated.RemoveAll(record => record.SessionId == sessionId);
+            updated.AddRange(records.GroupBy(record => record.Id, StringComparer.Ordinal).Select(group => group.Last()));
+            if (updated.Count > 0 || current.Count > 0)
             {
-                current.Clear();
-                _dimensions = dimensions;
+                await SaveAsync(updated, nextDimensions, cancellationToken).ConfigureAwait(false);
             }
 
-            var replaced = records.Select(record => record.Id).ToHashSet(StringComparer.Ordinal);
-            current.RemoveAll(record => replaced.Contains(record.Id));
-            current.AddRange(records.GroupBy(record => record.Id, StringComparer.Ordinal).Select(group => group.Last()));
-            await SaveAsync(current, cancellationToken).ConfigureAwait(false);
+            _records = updated;
+            _dimensions = updated.Count == 0 ? 0 : nextDimensions;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<bool> HasSessionAsync(string sessionId, CancellationToken cancellationToken)
+    {
+        await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            return (await LoadAsync(cancellationToken).ConfigureAwait(false)).Any(record => record.SessionId == sessionId);
         }
         finally
         {
@@ -114,10 +154,14 @@ public sealed class FileEmbeddingIndex : IEmbeddingIndex
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            var records = await LoadAsync(cancellationToken).ConfigureAwait(false);
-            if (records.RemoveAll(record => record.SessionId == sessionId) > 0)
+            var current = await LoadAsync(cancellationToken).ConfigureAwait(false);
+            var records = current.Where(record => record.SessionId != sessionId).ToList();
+            if (records.Count != current.Count)
             {
-                await SaveAsync(records, cancellationToken).ConfigureAwait(false);
+                var dimensions = records.Count == 0 ? 0 : _dimensions;
+                await SaveAsync(records, dimensions, cancellationToken).ConfigureAwait(false);
+                _records = records;
+                _dimensions = dimensions;
             }
         }
         finally
@@ -130,6 +174,9 @@ public sealed class FileEmbeddingIndex : IEmbeddingIndex
 
     private string VectorsPath => Path.Combine(_directory, VectorsFileName);
 
+    private string ObsoleteSnapshotPath => Path.Combine(_directory, "index.bin");
+
+
     private async Task<List<EmbeddingRecord>> LoadAsync(CancellationToken cancellationToken)
     {
         if (_records is not null)
@@ -137,13 +184,14 @@ public sealed class FileEmbeddingIndex : IEmbeddingIndex
             return _records;
         }
 
-        _records = [];
-        _dimensions = 0;
+        var loaded = new List<EmbeddingRecord>();
+        var dimensions = 0;
         try
         {
             if (!File.Exists(ManifestPath) || !File.Exists(VectorsPath))
             {
-                return _records;
+                _records = loaded;
+                return loaded;
             }
 
             Manifest? manifest;
@@ -154,9 +202,11 @@ public sealed class FileEmbeddingIndex : IEmbeddingIndex
 
             var bytes = await File.ReadAllBytesAsync(VectorsPath, cancellationToken).ConfigureAwait(false);
             if (manifest is not { Version: FormatVersion, Dimensions: > 0, Records: not null } ||
-                bytes.Length != (long)manifest.Records.Count * manifest.Dimensions * sizeof(float))
+                bytes.Length != (long)manifest.Records.Count * manifest.Dimensions * sizeof(float) ||
+                manifest.VectorsSha256 is { } digest && !StringComparer.OrdinalIgnoreCase.Equals(digest, Convert.ToHexString(SHA256.HashData(bytes))))
             {
-                return _records;
+                _records = loaded;
+                return loaded;
             }
 
             var rowBytes = manifest.Dimensions * sizeof(float);
@@ -165,8 +215,9 @@ public sealed class FileEmbeddingIndex : IEmbeddingIndex
                 var entry = manifest.Records[row];
                 if (entry?.Id is null || entry.SessionId is null)
                 {
-                    _records.Clear();
-                    return _records;
+                    loaded.Clear();
+                    _records = loaded;
+                    return loaded;
                 }
 
                 var vector = new float[manifest.Dimensions];
@@ -176,7 +227,7 @@ public sealed class FileEmbeddingIndex : IEmbeddingIndex
                     vector[index] = BinaryPrimitives.ReadSingleLittleEndian(span[(index * sizeof(float))..]);
                 }
 
-                _records.Add(new EmbeddingRecord(
+                loaded.Add(new EmbeddingRecord(
                     entry.Id,
                     entry.SessionId,
                     entry.Kind ?? string.Empty,
@@ -185,54 +236,121 @@ public sealed class FileEmbeddingIndex : IEmbeddingIndex
                     vector));
             }
 
-            _dimensions = manifest.Dimensions;
+            dimensions = manifest.Dimensions;
         }
         catch (Exception exception) when (exception is JsonException or IOException or UnauthorizedAccessException or NotSupportedException)
         {
-            _records.Clear();
-            _dimensions = 0;
+            loaded.Clear();
+            dimensions = 0;
         }
 
-        return _records;
+        _records = loaded;
+        _dimensions = dimensions;
+        return loaded;
     }
 
-    private async Task SaveAsync(List<EmbeddingRecord> records, CancellationToken cancellationToken)
+    private async Task SaveAsync(List<EmbeddingRecord> records, int dimensions, CancellationToken cancellationToken)
     {
         Directory.CreateDirectory(_directory);
-        var bytes = new byte[records.Count * _dimensions * sizeof(float)];
-        var offset = 0;
-        foreach (var record in records)
+        var vectorsTemp = VectorsPath + ".tmp";
+        var manifestTemp = ManifestPath + ".tmp";
+        var restoreTemp = ManifestPath + ".restore.tmp";
+        var previousManifest = File.Exists(ManifestPath) ? await File.ReadAllBytesAsync(ManifestPath, cancellationToken).ConfigureAwait(false) : null;
+        try
         {
-            foreach (var value in record.Vector)
+            string digest;
+            await using (var stream = new FileStream(vectorsTemp, FileMode.Create, FileAccess.Write, FileShare.None, 64 * 1024, useAsync: true))
+            using (var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256))
             {
-                BinaryPrimitives.WriteSingleLittleEndian(bytes.AsSpan(offset), value);
-                offset += sizeof(float);
+                var buffer = new byte[64 * 1024];
+                var buffered = 0;
+                foreach (var record in records)
+                {
+                    foreach (var value in record.Vector)
+                    {
+                        BinaryPrimitives.WriteSingleLittleEndian(buffer.AsSpan(buffered), value);
+                        buffered += sizeof(float);
+                        if (buffered == buffer.Length)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            hash.AppendData(buffer);
+                            await stream.WriteAsync(buffer, cancellationToken).ConfigureAwait(false);
+                            buffered = 0;
+                        }
+                    }
+                }
+
+                if (buffered > 0)
+                {
+                    hash.AppendData(buffer.AsSpan(0, buffered));
+                    await stream.WriteAsync(buffer.AsMemory(0, buffered), cancellationToken).ConfigureAwait(false);
+                }
+
+                await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
+                digest = Convert.ToHexString(hash.GetHashAndReset());
+            }
+
+            var manifest = new Manifest(
+                FormatVersion,
+                dimensions,
+                records.Select(record => new ManifestEntry(
+                    record.Id,
+                    record.SessionId,
+                    record.Kind,
+                    record.Text,
+                    record.At is { } at ? (long)at.TotalMilliseconds : null)).ToList(),
+                digest);
+            var manifestBytes = JsonSerializer.SerializeToUtf8Bytes(manifest, Json);
+            await File.WriteAllBytesAsync(manifestTemp, manifestBytes, cancellationToken).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Publish metadata first. A reader in the brief gap sees a digest mismatch and no
+            // vectors, never a mixture of generations. Keep the old manifest for rollback until
+            // the vectors rename completes.
+            File.Move(manifestTemp, ManifestPath, overwrite: true);
+            try
+            {
+                File.Move(vectorsTemp, VectorsPath, overwrite: true);
+                TryDelete(ObsoleteSnapshotPath);
+            }
+            catch
+            {
+                if (previousManifest is null)
+                {
+                    TryDelete(ManifestPath);
+                }
+                else
+                {
+                    await File.WriteAllBytesAsync(restoreTemp, previousManifest, CancellationToken.None).ConfigureAwait(false);
+                    File.Move(restoreTemp, ManifestPath, overwrite: true);
+                }
+
+                throw;
             }
         }
-
-        var manifest = new Manifest(
-            FormatVersion,
-            _dimensions,
-            records.Select(record => new ManifestEntry(
-                record.Id,
-                record.SessionId,
-                record.Kind,
-                record.Text,
-                record.At is { } at ? (long)at.TotalMilliseconds : null)).ToList());
-
-        // The two files are not replaced atomically together; the length check on load turns a
-        // crash between the two renames into an empty index that is rebuilt, never wrong hits.
-        await File.WriteAllBytesAsync(VectorsPath + ".tmp", bytes, cancellationToken).ConfigureAwait(false);
-        await using (var stream = File.Create(ManifestPath + ".tmp"))
+        finally
         {
-            await JsonSerializer.SerializeAsync(stream, manifest, Json, cancellationToken).ConfigureAwait(false);
+            TryDelete(vectorsTemp);
+            TryDelete(manifestTemp);
+            TryDelete(restoreTemp);
         }
-
-        File.Move(VectorsPath + ".tmp", VectorsPath, overwrite: true);
-        File.Move(ManifestPath + ".tmp", ManifestPath, overwrite: true);
     }
 
-    private sealed record Manifest(int Version, int Dimensions, IReadOnlyList<ManifestEntry?>? Records);
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            File.Delete(path);
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+    }
+
+    private sealed record Manifest(int Version, int Dimensions, IReadOnlyList<ManifestEntry?>? Records, string? VectorsSha256 = null);
 
     private sealed record ManifestEntry(string? Id, string? SessionId, string? Kind, string? Text, long? AtMs);
 }

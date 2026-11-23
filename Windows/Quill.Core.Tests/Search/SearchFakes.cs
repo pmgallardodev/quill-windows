@@ -81,6 +81,8 @@ internal sealed class MemoryEmbeddingIndex : IEmbeddingIndex
 
     public int UpsertCalls { get; private set; }
 
+    public Exception? ReplaceFailure { get; set; }
+
     public Task UpsertAsync(IReadOnlyList<EmbeddingRecord> records, CancellationToken cancellationToken)
     {
         UpsertCalls++;
@@ -91,6 +93,29 @@ internal sealed class MemoryEmbeddingIndex : IEmbeddingIndex
 
         return Task.CompletedTask;
     }
+
+    public Task ReplaceSessionAsync(string sessionId, IReadOnlyList<EmbeddingRecord> records, CancellationToken cancellationToken)
+    {
+        if (ReplaceFailure is not null)
+        {
+            throw ReplaceFailure;
+        }
+
+        foreach (var id in Records.Values.Where(record => record.SessionId == sessionId).Select(record => record.Id).ToList())
+        {
+            Records.Remove(id);
+        }
+
+        foreach (var record in records)
+        {
+            Records[record.Id] = record;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> HasSessionAsync(string sessionId, CancellationToken cancellationToken) =>
+        Task.FromResult(Records.Values.Any(record => record.SessionId == sessionId));
 
     public Task<IReadOnlyList<EmbeddingHit>> SearchAsync(
         float[] query,

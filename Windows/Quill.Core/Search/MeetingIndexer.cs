@@ -90,7 +90,8 @@ public sealed class MeetingIndexer
             var hash = Hash(session.DisplayTitle, passages);
             var existing = _catalog.Get(session.Id);
             if (existing is not null && existing.ContentHash == hash &&
-                (!vectors || existing.EmbeddingModel == _model!.ModelName))
+                (!vectors || existing.EmbeddingModel == _model!.ModelName) &&
+                (!vectors || await _index!.HasSessionAsync(session.Id, cancellationToken).ConfigureAwait(false)))
             {
                 unchanged++;
                 continue;
@@ -170,8 +171,7 @@ public sealed class MeetingIndexer
             return null;
         }
 
-        await _index!.DeleteSessionAsync(sessionId, cancellationToken).ConfigureAwait(false);
-        await _index.UpsertAsync(records, cancellationToken).ConfigureAwait(false);
+        await _index!.ReplaceSessionAsync(sessionId, records, cancellationToken).ConfigureAwait(false);
         return model.ModelName;
     }
 
