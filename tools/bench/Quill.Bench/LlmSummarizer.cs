@@ -28,10 +28,8 @@ public sealed record RunMetrics(
 public static class LlmSummarizer
 {
     /// <summary>
-    /// Must run before any other LLamaSharp call. "cpu"/"vulkan" force a backend where the LLamaSharp build
-    /// supports it. On net8.0, LLamaSharp 0.30.0 resolves to its netstandard2.0 asset, which has no
-    /// WithVulkan/WithAvx selection API (those are net10.0-only), so the call is made by reflection and
-    /// reported as unavailable instead of failing to compile.
+    /// Must run before any other LLamaSharp call. "cpu"/"vulkan" pick that backend (falling back to the
+    /// CPU builds when Vulkan cannot load); "auto" keeps LLamaSharp's own detection.
     /// </summary>
     public static void ConfigureBackend(string backend)
     {
@@ -50,15 +48,7 @@ public static class LlmSummarizer
             return;
         }
 
-        var withVulkan = config.GetType().GetMethod("WithVulkan", [typeof(bool)]);
-        if (withVulkan is null)
-        {
-            Console.Error.WriteLine($"backend '{backend}' requested, but this LLamaSharp build has no backend " +
-                                    "selection API (netstandard2.0 asset); using auto-detection");
-            return;
-        }
-
-        withVulkan.Invoke(config, [backend == "vulkan"]);
+        config.WithVulkan(backend == "vulkan").WithAutoFallback(true);
     }
 
     public static async Task RunAsync(string modelPath, string modelLabel, IReadOnlyList<Meeting> meetings,

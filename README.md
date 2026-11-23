@@ -10,7 +10,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Windows-11-0078D4?logo=windows&logoColor=white&style=flat-square" alt="Windows 11" />
-  <img src="https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet&logoColor=white&style=flat-square" alt=".NET 8" />
+  <img src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white&style=flat-square" alt=".NET 10" />
   <img src="https://img.shields.io/badge/Whisper-large--v3--turbo-412991?style=flat-square" alt="Whisper large-v3-turbo" />
   <img src="https://img.shields.io/badge/Audio-WASAPI-0078D4?style=flat-square" alt="WASAPI" />
   <img src="https://img.shields.io/badge/Transcription-local-0F766E?style=flat-square" alt="Local transcription" />
@@ -162,7 +162,7 @@ The published ZIP is self-contained: it does not require the .NET SDK or runtime
 ### To develop or publish
 
 - Windows 11 x64.
-- .NET SDK 8.
+- .NET SDK 10 (10.0.404 or a later 10.0 feature band, pinned by `global.json`).
 - PowerShell.
 - Internet access only for the initial release build to retrieve the model from the configured source.
 

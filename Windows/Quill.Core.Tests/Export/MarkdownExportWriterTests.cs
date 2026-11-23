@@ -18,7 +18,7 @@ public sealed class MarkdownExportWriterTests
 
         Assert.Equal(MarkdownExportStatus.Created, first.Status);
         Assert.Equal(Path.Combine(temp.Path, "2026-11-23-daily.md"), first.Path);
-        Assert.Equal("uno\n", Read(first.Path));
+        Assert.Equal("uno\n", Read(first.Path!));
         Assert.Equal(MarkdownExportStatus.Unchanged, second.Status);
         Assert.True(File.Exists(Path.Combine(temp.Path, MarkdownExportWriter.IndexRelativePath)));
     }
@@ -33,7 +33,7 @@ public sealed class MarkdownExportWriterTests
         var result = writer.Write("s1", "a.md", "dos\n", false);
 
         Assert.Equal(MarkdownExportStatus.Updated, result.Status);
-        Assert.Equal("dos\n", Read(result.Path));
+        Assert.Equal("dos\n", Read(result.Path!));
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public sealed class MarkdownExportWriterTests
     {
         using var temp = new TempDirectory();
         var writer = new MarkdownExportWriter(temp.Path);
-        var path = writer.Write("s1", "a.md", "uno\n", false).Path;
+        var path = writer.Write("s1", "a.md", "uno\n", false).Path!;
         File.WriteAllText(path, "uno\nmis notas\n");
 
         var skipped = writer.Write("s1", "a.md", "dos\n", overwriteEdited: false);
@@ -86,7 +86,7 @@ public sealed class MarkdownExportWriterTests
     {
         using var temp = new TempDirectory();
         var writer = new MarkdownExportWriter(temp.Path);
-        var path = writer.Write("s1", "a.md", "uno\n", false).Path;
+        var path = writer.Write("s1", "a.md", "uno\n", false).Path!;
         File.Delete(path);
 
         var result = writer.Write("s1", "a.md", "uno\n", false);
@@ -100,7 +100,7 @@ public sealed class MarkdownExportWriterTests
     {
         using var temp = new TempDirectory();
         var writer = new MarkdownExportWriter(temp.Path);
-        var path = writer.Write("s1", "a.md", "uno\n", false).Path;
+        var path = writer.Write("s1", "a.md", "uno\n", false).Path!;
         File.WriteAllText(Path.Combine(temp.Path, MarkdownExportWriter.IndexRelativePath), "{ broken");
 
         var result = writer.Write("s1", "a.md", "dos\n", false);

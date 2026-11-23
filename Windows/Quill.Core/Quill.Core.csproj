@@ -3,7 +3,7 @@
        NAudio, Whisper.net, LLamaSharp or any Windows-only API, so that
        Quill.Core.Tests runs on macOS and Linux. -->
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Quill.Core</RootNamespace>
