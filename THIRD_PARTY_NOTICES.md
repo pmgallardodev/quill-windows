@@ -26,7 +26,7 @@ The AI pack carries its own generated `THIRD-PARTY-NOTICES.md`, built from `tool
 
 | Model | Purpose | License | Source |
 | --- | --- | --- | --- |
-| Qwen3-4B-Instruct-2507 (GGUF Q4_K_M) | Summaries, catch-up and Ask | Apache-2.0 | https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507 |
+| Qwen3-4B-Instruct-2507 (GGUF UD-Q3_K_XL) | Summaries, catch-up and Ask | Apache-2.0 | https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507 |
 | OpenAI Whisper `small` (ggml Q5_1) | Live transcription | MIT | https://github.com/openai/whisper |
 | pyannote segmentation 3.0 (ONNX export by sherpa-onnx) | Speaker segmentation | MIT | https://huggingface.co/pyannote/segmentation-3.0 |
 | 3D-Speaker CAM++ zh/en advanced (ONNX) | Speaker embeddings and voice memory | Apache-2.0 | https://github.com/modelscope/3D-Speaker |
