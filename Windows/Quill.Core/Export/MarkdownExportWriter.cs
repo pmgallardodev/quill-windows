@@ -38,6 +38,7 @@ public sealed class MarkdownExportWriter
 
     private static readonly UTF8Encoding Utf8 = new(encoderShouldEmitUTF8Identifier: false);
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly object WriteLock = new();
 
     private readonly string _folder;
 
@@ -56,6 +57,14 @@ public sealed class MarkdownExportWriter
         ArgumentNullException.ThrowIfNull(content);
         ValidateFileName(preferredFileName);
 
+        lock (WriteLock)
+        {
+            return WriteLocked(sessionId, preferredFileName, content, overwriteEdited);
+        }
+    }
+
+    private MarkdownExportResult WriteLocked(string sessionId, string preferredFileName, string content, bool overwriteEdited)
+    {
         var index = LoadIndex();
         var bytes = Utf8.GetBytes(content);
         var hash = Hash(bytes);
@@ -96,7 +105,18 @@ public sealed class MarkdownExportWriter
         var target = Path.Combine(_folder, fileName);
         if (status != MarkdownExportStatus.Unchanged)
         {
-            WriteAtomically(target, bytes);
+            if (status == MarkdownExportStatus.Created)
+            {
+                while (!TryWriteAtomicallyCreateOnly(target, bytes))
+                {
+                    fileName = UniqueName($"{Path.GetFileNameWithoutExtension(fileName)}.md", sessionId, index);
+                    target = Path.Combine(_folder, fileName);
+                }
+            }
+            else
+            {
+                WriteAtomically(target, bytes);
+            }
         }
 
         index.Files[sessionId] = new IndexEntry { File = fileName, Sha256 = hash };
@@ -149,6 +169,32 @@ public sealed class MarkdownExportWriter
         {
             File.WriteAllBytes(temporary, bytes);
             File.Move(temporary, path, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(temporary))
+            {
+                File.Delete(temporary);
+            }
+        }
+    }
+
+    private static bool TryWriteAtomicallyCreateOnly(string path, byte[] bytes)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        var temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+        try
+        {
+            File.WriteAllBytes(temporary, bytes);
+            try
+            {
+                File.Move(temporary, path);
+                return true;
+            }
+            catch (IOException) when (File.Exists(path))
+            {
+                return false;
+            }
         }
         finally
         {

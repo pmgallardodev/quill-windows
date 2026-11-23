@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Quill.Core.Export;
 using Xunit;
 
@@ -107,6 +108,51 @@ public sealed class MarkdownExportWriterTests
 
         Assert.Equal(Path.Combine(temp.Path, "a-2.md"), result.Path);
         Assert.Equal("uno\n", Read(path));
+    }
+
+    [Fact]
+    public async Task ParallelWritersKeepIndependentExportsAndMappingsStable()
+    {
+        const int rounds = 5;
+        const int writersPerRound = 12;
+
+        for (var round = 0; round < rounds; round++)
+        {
+            using var temp = new TempDirectory();
+            using var ready = new CountdownEvent(writersPerRound);
+            using var start = new ManualResetEventSlim(false);
+            var writers = Enumerable.Range(0, writersPerRound)
+                .Select(index => (SessionId: $"round-{round}-session-{index}", Content: $"content-{round}-{index}\n"))
+                .Select(item => Task.Factory.StartNew(() =>
+                {
+                    var writer = new MarkdownExportWriter(temp.Path);
+                    ready.Signal();
+                    start.Wait();
+                    return (item.SessionId, item.Content, Result: writer.Write(item.SessionId, "shared-title.md", item.Content, false));
+                }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default))
+                .ToArray();
+
+            Assert.True(ready.Wait(TimeSpan.FromSeconds(10)), "Writers did not reach the synchronized start.");
+            start.Set();
+            var results = await Task.WhenAll(writers);
+
+            Assert.Equal(writersPerRound, results.Select(item => item.Result.Path).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+            foreach (var item in results)
+            {
+                Assert.Equal(MarkdownExportStatus.Created, item.Result.Status);
+                Assert.Equal(item.Content, Read(item.Result.Path!));
+            }
+
+            using var index = JsonDocument.Parse(File.ReadAllText(Path.Combine(temp.Path, MarkdownExportWriter.IndexRelativePath)));
+            Assert.Equal(writersPerRound, index.RootElement.GetProperty("files").EnumerateObject().Count());
+
+            foreach (var item in results)
+            {
+                var repeated = new MarkdownExportWriter(temp.Path).Write(item.SessionId, "shared-title.md", item.Content, false);
+                Assert.Equal(MarkdownExportStatus.Unchanged, repeated.Status);
+                Assert.Equal(item.Result.Path, repeated.Path);
+            }
+        }
     }
 
     [Fact]
