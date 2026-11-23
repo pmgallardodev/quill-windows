@@ -77,6 +77,33 @@ public class LlamaSharpLanguageModelTests
         Assert.Equal("pack-model", model.ModelName);
     }
 
+    [Fact]
+    public async Task AiPackLocator_WhileTheSplitModelIsBeingJoined_ReportsPreparing()
+    {
+        var status = new AiPackStatus(true, "/p", "2", new Dictionary<AiPackComponent, string>(), [AiPackComponent.LanguageModel])
+        {
+            Preparing = [new ModelPreparation(AiPackComponent.LanguageModel, ModelPreparationState.Preparing, 0.42, null)],
+        };
+        using var model = new LlamaSharpLanguageModel(new FixedLocator(status));
+
+        var error = await Assert.ThrowsAsync<LanguageModelUnavailableException>(() => model.GenerateTextAsync(Request, CancellationToken.None));
+
+        Assert.Contains("being prepared", error.Message);
+        Assert.Equal("unavailable", model.ModelName);
+    }
+
+    [Fact]
+    public void MissingModelReason_ExplainsAFailedJoinAndAPlainMissingModel()
+    {
+        var failed = AiPackStatus.NotInstalled with
+        {
+            Preparing = [new ModelPreparation(AiPackComponent.LanguageModel, ModelPreparationState.Failed, 0.5, "disk full")],
+        };
+
+        Assert.Contains("disk full", LlamaSharpLanguageModel.MissingModelReason(failed));
+        Assert.Equal("the AI pack has no language model", LlamaSharpLanguageModel.MissingModelReason(AiPackStatus.NotInstalled));
+    }
+
     [Theory]
     [InlineData(GpuPreference.Auto)]
     [InlineData(GpuPreference.Vulkan)]
@@ -119,6 +146,11 @@ public class LlamaSharpLanguageModelTests
         Assert.False(module.IsLanguageModelInstalled);
         Assert.Equal(SummaryStatus.AiPackMissing, outcome.Status);
         Assert.Equal(6, module.Templates.Count);
+    }
+
+    private sealed class FixedLocator(AiPackStatus status) : IAiPackLocator
+    {
+        public AiPackStatus Locate() => status;
     }
 
     private sealed class InlineScheduler : IInferenceScheduler
