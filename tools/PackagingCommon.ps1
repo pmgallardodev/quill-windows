@@ -19,6 +19,10 @@ $script:QuillMaxAssetBytes = [long]2147483648
 $script:QuillStoreThresholdBytes = [long]64MB
 
 $script:QuillAllowedDownloadHosts = @("huggingface.co", "github.com")
+$script:QuillPinnedWhisperSha256 = @{
+    "ggml-large-v3-turbo-q5_0.bin" = "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2"
+    "ggml-silero-v5.1.2.bin"       = "29940d98d42b91fbd05ce489f3ecf7c72f0a42f027e4875919a28fb4c04ea2cf"
+}
 
 function Get-QuillProperty {
     # StrictMode-safe property read for objects returned by ConvertFrom-Json.
@@ -47,6 +51,67 @@ function Get-QuillSha256 {
     param([Parameter(Mandatory)] [string]$Path)
 
     return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+
+function Test-QuillPinnedWhisperModel {
+    param(
+        [Parameter(Mandatory)] [string]$Name,
+        [Parameter(Mandatory)] [string]$Path
+    )
+
+    if (-not $script:QuillPinnedWhisperSha256.ContainsKey($Name)) {
+        return $true
+    }
+
+    return (Get-QuillSha256 -Path $Path) -eq $script:QuillPinnedWhisperSha256[$Name]
+}
+
+function Assert-QuillPinnedWhisperModel {
+    param(
+        [Parameter(Mandatory)] [string]$Name,
+        [Parameter(Mandatory)] [string]$Path
+    )
+
+    if (-not (Test-QuillPinnedWhisperModel -Name $Name -Path $Path)) {
+        throw "SHA-256 mismatch for pinned Whisper model '$Name'."
+    }
+}
+
+function Test-QuillVersionedAssetName {
+    param(
+        [Parameter(Mandatory)] [string]$Name,
+        [Parameter(Mandatory)] [string]$Version,
+        [Parameter(Mandatory)] [string[]]$Volumes
+    )
+
+    if ($Name -eq "quill-ai-pack-$Version.zip") {
+        return $true
+    }
+
+    foreach ($volume in $Volumes) {
+        if ($Name -eq "quill-ai-pack-$Version-$volume.zip") {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Get-QuillSafeMeasurementLines {
+    param([Parameter(Mandatory)] [string[]]$Lines)
+
+    foreach ($line in $Lines) {
+        $text = $line.Trim()
+        switch -Regex ($text) {
+            '^audio duration: [0-9]+(?:[.,][0-9]+)?s, threads=[0-9]+, gpu=(?:True|False)$' { $text; continue }
+            '^load: [0-9]+(?:[.,][0-9]+)?s$' { $text; continue }
+            '^chunk [0-9]+s: median [0-9]+ ms, min [0-9]+, max [0-9]+, RTF [0-9]+(?:[.,][0-9]+)?$' { $text; continue }
+            '^chunk [0-9]+s: audio too short$' { $text; continue }
+            '^VAD: [0-9]+ speech segments over [0-9]+(?:[.,][0-9]+)?s audio in [0-9]+ ms$' { $text; continue }
+            '^sherpa-onnx diarization: sampleRate=[0-9]+, init [0-9]+ ms, process [0-9]+ ms for [0-9]+(?:[.,][0-9]+)?s audio$' { $text; continue }
+            '^speaker embedding: dim [0-9]+, first values \[[0-9., -]+\]$' { $text; continue }
+        }
+    }
 }
 
 function Assert-QuillDownloadUri {

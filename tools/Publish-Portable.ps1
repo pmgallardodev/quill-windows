@@ -45,6 +45,7 @@ if (-not (Test-Path -LiteralPath $model)) {
 if ((Get-Item -LiteralPath $model).Length -lt $minimumWhisperBytes) {
     throw "La descarga de $model esta incompleta."
 }
+Assert-QuillPinnedWhisperModel -Name $modelName -Path $model
 
 if ($IncludeVad) {
     $vad = Join-Path $repositoryRoot "models\ggml-silero-v5.1.2.bin"
@@ -55,6 +56,8 @@ if ($IncludeVad) {
     if ((Get-Item -LiteralPath $vad).Length -lt $minimumVadBytes) {
         throw "La descarga de $vad esta incompleta."
     }
+
+    Assert-QuillPinnedWhisperModel -Name "ggml-silero-v5.1.2.bin" -Path $vad
 }
 
 Remove-Item -LiteralPath $publishDirectory -Recurse -Force -ErrorAction SilentlyContinue

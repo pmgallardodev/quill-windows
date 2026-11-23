@@ -412,9 +412,13 @@ foreach ($generated in @($manifestFileName, "THIRD-PARTY-NOTICES.md", "README.tx
 # --- 4. Zip every volume ----------------------------------------------------------------
 
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
-# Remove this version's old assets, including volumes that no longer exist (such as an old -llm.zip).
-Get-ChildItem -LiteralPath $OutputDirectory -File -Filter "quill-ai-pack-$Version*.zip" |
-    Where-Object { $_.Name -eq "quill-ai-pack-$Version.zip" -or $_.Name -match "^quill-ai-pack-$([regex]::Escape($Version))-[a-z0-9-]+\.zip$" } |
+# Remove only this version's exact asset names. A wildcard prefix would make a stable build
+# delete prerelease assets such as 1.4.0-beta.1.zip; the generated volume set also removes
+# stale volumes such as the former -llm.zip without crossing the version boundary.
+$assetVolumes = @("main") + @($models | ForEach-Object { [string]$_.Volume }) +
+    @($packEntries | ForEach-Object { [string]$_.Volume } | Sort-Object -Unique)
+Get-ChildItem -LiteralPath $OutputDirectory -File -Filter "quill-ai-pack-*.zip" |
+    Where-Object { Test-QuillVersionedAssetName -Name $_.Name -Version $Version -Volumes $assetVolumes } |
     Remove-Item -Force
 
 $assets = @()

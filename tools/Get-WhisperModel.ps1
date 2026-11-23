@@ -22,23 +22,7 @@ $minimumVadBytes = 500KB
 $baseUri = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main"
 $vadBaseUri = "https://huggingface.co/sandrohanea/whisper.net/resolve/v4/vad"
 
-# SHA-256 pinned from the Hugging Face LFS metadata of each file. A model not listed here
-# is only checked for a minimum size.
-$knownSha256 = @{
-    "ggml-large-v3-turbo-q5_0.bin" = "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2"
-    "ggml-silero-v5.1.2.bin"       = "29940d98d42b91fbd05ce489f3ecf7c72f0a42f027e4875919a28fb4c04ea2cf"
-}
-
-function Test-ModelHash {
-    param([string]$Name, [string]$Path)
-
-    if (-not $knownSha256.ContainsKey($Name)) {
-        return $true
-    }
-
-    $actual = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
-    return $actual -eq $knownSha256[$Name]
-}
+. (Join-Path $PSScriptRoot "PackagingCommon.ps1")
 
 function Get-Model {
     param(
@@ -49,7 +33,7 @@ function Get-Model {
     )
 
     if ((Test-Path -LiteralPath $Target) -and ((Get-Item -LiteralPath $Target).Length -ge $Minimum)) {
-        if (Test-ModelHash -Name $Name -Path $Target) {
+        if (Test-QuillPinnedWhisperModel -Name $Name -Path $Target) {
             Write-Host "Ya disponible: $Target"
             return
         }
@@ -72,7 +56,7 @@ function Get-Model {
         throw "La descarga de $Name esta incompleta."
     }
 
-    if (-not (Test-ModelHash -Name $Name -Path $partial)) {
+    if (-not (Test-QuillPinnedWhisperModel -Name $Name -Path $partial)) {
         Remove-Item -LiteralPath $partial -Force
         throw "El SHA-256 de $Name no coincide con el valor fijado."
     }

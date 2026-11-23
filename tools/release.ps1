@@ -43,10 +43,29 @@ if (-not $SkipAiPack) {
     & (Join-Path $PSScriptRoot "build-ai-pack.ps1") -Version $Version -AcceptNewHashes:$AcceptNewHashes
 }
 
+$assetVolumes = @("main")
+$modelsManifestPath = Join-Path $PSScriptRoot "ai-pack.models.json"
+if (Test-Path -LiteralPath $modelsManifestPath) {
+    $modelsDefinition = Get-Content -LiteralPath $modelsManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    foreach ($entry in @(Get-QuillProperty $modelsDefinition "components")) {
+        $volume = [string](Get-QuillProperty $entry "volume")
+        if ($volume) { $assetVolumes += $volume }
+        $split = Get-QuillProperty $entry "split"
+        $size = [long](Get-QuillProperty $entry "size")
+        $maxPartBytes = if ($null -ne $split) { [long](Get-QuillProperty $split "maxPartBytes") } else { 0L }
+        if ($maxPartBytes -gt 0 -and $size -gt 0) {
+            $partSizes = Get-QuillPartSizes -TotalBytes $size -MaxPartBytes $maxPartBytes
+            for ($index = 0; $index -lt $partSizes.Count; $index++) {
+                $assetVolumes += "$volume-part$($index + 1)"
+            }
+        }
+    }
+}
+$assetVolumes = @($assetVolumes | Sort-Object -Unique)
 $assets = @(
     Get-ChildItem -LiteralPath $artifacts -File -Filter "quill-$Version-win-x64.zip"
-    Get-ChildItem -LiteralPath $artifacts -File -Filter "quill-ai-pack-$Version*.zip" |
-        Where-Object { $_.Name -eq "quill-ai-pack-$Version.zip" -or $_.Name -match "^quill-ai-pack-$([regex]::Escape($Version))-[a-z0-9-]+\.zip$" }
+    Get-ChildItem -LiteralPath $artifacts -File -Filter "quill-ai-pack-*.zip" |
+        Where-Object { Test-QuillVersionedAssetName -Name $_.Name -Version $Version -Volumes $assetVolumes }
 )
 if ($assets.Count -eq 0) {
     throw "No release assets for $Version in $artifacts."
