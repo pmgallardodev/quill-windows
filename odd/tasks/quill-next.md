@@ -92,7 +92,10 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       final pipeline after transcription (speakers → final summary → optional auto-export),
       tray menu items (Ajustes, Importar), per-track audio levels, Core README update. Route D.
 - [ ] F8 Audio playback from transcript, transcript editing + re-summarize, import. Route D.
-- [ ] F9 Templates editor, Markdown/Obsidian export, settings (models, AI pack path, GPU). Route D.
+- [x] F9 Templates editor, Markdown/Obsidian export, settings (models, AI pack path, GPU). Route D.
+      Evidence: 9de94b4, e35cd57, 3127981, 749ffd4, 89ac41e, merged clean. Post-merge: Core
+      309/309, Windows projects 0/0, resx valid. Wiring (tray item, AiPackLocator from settings,
+      TemplateCatalog, live cadence/GPU gate, auto-export, model/GPU overrides) → I1.
 
 ### Wave C (parallel)
 - [ ] F10 Ask (per meeting + across meetings) + local semantic search. Route D.
