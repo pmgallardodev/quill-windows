@@ -51,10 +51,11 @@ public static class LlmSummarizer
         config.WithVulkan(backend == "vulkan").WithAutoFallback(true);
     }
 
-    public static async Task RunAsync(string modelPath, string modelLabel, IReadOnlyList<Meeting> meetings,
+    public static async Task<bool> RunAsync(string modelPath, string modelLabel, IReadOnlyList<Meeting> meetings,
         string outDirectory, int maxTokens, int gpuLayers)
     {
         Directory.CreateDirectory(outDirectory);
+        var allCompleted = true;
 
         var loadClock = Stopwatch.StartNew();
         var modelParams = new ModelParams(modelPath) { GpuLayerCount = gpuLayers, ContextSize = 4096 };
@@ -69,6 +70,16 @@ public static class LlmSummarizer
             var metricsPath = Path.Combine(outDirectory, $"{meeting.Id}.metrics.json");
             if (File.Exists(metricsPath))
             {
+                try
+                {
+                    var existing = JsonSerializer.Deserialize<RunMetrics>(File.ReadAllText(metricsPath));
+                    allCompleted &= existing?.Completed == true;
+                }
+                catch (JsonException)
+                {
+                    allCompleted = false;
+                }
+
                 Console.WriteLine($"[{modelLabel}] {meeting.Id}: already done, skipping");
                 continue;
             }
@@ -85,11 +96,14 @@ public static class LlmSummarizer
             }
 
             File.WriteAllText(metricsPath, JsonSerializer.Serialize(metrics, new JsonSerializerOptions { WriteIndented = true }));
+            allCompleted &= metrics.Completed;
             Console.WriteLine(
                 $"[{modelLabel}] {meeting.Id}: ok={metrics.Completed} prompt={metrics.PromptTokens} out={metrics.OutputTokens} " +
                 $"prefill={metrics.PrefillTokensPerSecond:F0}t/s decode={metrics.DecodeTokensPerSecond:F1}t/s wall={metrics.WallSeconds:F0}s " +
                 metrics.Error);
         }
+
+        return allCompleted;
     }
 
     private static async Task<RunMetrics> SummarizeAsync(LLamaWeights weights, string modelPath, string modelLabel, Meeting meeting,

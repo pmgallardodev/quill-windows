@@ -30,8 +30,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 $BenchDir = $PSScriptRoot
+. (Join-Path $BenchDir "..\PackagingCommon.ps1")
 $Cache = Join-Path $env:LOCALAPPDATA "quill-bench"
 $Results = Join-Path $BenchDir "results"
+$script:BenchFailures = 0
 New-Item -ItemType Directory -Force -Path $Cache, $Results, "$Cache\whisper", "$Cache\sherpa", "$Cache\llm", "$Cache\audio" | Out-Null
 $Log = Join-Path $Results ("windows-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".txt")
 
@@ -41,14 +43,33 @@ function Fetch([string]$Url, [string]$Dest) {
     if ((Test-Path $Dest) -and (Get-Item $Dest).Length -gt 0) { return }
     Say "download $(Split-Path $Dest -Leaf)"
     & curl.exe -fL --retry 3 -o "$Dest.part" $Url
-    if ($LASTEXITCODE -ne 0) { throw "download failed: $Url" }
+    if ($LASTEXITCODE -ne 0) { throw "download failed" }
     Move-Item -Force "$Dest.part" $Dest
 }
 
 function Run-Bench([string[]]$BenchArgs) {
-    Say ("> Quill.Bench " + ($BenchArgs -join " "))
+    $operation = if ($BenchArgs.Count -gt 0) { $BenchArgs[0] } else { "unknown" }
+    Say ("> Quill.Bench $operation")
+    $timer = [System.Diagnostics.Stopwatch]::StartNew()
     $output = & $Exe @BenchArgs 2>&1 | ForEach-Object { "$_" }
-    $output | ForEach-Object { Say $_ }
+    $timer.Stop()
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        $script:BenchFailures++
+        Say "measurement failed: $operation"
+        return $false
+    }
+
+    $safeLines = @(Get-QuillSafeMeasurementLines -Lines $output)
+    if ($safeLines.Count -eq 0) {
+        Say ("measurement elapsed: {0} ms" -f $timer.ElapsedMilliseconds)
+        return $true
+    }
+
+    foreach ($line in $safeLines) {
+        Say $line
+    }
+    return $true
 }
 
 # ---------------------------------------------------------------- environment
@@ -94,9 +115,17 @@ $es = @($voices | Where-Object { $_.Culture.Name -like "es-*" })
 $any = @($voices)
 Say "TTS voices: $(($voices | ForEach-Object { "$($_.Name) [$($_.Culture)]" }) -join ', ')"
 
+if ($any.Count -eq 0) {
+    throw "No enabled TTS voice is installed."
+}
+
+if ($es.Count -eq 0) {
+    Say "WARNING: no Spanish TTS voice installed; using an installed fallback voice."
+    $es = $any
+}
+
 $speech = "Buenos días a todos. Vamos a repasar el estado del proyecto antes de la entrega del jueves. El equipo de pagos ha terminado la integración con la nueva pasarela y las pruebas de carga han ido bien. Todavía tenemos un problema con las credenciales del entorno de pruebas del proveedor de mensajes, que caducaron la semana pasada. Elena se encarga de hablar con ellos hoy mismo. Por otro lado, la integración continua está tardando demasiado, casi cuarenta minutos por ejecución, y eso puede retrasar la publicación. Propongo congelar los cambios en la rama principal desde el miércoles por la tarde. Si nadie tiene objeciones, lo dejamos así y lo revisamos en la reunión del viernes."
 if ($Audio -eq "") {
-    if ($es.Count -eq 0) { Say "WARNING: no Spanish TTS voice installed; using $($any[0].Name). Pass -Audio <wav> for a realistic measurement." ; $es = $any }
     $Audio = "$Cache\audio\es-speech.wav"
     Synthesize $Audio @(, @($es[0].Name, $speech))
 }
@@ -153,4 +182,9 @@ if ($Llm) {
     Run-Bench @("score", "--results", "$Results", "--report", "$Results\scores-windows.md")
 }
 
-Say "== done. Send back: $Log"
+if ($script:BenchFailures -gt 0) {
+    Say "== failed: $script:BenchFailures required measurement(s) failed"
+    exit 1
+}
+
+Say "== done. Measurements completed."

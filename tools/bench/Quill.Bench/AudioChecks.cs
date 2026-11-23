@@ -36,7 +36,7 @@ public static class AudioChecks
                 var isFloat = format == 3 && bits == 32;
                 if (!isFloat && !(format == 1 && bits == 16))
                 {
-                    throw new InvalidDataException($"{path}: unsupported WAV format {format}/{bits} bit");
+                    throw new InvalidDataException($"unsupported WAV format {format}/{bits} bit");
                 }
 
                 var bytesPerSample = bits / 8;
@@ -60,7 +60,7 @@ public static class AudioChecks
             offset += 8 + size + (size & 1);
         }
 
-        throw new InvalidDataException($"{path}: no data chunk");
+        throw new InvalidDataException("WAV has no data chunk");
     }
 
     private static float[] Resample(float[] input, int from, int to)
@@ -83,8 +83,7 @@ public static class AudioChecks
         int[] chunkSeconds, int repeats, int threads, bool useGpu)
     {
         var audio = ReadWav16kMono(wavPath);
-        Console.WriteLine($"audio: {audio.Length / 16000.0:F1}s, model: {Path.GetFileName(modelPath)}, " +
-                          $"threads={threads}, gpu={useGpu}");
+        Console.WriteLine($"audio duration: {audio.Length / 16000.0:F1}s, threads={threads}, gpu={useGpu}");
         var load = Stopwatch.StartNew();
         using var factory = WhisperFactory.FromPath(modelPath, new WhisperFactoryOptions { UseGpu = useGpu });
         await using var processor = factory.CreateBuilder().WithLanguage("es").WithThreads(threads).WithNoContext().Build();
@@ -103,25 +102,21 @@ public static class AudioChecks
             }
 
             var timings = new List<double>();
-            string text = "";
             for (var i = 0; i < repeats; i++)
             {
                 var start = (i * length) % Math.Max(1, audio.Length - length);
                 var sw = Stopwatch.StartNew();
-                var sb = new System.Text.StringBuilder();
-                await foreach (var seg in processor.ProcessAsync(audio.AsMemory(start, length)))
+                await foreach (var _ in processor.ProcessAsync(audio.AsMemory(start, length)))
                 {
-                    sb.Append(seg.Text);
                 }
 
                 timings.Add(sw.Elapsed.TotalMilliseconds);
-                if (i == 0) text = sb.ToString().Trim();
             }
 
             timings.Sort();
             var median = timings[timings.Count / 2];
             Console.WriteLine($"chunk {seconds}s: median {median:F0} ms, min {timings[0]:F0}, max {timings[^1]:F0}, " +
-                              $"RTF {median / (seconds * 1000):F2} | \"{Truncate(text, 90)}\"");
+                              $"RTF {median / (seconds * 1000):F2}");
         }
 
         if (vadModelPath is not null && File.Exists(vadModelPath))
@@ -131,7 +126,7 @@ public static class AudioChecks
                 .WithMinSilenceDuration(TimeSpan.FromMilliseconds(300)).Build();
             var sw = Stopwatch.StartNew();
             var segments = vad.DetectSpeech(audio).ToList();
-            Console.WriteLine($"VAD (silero {Path.GetFileName(vadModelPath)}): {segments.Count} speech segments over " +
+            Console.WriteLine($"VAD: {segments.Count} speech segments over " +
                               $"{audio.Length / 16000.0:F0}s audio in {sw.Elapsed.TotalMilliseconds:F0} ms");
         }
     }
@@ -168,5 +163,4 @@ public static class AudioChecks
         Console.WriteLine($"speaker embedding: dim {extractor.Dim}, first values [{string.Join(", ", embedding.Take(3).Select(v => v.ToString("F3")))}]");
     }
 
-    private static string Truncate(string s, int n) => s.Length <= n ? s : s[..n] + "…";
 }

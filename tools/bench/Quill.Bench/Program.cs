@@ -19,8 +19,13 @@ switch (cmd)
         var label = opts.GetValueOrDefault("label", Path.GetFileNameWithoutExtension(model));
         LlmSummarizer.ConfigureBackend(opts.GetValueOrDefault("backend", "auto"));
         var outDir = Path.Combine(opts.GetValueOrDefault("out", Path.Combine(benchRoot, "results")), label);
-        await LlmSummarizer.RunAsync(model, label, Corpus.Load(corpusDir, only), outDir,
+        var completed = await LlmSummarizer.RunAsync(model, label, Corpus.Load(corpusDir, only), outDir,
             int.Parse(opts.GetValueOrDefault("max-tokens", "2500")), int.Parse(opts.GetValueOrDefault("gpu-layers", "99")));
+        if (!completed)
+        {
+            Environment.ExitCode = 1;
+        }
+
         break;
     }
     case "score":
