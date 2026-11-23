@@ -23,6 +23,13 @@ on these ports, and are wired in the app composition root.
 | `Quill.Core.Storage` | `FileSessionStore` (session format v2), `NotesDocument` (notes.md) |
 | `Quill.Core.Templates` | `TemplateParser` (frontmatter + markdown), `DefaultTemplates` (six built-ins embedded from `Templates/Defaults/*.md`) |
 | `Quill.Core.AiPack` | `ManifestAiPackLocator` |
+| `Quill.Core.Scheduling` | `InferenceScheduler`: the one app-wide `IInferenceScheduler` (priority queue, one job at a time) |
+| `Quill.Core.Live` | Live transcription: `AudioRingBuffer`, `SpeechChunker` (VAD chunks), `ScheduledStreamingTranscriber`, `LiveTranscriptionPipeline`, `LiveTranscriptBuffer` (`SegmentAdded`), `LiveTranscriptPersistence` (live/transcript.json), `LiveTimeline` |
+| `Quill.Core.Speakers` | `SpeakerResolutionService` (echo → diarization → resolution, rename/merge/reassign), `CrossTrackEchoClassifier`, `SpeakerResolver`, `SpeakerProfile`, `FileSpeakerResolutionStore` (speakers.resolution.json) |
+| `Quill.Core.Settings` | `QuillSettings` (`ai`, `summaries`, `templates`, `export`, `privacy` sections of config.json), `SettingsDocument` (lenient parse + merge) |
+| `Quill.Core.Export` | `MeetingExportService` (single / all / `ExportIfEnabledAsync`), `MarkdownMeetingExporter`, `MarkdownExportWriter` (never overwrites hand edits unless asked) |
+| `Quill.Core.Import` | `ImportPlan` (one or two audio files → a session: roles, swap, title/start) |
+| `Quill.Core.Pipeline` | App orchestration rules: `PostTranscriptionPipeline` (speakers → final summary → auto-export, one session at a time), `TranscriptSegmentLocator`, `LiveSummaryPolicy` (setting / GPU / model gate), `AiPackOverrides` (`ai.llm_model`, `ai.live_whisper_model`) |
 | `Quill.Windows.Sessions`, `Quill.Windows.Transcription` (folder `Legacy/`) | v1 session code moved here unchanged (`SessionCatalog`, `SessionMetadata`, `TranscriptDocument`, `SessionStatus`, `SessionInsights`, `TranscriptExport`, `ResumePolicy`). Namespaces kept so existing Windows code compiles untouched. Internal; visible to `quill`, `Quill.Windows.Tests`, `Quill.Core.Tests`. |
 
 **Name clash to know about:** `Quill.Windows.Sessions.TranscriptSegment` is the
@@ -149,6 +156,18 @@ v2 adds only new files, so older Quill versions keep reading the folder:
 | `live/transcript.json` | Live-pass transcript (same shape as `transcript.json`) |
 | `speakers.json` | `{ "version": 1, "speakers": [ { "id", "track": "mic"\|"system", "displayName"? } ] }` |
 | `notes.md` | Markdown; bullets `- [hh:mm:ss] text` or `- text` (`NotesDocument`) |
+| `speakers.resolution.json` | Speaker resolution state: colour slots, voice embeddings, manual edit log (re-applied on every resolve) |
+
+`live/` holds only what the recording produced while it ran; the final pass never rewrites it.
+
+## Windows wiring (composition root)
+
+`Quill.Windows/Composition/QuillServices` is built once at startup from
+`ConfigStore.LoadSettings()`: one `InferenceScheduler`, the AI pack locator (with overrides),
+`FileSessionStore`, `TemplateCatalog`, `SummariesModule`, `SpeakersModule`, the companion panel and
+the real `ISessionActions`. Recording start → live transcription + live summary loop + companion
+panel; stop → close panel (notes flushed) → finish live text → final transcription →
+`PostTranscriptionPipeline`.
 
 `transcript.json` segments may carry two optional fields, `"track"` and
 `"edited"`, which v1 readers ignore. When `track` is absent it is derived from
