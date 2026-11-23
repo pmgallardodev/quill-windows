@@ -1101,4 +1101,76 @@ Esto no se puede deshacer.</value>
   <data name="Privacy_Error_Hotkey" xml:space="preserve">
     <value>El atajo del panel no es válido. Usa, por ejemplo, Ctrl+Shift+Q.</value>
   </data>
+  <data name="Ask_Tab" xml:space="preserve">
+    <value>Preguntar</value>
+  </data>
+  <data name="Ask_Placeholder" xml:space="preserve">
+    <value>Pregunta algo sobre esta reunión…</value>
+  </data>
+  <data name="Ask_LibraryPlaceholder" xml:space="preserve">
+    <value>Pregunta algo sobre todas tus reuniones…</value>
+  </data>
+  <data name="Ask_Button" xml:space="preserve">
+    <value>Preguntar</value>
+  </data>
+  <data name="Ask_Cancel" xml:space="preserve">
+    <value>Detener</value>
+  </data>
+  <data name="Ask_Hint" xml:space="preserve">
+    <value>Las respuestas salen solo de tus reuniones y citan el momento exacto. Haz clic en una cita para escucharla.</value>
+  </data>
+  <data name="Ask_Thinking" xml:space="preserve">
+    <value>Buscando en la reunión…</value>
+  </data>
+  <data name="Ask_ThinkingLibrary" xml:space="preserve">
+    <value>Buscando en tus reuniones…</value>
+  </data>
+  <data name="Ask_Cancelled" xml:space="preserve">
+    <value>Pregunta cancelada.</value>
+  </data>
+  <data name="Ask_AiMissing" xml:space="preserve">
+    <value>Preguntar necesita el paquete de IA. Instálalo desde Ajustes.</value>
+  </data>
+  <data name="Ask_Unavailable" xml:space="preserve">
+    <value>Preguntar no está disponible en esta versión.</value>
+  </data>
+  <data name="Ask_Error" xml:space="preserve">
+    <value>No se pudo responder: {0}</value>
+  </data>
+  <data name="Ask_AnswerLabel" xml:space="preserve">
+    <value>Respuesta</value>
+  </data>
+  <data name="Ask_Sources" xml:space="preserve">
+    <value>Fuentes</value>
+  </data>
+  <data name="Ask_Ungrounded" xml:space="preserve">
+    <value>Esta respuesta no cita ningún momento de tus reuniones. Compruébala antes de fiarte de ella.</value>
+  </data>
+  <data name="Search_LibraryTitle" xml:space="preserve">
+    <value>Buscar en todas las reuniones</value>
+  </data>
+  <data name="Search_LibraryPlaceholder" xml:space="preserve">
+    <value>Buscar palabras o ideas…</value>
+  </data>
+  <data name="Search_LibraryButton" xml:space="preserve">
+    <value>Buscar</value>
+  </data>
+  <data name="Search_LibraryLexicalOnly" xml:space="preserve">
+    <value>solo por palabras: instala el modelo de búsqueda del paquete de IA para encontrar también ideas parecidas</value>
+  </data>
+  <data name="Search_LibraryError" xml:space="preserve">
+    <value>No se pudo buscar: {0}</value>
+  </data>
+  <data name="Search_LibraryAskAll" xml:space="preserve">
+    <value>Preguntar a todas las reuniones</value>
+  </data>
+  <data name="Search_LibraryKindTranscript" xml:space="preserve">
+    <value>Transcripción</value>
+  </data>
+  <data name="Search_LibraryKindSummary" xml:space="preserve">
+    <value>Resumen</value>
+  </data>
+  <data name="Search_LibraryKindNote" xml:space="preserve">
+    <value>Nota</value>
+  </data>
 </root>
