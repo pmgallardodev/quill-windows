@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Platform-free core: domain, ports and pure logic. Must never reference WPF,
+       NAudio, Whisper.net, LLamaSharp or any Windows-only API, so that
+       Quill.Core.Tests runs on macOS and Linux. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Quill.Core</RootNamespace>
+    <AssemblyName>Quill.Core</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The Windows app assembly is named "quill". -->
+    <InternalsVisibleTo Include="quill" />
+    <InternalsVisibleTo Include="Quill.Windows.Tests" />
+    <InternalsVisibleTo Include="Quill.Core.Tests" />
+  </ItemGroup>
+</Project>

@@ -2,7 +2,7 @@ using Quill.Windows.Sessions;
 using Quill.Windows.Transcription;
 using Xunit;
 
-namespace Quill.Windows.Tests;
+namespace Quill.Core.Tests;
 
 public class ResumePolicyTests
 {
