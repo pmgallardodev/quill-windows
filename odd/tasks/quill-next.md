@@ -99,7 +99,11 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       show/close CompanionPanelModule around recording (CloseAsync before final summary),
       final pipeline after transcription (speakers → final summary → optional auto-export),
       tray menu items (Ajustes, Importar), per-track audio levels, Core README update. Route D.
-- [ ] F8 Audio playback from transcript, transcript editing + re-summarize, import. Route D.
+- [x] F8 Audio playback from transcript, transcript editing + re-summarize, import. Route D.
+      Evidence: 0c16ae0, a099b55, 3038aa8, 1fc82a3, e8f5443, merged clean. Post-merge: Core
+      330/330, Windows projects 0/0, resx valid. Custom WSOLA time-stretch (NAudio has none).
+      TranscriptionCoordinator: single-track sessions allowed (7 lines). I1: real
+      ReassignSpeakerAsync via F5. Pending: listen to playback/speed + import on Windows.
 - [x] F9 Templates editor, Markdown/Obsidian export, settings (models, AI pack path, GPU). Route D.
       Evidence: 9de94b4, e35cd57, 3127981, 749ffd4, 89ac41e, merged clean. Post-merge: Core
       309/309, Windows projects 0/0, resx valid. Wiring (tray item, AiPackLocator from settings,
