@@ -73,10 +73,14 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       in the integration task. Pending: Windows runtime check (Mica, theme, virtualization).
 
 ### Migration (after Wave A merges, no agent touching csproj)
-- [ ] M1 Retarget all projects to net10.0 / net10.0-windows (owner decision 2026-11-23: .NET 8
+- [x] M1 Retarget all projects to net10.0 / net10.0-windows (owner decision 2026-11-23: .NET 8
       support ended 2026-11-10); install .NET 10 SDK in ~/.dotnet; upgrade LLamaSharp to latest
       (0.30.x) with explicit Vulkan/CPU backend selection; update README badges/requirements.
       Route: inline if mechanical, else D.
+      Evidence: 4183700, 9f1b61e, merged clean. Post-merge: SDK 10.0.404, Core 354/354 on
+      net10.0, Windows 0/0; agent: self-contained win-x64 publish OK (293 files, 397 MB).
+      LLamaSharp 0.30.0; LlamaSharpOptions Gpu/GpuDevice/ModelPath (I1 maps settings).
+      Adapter moved to Adapters/Llm (namespace kept). Gpu change needs app restart.
 
 ### Wave B (parallel)
 - [x] F7 Companion panel (floating, pill, live tabs, What did I miss?, markers, notes, optional
