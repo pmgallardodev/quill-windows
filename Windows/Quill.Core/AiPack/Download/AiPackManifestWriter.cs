@@ -6,7 +6,9 @@ namespace Quill.Core.AiPack.Download;
 /// <summary>
 /// Adds downloaded components to "&lt;root&gt;/ai-pack.json" in the layout
 /// <see cref="ManifestAiPackLocator"/> reads: <c>files.&lt;camelCaseComponent&gt; = relative path</c>.
-/// Every other key (including fields written by packaging) is kept; the file is replaced
+/// Every other key (including "schema" and other components' "splitFiles" written by packaging)
+/// is kept; a registered component's own "splitFiles" entry is dropped because the whole file
+/// replaces its parts. A fresh manifest holds only "version" and "files". The file is replaced
 /// atomically through a temporary file.
 /// </summary>
 public static class AiPackManifestWriter
@@ -31,9 +33,14 @@ public static class AiPackManifestWriter
             manifest["files"] = files;
         }
 
+        var splitFiles = manifest["splitFiles"] as JsonObject;
         foreach (var entry in entries)
         {
-            files[JsonNamingPolicy.CamelCase.ConvertName(entry.Component.ToString())] = entry.Path;
+            var key = JsonNamingPolicy.CamelCase.ConvertName(entry.Component.ToString());
+            files[key] = entry.Path;
+
+            // The verified whole file supersedes split parts of the same component (schema 2).
+            splitFiles?.Remove(key);
         }
 
         Directory.CreateDirectory(root);

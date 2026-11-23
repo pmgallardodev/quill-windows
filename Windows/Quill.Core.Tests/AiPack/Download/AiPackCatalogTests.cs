@@ -35,11 +35,9 @@ public sealed class AiPackCatalogTests
     }
 
     /// <summary>
-    /// The embedded catalog is a copy of tools/ai-pack.models.json (the packaging source of truth).
-    /// Every component shared by URL must agree on path, size and SHA-256; components other than
-    /// the language model must use the same URL. The language model differs on purpose while the
-    /// tools catalog packs another file for the 2 GiB asset cap: it is compared once the tools
-    /// entry points at the same file (same URL or path) or declares split parts of it.
+    /// The embedded catalog is a copy of tools/ai-pack.models.json (the packaging source of truth):
+    /// every component must agree on URL, path, size and SHA-256 of the whole file. Packaging-only
+    /// fields ("split", "volume", "maxBytes", top-level "alternatives") are ignored.
     /// </summary>
     [Fact]
     public void MatchesTheToolsCatalog()
@@ -47,28 +45,16 @@ public sealed class AiPackCatalogTests
         var tools = JsonNode.Parse(File.ReadAllText(ToolsCatalogPath()))!["components"]!.AsArray();
         var embedded = AiPackCatalog.Default.Entries.ToDictionary(e => e.Component);
 
+        Assert.Equal(embedded.Count, tools.Count);
         foreach (var node in tools)
         {
             var component = Enum.Parse<AiPackComponent>((string)node!["component"]!, ignoreCase: true);
             var mine = embedded[component];
-            var url = (string)node["url"]!;
-            var path = (string)node["path"]!;
-            var sameFile = url == mine.Url.AbsoluteUri || path == mine.Path || node["parts"] is not null;
-
-            if (component != AiPackComponent.LanguageModel)
-            {
-                Assert.Equal(url, mine.Url.AbsoluteUri);
-            }
-
-            if (sameFile)
-            {
-                Assert.Equal(path, mine.Path);
-                Assert.Equal((long)node["size"]!, mine.Size);
-                Assert.Equal((string)node["sha256"]!, mine.Sha256);
-            }
+            Assert.Equal((string)node["url"]!, mine.Url.AbsoluteUri);
+            Assert.Equal((string)node["path"]!, mine.Path);
+            Assert.Equal((long)node["size"]!, mine.Size);
+            Assert.Equal((string)node["sha256"]!, mine.Sha256);
         }
-
-        Assert.Equal(embedded.Count, tools.Count);
     }
 
     [Theory]

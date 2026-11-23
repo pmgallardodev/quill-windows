@@ -60,6 +60,37 @@ public sealed class AiPackInstallerTests
     }
 
     [Fact]
+    public void RegisteringAWholeFileDropsItsSplitEntryButKeepsOthers()
+    {
+        using var temp = new TempDirectory();
+        File.WriteAllText(Path.Combine(temp.Path, ManifestAiPackLocator.ManifestFileName), """
+            {
+              "schema": 2, "version": "1.0.0",
+              "files": { "languageModel": "llm/model.gguf" },
+              "splitFiles": { "languageModel": { "parts": [] }, "textEmbedding": { "parts": [] } }
+            }
+            """);
+
+        AiPackManifestWriter.Register(temp.Path, [Llm()]);
+
+        var manifest = JsonNode.Parse(File.ReadAllText(Path.Combine(temp.Path, ManifestAiPackLocator.ManifestFileName)))!;
+        Assert.Equal(2, (int?)manifest["schema"]);
+        Assert.Null(manifest["splitFiles"]!["languageModel"]);
+        Assert.NotNull(manifest["splitFiles"]!["textEmbedding"]);
+    }
+
+    [Fact]
+    public void FreshManifestHasFilesOnly()
+    {
+        using var temp = new TempDirectory();
+
+        AiPackManifestWriter.Register(temp.Path, [Llm()]);
+
+        var manifest = JsonNode.Parse(File.ReadAllText(Path.Combine(temp.Path, ManifestAiPackLocator.ManifestFileName)))!.AsObject();
+        Assert.Equal(["version", "files"], manifest.Select(p => p.Key));
+    }
+
+    [Fact]
     public async Task HashMismatchDeletesTheDownloadedFile()
     {
         using var temp = new TempDirectory();

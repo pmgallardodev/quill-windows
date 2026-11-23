@@ -39,7 +39,12 @@ public sealed record AiPackDownloadPlan(
             Path.TrimEndingDirectorySeparator(fullRoot),
             StringComparison.OrdinalIgnoreCase);
 
-        var items = catalog.Entries.Where(e => !(sameRoot && status.Has(e.Component))).ToList();
+        // A split component whose parts are being joined in the background writes the same file:
+        // leave it to the join instead of racing it.
+        var items = catalog.Entries
+            .Where(e => !(sameRoot && (status.Has(e.Component) ||
+                status.PreparationOf(e.Component)?.State == ModelPreparationState.Preparing)))
+            .ToList();
         return new AiPackDownloadPlan(fullRoot, items, items.Sum(i => i.Size), items.Sum(i => BytesOnDisk(fullRoot, i)));
     }
 

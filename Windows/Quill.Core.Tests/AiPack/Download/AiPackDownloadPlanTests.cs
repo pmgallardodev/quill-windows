@@ -55,6 +55,22 @@ public sealed class AiPackDownloadPlanTests
     }
 
     [Fact]
+    public void SkipsAComponentWhoseSplitPartsAreBeingJoined()
+    {
+        using var temp = new TempDirectory();
+        var status = AiPackStatus.NotInstalled with
+        {
+            IsInstalled = true,
+            Root = temp.Path,
+            Preparing = [new ModelPreparation(AiPackComponent.LanguageModel, ModelPreparationState.Preparing, 0.3, null)],
+        };
+
+        var plan = AiPackDownloadPlan.Create(new AiPackCatalog([Llm(), Whisper()]), status, temp.Path);
+
+        Assert.Equal([AiPackComponent.LiveWhisper], plan.Items.Select(i => i.Component));
+    }
+
+    [Fact]
     public void CountsPartialAndCompleteFilesAsAlreadyDownloaded()
     {
         using var temp = new TempDirectory();
