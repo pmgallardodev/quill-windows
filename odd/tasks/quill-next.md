@@ -155,6 +155,11 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
 - [ ] P1b Split-model support: Q4_K_M as default, split into parts < 2 GiB at build time,
       reassembled/loaded by Quill with SHA-256 verification; locator + adapter + scripts + README.
       Route D.
+- [ ] P2 Hybrid AI-pack install (owner decision 2026-11-23, revises Q1): in-app "Descargar pack
+      de IA" button (user-initiated only, never automatic) downloading pinned Hugging Face
+      revisions with size cap + SHA-256 verification, resumable, progress, cancel, free-space
+      check; manual ZIPs (P1b) keep working offline. README "never downloads" wording updated to
+      "only when you press Download". Route D after P1b merges.
 
 ## Acceptance criteria
 - Summary JSON has all sections; empty sections render "None"; every item's timestamp exists.
