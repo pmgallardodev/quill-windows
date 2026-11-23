@@ -79,8 +79,18 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       Route: inline if mechanical, else D.
 
 ### Wave B (parallel)
-- [ ] F7 Companion panel (floating, pill, live tabs, What did I miss?, markers, notes, optional
+- [x] F7 Companion panel (floating, pill, live tabs, What did I miss?, markers, notes, optional
       recording-notice button). Route D.
+      Evidence: 86268c6, 5f514a4, merge c660536 (parent resolved Strings.resx append conflict;
+      XML valid). Core 260/260, Windows projects build 0/0. Pending: wiring (I1), level meters
+      need per-track peak/RMS from RecordingSession, Windows checks.
+
+### Integration (after Wave B)
+- [ ] I1 Composition root: real ISessionActions (F4 summaries, F5 speakers, F8 playback), one
+      app-wide InferenceScheduler, start LiveSummaryLoop + forward LiveTranscriptBuffer segments,
+      show/close CompanionPanelModule around recording (CloseAsync before final summary),
+      final pipeline after transcription (speakers → final summary → optional auto-export),
+      tray menu items (Ajustes, Importar), per-track audio levels, Core README update. Route D.
 - [ ] F8 Audio playback from transcript, transcript editing + re-summarize, import. Route D.
 - [ ] F9 Templates editor, Markdown/Obsidian export, settings (models, AI pack path, GPU). Route D.
 
