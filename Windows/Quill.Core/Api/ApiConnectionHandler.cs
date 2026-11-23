@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text.Json.Nodes;
 
 namespace Quill.Core.Api;
 
@@ -88,7 +87,4 @@ public sealed class ApiConnectionHandler
 
         return await _router.HandleAsync(new ApiRequest(head.Method, head.Target, body), cancellationToken).ConfigureAwait(false);
     }
-
-    /// <summary>Body for a 500 written by the host when even the handler failed.</summary>
-    public static string InternalErrorJson { get; } = new JsonObject { ["error"] = "internal_error" }.ToJsonString();
 }

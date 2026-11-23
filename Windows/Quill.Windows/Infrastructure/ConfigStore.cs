@@ -129,6 +129,30 @@ internal static class ConfigStore
         File.Move(temporary, ConfigPath, overwrite: true);
     }
 
+    /// <summary>The "api" section of config.json (local API). Lenient like <see cref="LoadSettings"/>: off on any problem.</summary>
+    public static ApiSettings LoadApiSettings()
+    {
+        try
+        {
+            return ApiSettingsDocument.Parse(File.Exists(ConfigPath) ? File.ReadAllText(ConfigPath) : null);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            return new ApiSettings();
+        }
+    }
+
+    /// <summary>Writes the "api" section, keeping every other key. Same atomic replace as <see cref="SaveSettings"/>.</summary>
+    public static void SaveApiSettings(ApiSettings settings)
+    {
+        var existing = File.Exists(ConfigPath) ? File.ReadAllText(ConfigPath) : null;
+        var merged = ApiSettingsDocument.Merge(existing, settings);
+        Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath)!);
+        var temporary = ConfigPath + ".tmp";
+        File.WriteAllText(temporary, merged);
+        File.Move(temporary, ConfigPath, overwrite: true);
+    }
+
     public static string TemplatesFolder(QuillSettings settings) =>
         Path.GetFullPath(Environment.ExpandEnvironmentVariables(settings.Templates.ResolveFolder(RoamingAppData)));
 
