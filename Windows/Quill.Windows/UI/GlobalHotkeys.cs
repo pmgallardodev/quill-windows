@@ -1,5 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
+using Quill.Core.Settings;
+using Quill.Windows.Privacy;
 
 namespace Quill.Windows.UI;
 
@@ -17,6 +19,7 @@ internal sealed class GlobalHotkeys : IDisposable
 
     private const int ToggleId = 0x5101;
     private const int MarkerId = 0x5102;
+    private const int CompanionId = 0x5103;
 
     private readonly HwndSource _source;
     private readonly Action _toggle;
@@ -35,11 +38,19 @@ internal sealed class GlobalHotkeys : IDisposable
 
     public bool MarkerRegistered { get; private set; }
 
+    public bool CompanionRegistered { get; private set; }
+
+    /// <summary>The companion shortcut currently registered, or null when it is not.</summary>
+    public HotkeyGesture? CompanionGesture { get; private set; }
+
+    /// <summary>The show/hide companion panel shortcut was pressed (raised on the UI thread).</summary>
+    public event Action? CompanionToggleRequested;
+
     /// <summary>
     /// Devuelve null si no se pudo crear la ventana oculta que recibe los mensajes.
     /// Los atajos son una comodidad: que fallen no puede impedir arrancar.
     /// </summary>
-    public static GlobalHotkeys? TryCreate(Action toggle, Action marker)
+    public static GlobalHotkeys? TryCreate(Action toggle, Action marker, HotkeyGesture? companion = null)
     {
         HwndSource? source = null;
         try
@@ -53,6 +64,11 @@ internal sealed class GlobalHotkeys : IDisposable
 
             var hotkeys = new GlobalHotkeys(source, toggle, marker);
             hotkeys.Register();
+            if (companion is not null)
+            {
+                hotkeys.SetCompanionGesture(companion);
+            }
+
             return hotkeys;
         }
         catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception)
@@ -81,7 +97,42 @@ internal sealed class GlobalHotkeys : IDisposable
             UnregisterHotKey(_source.Handle, MarkerId);
         }
 
+        if (CompanionRegistered)
+        {
+            UnregisterHotKey(_source.Handle, CompanionId);
+        }
+
         _source.Dispose();
+    }
+
+    /// <summary>
+    /// (Re)registers the show/hide companion panel shortcut. Returns false when another
+    /// application owns it; the shortcut then does not exist until the next change.
+    /// </summary>
+    public bool SetCompanionGesture(HotkeyGesture gesture)
+    {
+        ArgumentNullException.ThrowIfNull(gesture);
+        if (_disposed)
+        {
+            return false;
+        }
+
+        if (CompanionRegistered && gesture == CompanionGesture)
+        {
+            return true;
+        }
+
+        if (CompanionRegistered)
+        {
+            UnregisterHotKey(_source.Handle, CompanionId);
+            CompanionRegistered = false;
+            CompanionGesture = null;
+        }
+
+        var (modifiers, key) = HotkeyInterop.ToNative(gesture);
+        CompanionRegistered = RegisterHotKey(_source.Handle, CompanionId, modifiers, key);
+        CompanionGesture = CompanionRegistered ? gesture : null;
+        return CompanionRegistered;
     }
 
     private void Register()
@@ -110,6 +161,11 @@ internal sealed class GlobalHotkeys : IDisposable
             case MarkerId:
                 handled = true;
                 _marker();
+                break;
+
+            case CompanionId:
+                handled = true;
+                CompanionToggleRequested?.Invoke();
                 break;
         }
 

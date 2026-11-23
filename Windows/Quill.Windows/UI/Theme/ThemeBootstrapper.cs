@@ -65,7 +65,8 @@ internal static class ThemeBootstrapper
     }
 
     /// <summary>
-    /// Opts a window into Mica (with graceful fallback) and live theme following. Call from the
+    /// Opts a window into Mica (with graceful fallback), live theme following and discreet mode
+    /// (capture exclusion, see <see cref="Privacy.DiscreetMode"/>). Call from the
     /// window constructor. Best used with <c>ui:FluentWindow</c>; for a plain Window the backdrop
     /// only shows if its Background is transparent.
     /// </summary>
@@ -79,6 +80,10 @@ internal static class ThemeBootstrapper
         }
 
         SystemThemeWatcher.Watch(window, backdrop, updateAccents: true);
+
+        // Every Quill window passes through here before its HWND exists, so discreet mode can
+        // exclude it from screen capture before the first frame is drawn.
+        Privacy.DiscreetMode.Track(window);
     }
 
     /// <summary>Reads the Windows "app mode" (Settings > Personalization > Colors).</summary>

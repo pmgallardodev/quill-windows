@@ -61,6 +61,33 @@ internal sealed class CompanionPanelModule
         }
     }
 
+    /// <summary>
+    /// Hides the open panel, or shows it again without taking focus (companion hotkey). Does
+    /// nothing when no panel is open. May be called from any thread.
+    /// </summary>
+    public void ToggleVisibility()
+    {
+        if (!_dispatcher.CheckAccess())
+        {
+            _dispatcher.BeginInvoke(ToggleVisibility);
+            return;
+        }
+
+        if (_window is not { } window)
+        {
+            return;
+        }
+
+        if (window.IsVisible)
+        {
+            window.Hide();
+        }
+        else
+        {
+            window.Show();
+        }
+    }
+
     /// <summary>Closes the panel; pending notes are written in the background.</summary>
     public void Close() => _ = CloseAsync();
 

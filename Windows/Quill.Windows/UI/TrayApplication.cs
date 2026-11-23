@@ -9,8 +9,10 @@ using Quill.Core.Scheduling;
 using Quill.Core.Storage;
 using Quill.Windows.Audio;
 using Quill.Windows.Infrastructure;
+using Quill.Windows.Privacy;
 using Quill.Windows.Sessions;
 using Quill.Windows.Transcription;
+using Quill.Windows.UI.Companion;
 using Forms = System.Windows.Forms;
 using WpfApplication = System.Windows.Application;
 
@@ -32,6 +34,7 @@ internal static class TrayApplication
             ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown,
         };
         Theme.ThemeBootstrapper.Initialize(application);
+        DiscreetMode.Initialize(ConfigStore.LoadSettings().Privacy);
         using var controller = new TrayController(application, recordingsRoot);
         var exitCode = application.Run();
         controller.WaitForCleanup();
@@ -44,6 +47,7 @@ internal sealed class TrayController : IDisposable
     private readonly WpfApplication _application;
     private readonly string _recordingsRoot;
     private readonly Forms.NotifyIcon _icon;
+    private readonly QuillNotifier _notifier;
     private readonly Forms.ToolStripMenuItem _toggle;
     private readonly Forms.ToolStripMenuItem _pause;
     private readonly Forms.ToolStripMenuItem _marker;
@@ -108,6 +112,10 @@ internal sealed class TrayController : IDisposable
         // Abrir la ventana en lugar de grabar: un doble clic accidental ya no puede
         // cortar una reunion en curso.
         _icon.DoubleClick += (_, _) => ShowSessions();
+        _notifier = new QuillNotifier(ShowOsNotification, () => DiscreetMode.IsOn);
+        // The tray menu is a WinForms popup, not a WPF window: protect it when it opens.
+        menu.Opened += (_, _) => DiscreetMode.ProtectSurface(menu.Handle);
+        DiscreetMode.Changed += OnDiscreetModeChanged;
 
         _ticker = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _ticker.Tick += (_, _) => OnTick();
@@ -144,7 +152,12 @@ internal sealed class TrayController : IDisposable
         {
             _hotkeys = GlobalHotkeys.TryCreate(
                 () => Post(() => _ = ToggleAsync()),
-                () => Post(AddMarker));
+                () => Post(AddMarker),
+                DiscreetMode.Settings.CompanionGesture);
+            if (_hotkeys is not null)
+            {
+                _hotkeys.CompanionToggleRequested += () => Post(OnCompanionHotkey);
+            }
         }
 
         // El ticker tiene que correr tambien sin grabacion: detectar una reunion
@@ -213,6 +226,7 @@ internal sealed class TrayController : IDisposable
             _sessionsWindow = null;
         }
 
+        DiscreetMode.Changed -= OnDiscreetModeChanged;
         _hotkeys?.Dispose();
         _sessionsViewModel.Dispose();
         _transcription.StateChanged -= _transcriptionStateHandler;
@@ -350,6 +364,7 @@ internal sealed class TrayController : IDisposable
             }
 
             _recordingStartedAt = DateTimeOffset.UtcNow;
+            DiscreetMode.SetRecording(true);
             _toggle.Text = "Detener grabacion";
             _pause.Text = "Pausar grabacion";
             _pause.Visible = true;
@@ -357,16 +372,17 @@ internal sealed class TrayController : IDisposable
             _deviceCheckTicks = 0;
             _deviceChangeReported = false;
             ApplyIcon(recording: true);
-            _icon.Text = "quill - GRABANDO 0:00";
+            SetTooltip("quill - GRABANDO 0:00");
             _ticker.Start();
             _sessionsViewModel.SetActiveSession(_session.Directory, isPaused: false);
-            _icon.ShowBalloonTip(3_000, "quill", "Grabacion activa: microfono y audio del sistema.", Forms.ToolTipIcon.Info);
+            _notifier.Notify(3_000, "quill", "Grabacion activa: microfono y audio del sistema.", NotificationKind.Info);
         }
         catch (Exception exception)
         {
             var failedSession = _session;
             _session = null;
             _recordingStartedAt = null;
+            DiscreetMode.SetRecording(false);
             if (!_detectsMeetings)
             {
                 _ticker.Stop();
@@ -398,7 +414,7 @@ internal sealed class TrayController : IDisposable
                 _ = live.DisposeAsync().AsTask();
             }
 
-            _icon.ShowBalloonTip(6_000, "quill - error", exception.Message, Forms.ToolTipIcon.Error);
+            _notifier.Notify(6_000, "quill - error", exception.Message, NotificationKind.Error);
         }
     }
 
@@ -432,6 +448,7 @@ internal sealed class TrayController : IDisposable
         _isStopping = true;
         _recordingGeneration++;
         _session = null;
+        DiscreetMode.SetRecording(false);
         _stoppingSessionDirectory = session.Directory;
         if (!_detectsMeetings)
         {
@@ -498,19 +515,19 @@ internal sealed class TrayController : IDisposable
 
         if (stopError is not null)
         {
-            _icon.Text = queued ? "quill - transcripcion en cola" : "quill - error al guardar";
-            _icon.ShowBalloonTip(6_000, "quill - aviso", stopError.Message, Forms.ToolTipIcon.Warning);
+            SetTooltip(queued ? "quill - transcripcion en cola" : "quill - error al guardar");
+            _notifier.Notify(6_000, "quill - aviso", stopError.Message, NotificationKind.Warning);
         }
         else
         {
-            _icon.Text = queued ? "quill - transcripcion en cola" : "quill - grabacion guardada";
-            _icon.ShowBalloonTip(
+            SetTooltip(queued ? "quill - transcripcion en cola" : "quill - grabacion guardada");
+            _notifier.Notify(
                 3_000,
                 "quill",
                 queued
                     ? "Grabacion terminada. La transcripcion local inicio en segundo plano."
                     : "Grabacion terminada. La transcripcion esta desactivada o no pudo encolarse.",
-                Forms.ToolTipIcon.Info);
+                NotificationKind.Info);
         }
 
         _toggle.Text = "Iniciar grabacion";
@@ -527,11 +544,11 @@ internal sealed class TrayController : IDisposable
         {
             if (_session is not null)
             {
-                _icon.ShowBalloonTip(
+                _notifier.Notify(
                     6_000,
                     "quill - aviso",
                     $"La captura de audio encontro un problema: {exception.Message}",
-                    Forms.ToolTipIcon.Warning);
+                    NotificationKind.Warning);
             }
         });
     }
@@ -544,7 +561,7 @@ internal sealed class TrayController : IDisposable
         }
 
         var elapsed = FormatDuration(session.Elapsed);
-        _icon.Text = session.IsPaused ? $"quill - PAUSADO {elapsed}" : $"quill - GRABANDO {elapsed}";
+        SetTooltip(session.IsPaused ? $"quill - PAUSADO {elapsed}" : $"quill - GRABANDO {elapsed}");
     }
 
     private void ShowTranscriptionStatus(TranscriptionUpdate update)
@@ -557,39 +574,39 @@ internal sealed class TrayController : IDisposable
             case SessionState.Running:
                 if (!isRecording)
                 {
-                    _icon.Text = update.Queued > 0
+                    SetTooltip(update.Queued > 0
                         ? $"quill - transcribiendo ({update.Queued} en cola)"
-                        : "quill - transcribiendo";
+                        : "quill - transcribiendo");
                 }
                 break;
 
             case SessionState.Done:
                 if (!isRecording)
                 {
-                    _icon.Text = "quill - listo";
+                    SetTooltip("quill - listo");
                 }
-                _icon.ShowBalloonTip(4_000, "quill", $"Transcripcion lista: {name}", Forms.ToolTipIcon.Info);
+                _notifier.Notify(4_000, "quill", $"Transcripcion lista: {name}", NotificationKind.Info);
                 break;
 
             case SessionState.Failed:
                 if (!isRecording)
                 {
-                    _icon.Text = "quill - error de transcripcion";
+                    SetTooltip("quill - error de transcripcion");
                 }
-                _icon.ShowBalloonTip(6_000, "quill - error", $"{name}: {update.Error}", Forms.ToolTipIcon.Error);
+                _notifier.Notify(6_000, "quill - error", $"{name}: {update.Error}", NotificationKind.Error);
                 break;
 
             case SessionState.Disabled:
                 if (!isRecording)
                 {
-                    _icon.Text = "quill - transcripcion desactivada";
+                    SetTooltip("quill - transcripcion desactivada");
                 }
 
-                _icon.ShowBalloonTip(
+                _notifier.Notify(
                     4_000,
                     "quill",
                     $"Grabacion guardada sin transcribir: {name}",
-                    Forms.ToolTipIcon.Info);
+                    NotificationKind.Info);
                 break;
         }
     }
@@ -625,7 +642,7 @@ internal sealed class TrayController : IDisposable
         }
 
         session.AddMarker();
-        _icon.ShowBalloonTip(1_500, "quill", $"Momento marcado en {FormatDuration(session.Elapsed)}.", Forms.ToolTipIcon.Info);
+        _notifier.Notify(1_500, "quill", $"Momento marcado en {FormatDuration(session.Elapsed)}.", NotificationKind.Info);
     }
 
     private void OnTick()
@@ -687,7 +704,7 @@ internal sealed class TrayController : IDisposable
             if (_session is not null)
             {
                 _meetingOffered = application;
-                _icon.ShowBalloonTip(4_000, "quill", $"Grabacion iniciada: {application} esta usando el microfono.", Forms.ToolTipIcon.Info);
+                _notifier.Notify(4_000, "quill", $"Grabacion iniciada: {application} esta usando el microfono.", NotificationKind.Info);
             }
 
             return;
@@ -697,11 +714,13 @@ internal sealed class TrayController : IDisposable
         var shortcut = _hotkeys?.ToggleRegistered == true
             ? "Ctrl+Shift+R"
             : "el menu de la bandeja";
-        _icon.ShowBalloonTip(
+        _notifier.Notify(
             6_000,
             "quill",
             $"{application} esta usando el microfono. Usa {shortcut} para grabar.",
-            Forms.ToolTipIcon.Info);
+            NotificationKind.Info,
+            NotificationTopic.MeetingDetected,
+            application);
     }
 
     /// <summary>
@@ -729,12 +748,12 @@ internal sealed class TrayController : IDisposable
             : changed.Microphone
                 ? "el microfono"
                 : "el dispositivo de audio";
-        _icon.ShowBalloonTip(
+        _notifier.Notify(
             8_000,
             "quill - aviso",
             $"Cambio {changedDevices} predeterminado. La grabacion sigue con el anterior, "
                 + "asi que puede que una pista ya no se este capturando.",
-            Forms.ToolTipIcon.Warning);
+            NotificationKind.Warning);
     }
 
     private void ShowSessions()
@@ -753,7 +772,7 @@ internal sealed class TrayController : IDisposable
         catch (Exception exception) when (
             exception is Win32Exception or InvalidOperationException or UnauthorizedAccessException or ArgumentException)
         {
-            _icon.ShowBalloonTip(6_000, "quill - error", $"No se pudo abrir grabaciones: {exception.Message}", Forms.ToolTipIcon.Error);
+            _notifier.Notify(6_000, "quill - error", $"No se pudo abrir grabaciones: {exception.Message}", NotificationKind.Error);
         }
     }
 
@@ -780,10 +799,73 @@ internal sealed class TrayController : IDisposable
     /// </summary>
     private void ApplyIcon(bool recording)
     {
-        var icon = recording ? _recordingIcon ?? _idleIcon : _idleIcon;
+        var icon = TrayAppearance.ShowsRecordingIcon(recording, DiscreetMode.Settings.UsesNeutralTrayIcon)
+            ? _recordingIcon ?? _idleIcon
+            : _idleIcon;
         if (!ReferenceEquals(_icon.Icon, icon))
         {
             _icon.Icon = icon;
+        }
+    }
+
+    /// <summary>All user notifications go through here; see <see cref="QuillNotifier"/>.</summary>
+    public QuillNotifier Notifier => _notifier;
+
+    /// <summary>
+    /// Set by the composition root once the companion panel module exists; the companion
+    /// hotkey then shows or hides it directly. While null the hotkey raises
+    /// <see cref="CompanionToggleRequested"/> instead.
+    /// </summary>
+    public CompanionPanelModule? CompanionPanel { get; set; }
+
+    /// <summary>The companion hotkey was pressed and no <see cref="CompanionPanel"/> is set (UI thread).</summary>
+    public event Action? CompanionToggleRequested;
+
+    private void OnCompanionHotkey()
+    {
+        if (CompanionPanel is { } panel)
+        {
+            panel.ToggleVisibility();
+        }
+        else
+        {
+            CompanionToggleRequested?.Invoke();
+        }
+    }
+
+    private void ShowOsNotification(QuillNotification notification) =>
+        _icon.ShowBalloonTip(
+            (int)notification.Duration.TotalMilliseconds,
+            notification.Title,
+            notification.Text,
+            notification.Kind switch
+            {
+                NotificationKind.Warning => Forms.ToolTipIcon.Warning,
+                NotificationKind.Error => Forms.ToolTipIcon.Error,
+                _ => Forms.ToolTipIcon.Info,
+            });
+
+    /// <summary>In discreet mode with a neutral icon the tooltip never says "GRABANDO".</summary>
+    private void SetTooltip(string text) =>
+        _icon.Text = TrayAppearance.Tooltip(text, _session is not null, DiscreetMode.Settings.UsesNeutralTrayIcon);
+
+    private void OnDiscreetModeChanged(object? sender, EventArgs e)
+    {
+        if (_coreDisposed)
+        {
+            return;
+        }
+
+        if (_session is { } session)
+        {
+            ApplyIcon(recording: !session.IsPaused);
+            UpdateElapsedTime();
+        }
+
+        var gesture = DiscreetMode.Settings.CompanionGesture;
+        if (_hotkeys is not null && _hotkeys.CompanionGesture != gesture)
+        {
+            _hotkeys.SetCompanionGesture(gesture);
         }
     }
 
