@@ -57,20 +57,24 @@ Each release has two kinds of asset. Both are plain ZIP files under 2 GiB, and n
 | --- | --- | --- |
 | `quill-<version>-win-x64.zip` | Quill, the .NET runtime, native runtimes, Whisper `large-v3-turbo` | Recording and final transcription |
 | `quill-ai-pack-<version>.zip` | `ai-pack.json`, live Whisper `small`, speaker models, search embeddings | Live text, speakers, voice memory, semantic search |
-| `quill-ai-pack-<version>-llm.zip` | The local language model (Qwen3-4B Instruct, GGUF) | Summaries, live summary, "What did I miss?", Ask |
+| `quill-ai-pack-<version>-llm-part1.zip` | First part of the local language model (Qwen3-4B Instruct 2507, GGUF Q4_K_M) | Summaries, live summary, "What did I miss?", Ask |
+| `quill-ai-pack-<version>-llm-part2.zip` | Second part of the language model | Same as above; both parts are required |
 
-The language model gets its own ZIP because GitHub limits each asset to 2 GiB.
+The language model (2.33 GiB) is larger than GitHub's 2 GiB limit per asset, so it ships as two byte-exact parts in two ZIPs. Quill joins them by itself; you only extract.
 
 1. Extract `quill-<version>-win-x64.zip` to a folder you do not intend to move, for example `%LOCALAPPDATA%\Programs\Quill`.
-2. Extract every `quill-ai-pack-<version>*.zip` **into that same folder**. In Explorer, choose `Extract All...` and point the destination at the Quill folder, not at a new subfolder. The result must be:
+2. Extract **all three** `quill-ai-pack-<version>*.zip` **into that same folder**. In Explorer, choose `Extract All...` and point the destination at the Quill folder, not at a new subfolder. The result must be:
 
    ```text
    Quill\quill.exe
    Quill\ai-pack\ai-pack.json
-   Quill\ai-pack\llm\...
+   Quill\ai-pack\llm\Qwen3-4B-Instruct-2507-Q4_K_M.gguf.part1
+   Quill\ai-pack\llm\Qwen3-4B-Instruct-2507-Q4_K_M.gguf.part2
    ```
 
 3. Run `quill.exe`. Settings shows whether the AI pack was found.
+
+On the first start Quill joins the two parts into `ai-pack\llm\Qwen3-4B-Instruct-2507-Q4_K_M.gguf` in the background, checks its SHA-256 against `ai-pack.json` and only then deletes the parts. This takes a few minutes and needs about 2.5 GB of free disk space; recording works meanwhile, and AI features show that the model is being prepared. If the `ai-pack` folder is read-only, the joined model is written to `%LOCALAPPDATA%\Quill\ai-pack` instead and the parts stay in place. If a part is damaged, Quill says so and keeps the parts: extract the ZIPs again.
 
 To keep the AI pack somewhere else (another disk, for instance), extract it there and choose that `ai-pack` folder in Settings, or set it in `config.json`:
 
@@ -80,7 +84,7 @@ To keep the AI pack somewhere else (another disk, for instance), extract it ther
 }
 ```
 
-Without the AI pack, recording, final transcription, playback, transcript editing, export and keyword search keep working; AI features show an "install the AI pack" state instead. A partial pack works per component: for example, without the `-llm` ZIP, live text and speakers work but summaries do not. Release notes list the SHA-256 of every asset; compare with `Get-FileHash <file> -Algorithm SHA256` before extracting.
+Without the AI pack, recording, final transcription, playback, transcript editing, export and keyword search keep working; AI features show an "install the AI pack" state instead. A partial pack works per component: for example, without the `-llm-part1`/`-llm-part2` ZIPs, live text and speakers work but summaries do not. Release notes list the SHA-256 of every asset; compare with `Get-FileHash <file> -Algorithm SHA256` before extracting.
 
 ## Status
 
@@ -203,7 +207,7 @@ System audio uses global loopback. It captures everything Windows plays through 
 - Windows 11 x64.
 - No .NET installation: the runtime is bundled in the ZIP.
 - A Vulkan-capable GPU is optional. Whisper and the language model use it when present and fall back to the CPU otherwise.
-- About 2.8 GB of disk for the AI pack, and 8 GB of RAM or more for summaries with the local language model.
+- About 3.4 GB of disk for the AI pack (about 6 GB while the language model is joined on first start), and 8 GB of RAM or more for summaries with the local language model.
 - A CPU with AVX, AVX2, FMA, and F16C support.
 - Enough free storage for the package and recordings. The bundled model is about 547 MB, and an hour of meeting is about 230 MB of audio.
 - A default microphone and default audio-output device.
@@ -268,7 +272,7 @@ Bundle the Silero VAD model too, so `"vad": true` can be enabled later:
 
 It runs `Publish-Portable.ps1` and `build-ai-pack.ps1`, then prints each asset's size and SHA-256 as a Markdown table and writes `artifacts\SHA256SUMS-1.4.0.txt`. Upload the ZIPs and the checksum file to the GitHub release.
 
-`build-ai-pack.ps1` reads `tools\ai-pack.models.json`: one entry per model with its pinned URL, size, SHA-256, license and destination volume. It downloads each model once into `artifacts\ai-pack-cache\` (HTTPS only, size bounded, hash checked, never executed), writes `ai-pack\ai-pack.json` and `ai-pack\THIRD-PARTY-NOTICES.md`, and zips every volume, failing if one reaches 2 GiB. To try another model, edit its entry and set `"sha256": "TO_FILL_ON_FIRST_BUILD"`: the next build downloads it, prints its hash and size, and refuses to package until you pin those values or pass `-AcceptNewHashes`. The models need about 3 GB in the cache plus the same again for the ZIPs.
+`build-ai-pack.ps1` reads `tools\ai-pack.models.json`: one entry per model with its pinned URL, size, SHA-256, license and destination volume. It downloads each model once into `artifacts\ai-pack-cache\` (HTTPS only, size bounded, hash checked, never executed), writes `ai-pack\ai-pack.json` and `ai-pack\THIRD-PARTY-NOTICES.md`, and zips every volume, failing if one reaches 2 GiB. An entry with `"split": { "maxPartBytes": ... }` (the default language model) is cut into `<file>.part1..N`, one ZIP per part (`-llm-part1.zip`, `-llm-part2.zip`), and `ai-pack.json` lists the parts with their sizes and SHA-256 under `splitFiles` together with the pinned hash of the whole file, which Quill checks after joining. `alternatives.languageModel` keeps UD-Q3_K_XL (1.98 GiB, fits one asset, not benchmarked): copy it over the `languageModel` entry to ship a single unsplit `-llm.zip` instead. To try another model, edit its entry and set `"sha256": "TO_FILL_ON_FIRST_BUILD"`: the next build downloads it, prints its hash and size, and refuses to package until you pin those values or pass `-AcceptNewHashes`. The models need about 3.4 GB in the cache, 2.5 GB for the temporary parts and 3.4 GB for the ZIPs.
 
 ## Commands
 

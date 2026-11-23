@@ -69,6 +69,7 @@ public sealed class LlamaSharpLanguageModel : ILanguageModel, IDisposable
     private static bool _nativeConfigured;
 
     private readonly Func<string?> _resolveModelPath;
+    private readonly Func<string?>? _describeMissingModel;
     private readonly LlamaSharpOptions _options;
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly ConcurrentDictionary<string, string> _grammars = new(StringComparer.Ordinal);
@@ -89,6 +90,18 @@ public sealed class LlamaSharpLanguageModel : ILanguageModel, IDisposable
         {
             throw new ArgumentOutOfRangeException(nameof(options), _options.ContextTokens, "context must be at least 512 tokens");
         }
+    }
+
+    /// <summary>
+    /// Resolves the model through the AI pack on every load attempt. While a split model is being
+    /// joined (or failed to join) the <see cref="LanguageModelUnavailableException"/> says so
+    /// instead of reporting a plain missing model.
+    /// </summary>
+    public LlamaSharpLanguageModel(IAiPackLocator aiPack, LlamaSharpOptions? options = null)
+        : this(() => aiPack.Locate().PathOf(AiPackComponent.LanguageModel), options)
+    {
+        ArgumentNullException.ThrowIfNull(aiPack);
+        _describeMissingModel = () => MissingModelReason(aiPack.Locate());
     }
 
     public string ModelName => NameFromPath(_loadedPath ?? SafeResolve()) ?? "unavailable";
@@ -128,6 +141,17 @@ public sealed class LlamaSharpLanguageModel : ILanguageModel, IDisposable
             _gate.Release();
         }
     }
+
+    /// <summary>Why the AI pack has no usable language model, for <see cref="LanguageModelUnavailableException"/>.</summary>
+    internal static string MissingModelReason(AiPackStatus status) =>
+        status.PreparationOf(AiPackComponent.LanguageModel) switch
+        {
+            { State: ModelPreparationState.Preparing } preparing =>
+                $"the AI model is being prepared ({(int)(preparing.Progress * 100)}%)",
+            { State: ModelPreparationState.Failed } failed =>
+                $"the AI model could not be prepared: {failed.Error}",
+            _ => "the AI pack has no language model",
+        };
 
     /// <summary>"Qwen3-4B-Instruct-2507-Q4_K_M.gguf" becomes "qwen3-4b-instruct-2507-q4_k_m".</summary>
     internal static string? NameFromPath(string? path) =>
@@ -185,7 +209,9 @@ public sealed class LlamaSharpLanguageModel : ILanguageModel, IDisposable
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
         {
             throw new LanguageModelUnavailableException(
-                string.IsNullOrWhiteSpace(path) ? "the AI pack has no language model" : $"language model not found: {path}");
+                string.IsNullOrWhiteSpace(path)
+                    ? SafeDescribeMissingModel() ?? "the AI pack has no language model"
+                    : $"language model not found: {path}");
         }
 
         var plan = LlamaBackendPlan.For(_options);
@@ -237,6 +263,18 @@ public sealed class LlamaSharpLanguageModel : ILanguageModel, IDisposable
             {
                 // The native library is already loaded; keep whatever backend it chose.
             }
+        }
+    }
+
+    private string? SafeDescribeMissingModel()
+    {
+        try
+        {
+            return _describeMissingModel?.Invoke();
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            return null;
         }
     }
 
