@@ -10,10 +10,33 @@ public sealed class SpeechChunkerTests
 {
     private static readonly TimeSpan Tolerance = TimeSpan.FromMilliseconds(80);
 
+    /// <summary>
+    /// Short-chunk tuning so mechanism tests stay small; the shipped defaults are covered by
+    /// <see cref="DefaultsAvoidPaddedShortChunksWithinTheLiveLatencyBudget"/>.
+    /// </summary>
+    private static readonly SpeechChunkerOptions Tuned = new()
+    {
+        MinChunk = TimeSpan.FromSeconds(3),
+        MaxChunk = TimeSpan.FromSeconds(12),
+    };
+
+    [Fact]
+    public void DefaultsAvoidPaddedShortChunksWithinTheLiveLatencyBudget()
+    {
+        var options = new SpeechChunkerOptions();
+
+        // Whisper pads every chunk to a 30 s window, so a short chunk costs as much as a long one.
+        Assert.True(options.MinChunk >= TimeSpan.FromSeconds(6));
+        // Continuous speech is cut at MaxChunk; with about 1 s of inference the first word of a
+        // forced chunk must still show up within 10 s.
+        Assert.True(options.MaxChunk <= TimeSpan.FromSeconds(9));
+        Assert.True(options.MaxChunk - options.MinChunk >= TimeSpan.FromSeconds(2));
+    }
+
     [Fact]
     public void SilenceNeverProducesChunks()
     {
-        var chunker = new SpeechChunker(Track.Microphone, TimeSpan.Zero);
+        var chunker = new SpeechChunker(Track.Microphone, TimeSpan.Zero, Tuned);
 
         var chunks = chunker.Push(Silence(30)).Concat(chunker.Flush()).ToList();
 
@@ -24,7 +47,7 @@ public sealed class SpeechChunkerTests
     [Fact]
     public void CutsUtteranceOnSilenceAfterMinimumLength()
     {
-        var chunker = new SpeechChunker(Track.System, TimeSpan.Zero);
+        var chunker = new SpeechChunker(Track.System, TimeSpan.Zero, Tuned);
 
         var chunks = chunker.Push(Concat(Speech(4), Silence(1)));
 
@@ -38,7 +61,7 @@ public sealed class SpeechChunkerTests
     [Fact]
     public void TrimsLeadingSilenceToPreRollAndAppliesTrackOffset()
     {
-        var options = new SpeechChunkerOptions();
+        var options = Tuned;
         var chunker = new SpeechChunker(Track.Microphone, TimeSpan.FromSeconds(2), options);
 
         var chunk = Assert.Single(chunker.Push(Concat(Silence(5), Speech(4), Silence(1))));
@@ -50,7 +73,7 @@ public sealed class SpeechChunkerTests
     [Fact]
     public void ShortUtteranceIsEmittedAfterLongerSilence()
     {
-        var options = new SpeechChunkerOptions();
+        var options = Tuned;
         var chunker = new SpeechChunker(Track.Microphone, TimeSpan.Zero, options);
 
         Assert.Empty(chunker.Push(Concat(Speech(1), Silence(1))));
@@ -62,7 +85,7 @@ public sealed class SpeechChunkerTests
     [Fact]
     public void ShortPauseMergesUtterancesBelowMinimumLength()
     {
-        var chunker = new SpeechChunker(Track.Microphone, TimeSpan.Zero);
+        var chunker = new SpeechChunker(Track.Microphone, TimeSpan.Zero, Tuned);
 
         var chunks = chunker.Push(Concat(Speech(1), Silence(0.8), Speech(3), Silence(1)));
 
@@ -74,7 +97,7 @@ public sealed class SpeechChunkerTests
     [Fact]
     public void ContinuousSpeechIsCutAtMaximumWithOverlap()
     {
-        var options = new SpeechChunkerOptions();
+        var options = Tuned;
         var chunker = new SpeechChunker(Track.System, TimeSpan.Zero, options);
 
         var chunks = chunker.Push(Speech(30)).Concat(chunker.Flush()).ToList();
@@ -92,7 +115,7 @@ public sealed class SpeechChunkerTests
     [Fact]
     public void FlushEmitsPendingSpeech()
     {
-        var chunker = new SpeechChunker(Track.Microphone, TimeSpan.Zero);
+        var chunker = new SpeechChunker(Track.Microphone, TimeSpan.Zero, Tuned);
 
         Assert.Empty(chunker.Push(Speech(2)));
         var chunk = Assert.Single(chunker.Flush());
@@ -104,7 +127,7 @@ public sealed class SpeechChunkerTests
     [Fact]
     public void FlushDropsSpeckOfSpeechShorterThanMinimum()
     {
-        var chunker = new SpeechChunker(Track.Microphone, TimeSpan.Zero);
+        var chunker = new SpeechChunker(Track.Microphone, TimeSpan.Zero, Tuned);
 
         chunker.Push(Concat(Silence(1), Speech(0.06)));
 
@@ -115,8 +138,8 @@ public sealed class SpeechChunkerTests
     public void PushingInOddPiecesMatchesPushingAtOnce()
     {
         var signal = Concat(Silence(1.3), Speech(4.1), Silence(1.2), Speech(2), Silence(2));
-        var whole = new SpeechChunker(Track.Microphone, TimeSpan.Zero);
-        var pieces = new SpeechChunker(Track.Microphone, TimeSpan.Zero);
+        var whole = new SpeechChunker(Track.Microphone, TimeSpan.Zero, Tuned);
+        var pieces = new SpeechChunker(Track.Microphone, TimeSpan.Zero, Tuned);
 
         var expected = whole.Push(signal).Concat(whole.Flush()).ToList();
         var actual = new List<AudioChunk>();
@@ -138,7 +161,7 @@ public sealed class SpeechChunkerTests
     [Fact]
     public void SteadyBackgroundNoiseIsNotSpeech()
     {
-        var chunker = new SpeechChunker(Track.System, TimeSpan.Zero);
+        var chunker = new SpeechChunker(Track.System, TimeSpan.Zero, Tuned);
 
         var chunks = chunker.Push(Concat(Noise(6, 0.02f), Speech(4, 0.3f), Noise(2, 0.02f)));
 
@@ -149,7 +172,7 @@ public sealed class SpeechChunkerTests
     [Fact]
     public void ChunkSamplesAreIndependentCopies()
     {
-        var chunker = new SpeechChunker(Track.System, TimeSpan.Zero);
+        var chunker = new SpeechChunker(Track.System, TimeSpan.Zero, Tuned);
         var first = Assert.Single(chunker.Push(Concat(Speech(4), Silence(1))));
         var snapshot = first.Samples.ToArray();
 

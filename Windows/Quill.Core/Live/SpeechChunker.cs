@@ -3,14 +3,23 @@ using Quill.Core.Ports;
 
 namespace Quill.Core.Live;
 
-/// <summary>Tuning for <see cref="SpeechChunker"/>. Defaults target "live text ≤ 10 s behind" (design §15).</summary>
+/// <summary>
+/// Tuning for <see cref="SpeechChunker"/>. Defaults target "live text ≤ 10 s behind" (design §15).
+/// </summary>
+/// <remarks>
+/// Whisper pads every chunk to a 30 s window, so inference costs about the same for a 3 s and a
+/// 9 s chunk (F0 benchmark). Longer chunks therefore mean fewer inference runs and more context per
+/// run. The upper bound is latency: a forced cut makes the first word of a chunk wait
+/// <see cref="MaxChunk"/> plus inference (about 1 s), so 9 s keeps it within the 10 s budget, while
+/// a minimum of 6 s halves the number of runs compared to 3 s when people pause often.
+/// </remarks>
 public sealed record SpeechChunkerOptions
 {
     /// <summary>A chunk is cut on a normal pause only once it is at least this long.</summary>
-    public TimeSpan MinChunk { get; init; } = TimeSpan.FromSeconds(3);
+    public TimeSpan MinChunk { get; init; } = TimeSpan.FromSeconds(6);
 
     /// <summary>Continuous speech is cut at this length, keeping <see cref="Overlap"/> for the next chunk.</summary>
-    public TimeSpan MaxChunk { get; init; } = TimeSpan.FromSeconds(12);
+    public TimeSpan MaxChunk { get; init; } = TimeSpan.FromSeconds(9);
 
     /// <summary>Silence that ends an utterance of at least <see cref="MinChunk"/>.</summary>
     public TimeSpan PauseSilence { get; init; } = TimeSpan.FromMilliseconds(600);
