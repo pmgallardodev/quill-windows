@@ -103,7 +103,7 @@ public class AppSessionActionsTests
         Assert.Equal(["speakers:s1", "build:s1", "export:s1"], harness.Calls);
     }
 
-    private sealed class Harness
+    internal sealed class Harness
     {
         public QuillSettings Settings { get; init; } = new();
 

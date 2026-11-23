@@ -74,6 +74,7 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
     private string _searchStatus = string.Empty;
     private string _statusText = string.Empty;
     private bool _isMyTasksVisible;
+    private bool _isLibraryVisible;
     private CancellationTokenSource? _searchCancellation;
     private CancellationTokenSource? _refreshCancellation;
     private CancellationTokenSource? _myTasksCancellation;
@@ -125,8 +126,9 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
         });
         ClearSearchCommand = new RelayCommand(_ => SearchQuery = string.Empty);
         RefreshCommand = new RelayCommand(_ => Refresh());
-        ShowMeetingsCommand = new RelayCommand(_ => IsMyTasksVisible = false);
+        ShowMeetingsCommand = new RelayCommand(_ => ShowMeetingsPane());
         ShowMyTasksCommand = new RelayCommand(_ => IsMyTasksVisible = true);
+        ShowLibraryCommand = new RelayCommand(_ => IsLibraryVisible = true);
         MyTasks = new MyTasksViewModel(_store, OpenMeeting);
 
         // The coordinator publishes without limit. Accumulate here and flush to the view
@@ -169,6 +171,12 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ShowMeetingsCommand { get; }
 
     public ICommand ShowMyTasksCommand { get; }
+
+    /// <summary>"Buscar": search and Ask across every meeting (F10 library search view).</summary>
+    public ICommand ShowLibraryCommand { get; }
+
+    /// <summary>Called (UI thread) after a meeting folder was deleted, with its session id.</summary>
+    public Action<string>? SessionDeleted { get; set; }
 
     public bool IsAiAvailable => _actions.IsAiAvailable;
 
@@ -221,6 +229,7 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
             Raise(nameof(IsMeetingsVisible));
             if (value)
             {
+                IsLibraryVisible = false;
                 _ = LoadMyTasksAsync();
             }
             else if (_detail is not null)
@@ -231,7 +240,63 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    public bool IsMeetingsVisible => !_isMyTasksVisible;
+    public bool IsMeetingsVisible => !_isMyTasksVisible && !_isLibraryVisible;
+
+    public bool IsLibraryVisible
+    {
+        get => _isLibraryVisible;
+        set
+        {
+            if (!Set(ref _isLibraryVisible, value))
+            {
+                return;
+            }
+
+            Raise(nameof(IsMeetingsVisible));
+            if (value)
+            {
+                IsMyTasksVisible = false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Opens a meeting on its Transcript tab and plays it from <paramref name="at"/> (Ask citations,
+    /// library search results). UI thread.
+    /// </summary>
+    public void OpenMoment(string sessionId, TimeSpan at)
+    {
+        if (string.IsNullOrWhiteSpace(sessionId))
+        {
+            return;
+        }
+
+        ShowMeetingsPane();
+        _pendingOpen = (MeetingDetailViewModel.TranscriptTab, null);
+        var target = Meetings.FirstOrDefault(row => string.Equals(row.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
+        if (target is null)
+        {
+            // The list may still be loading (window just opened): select it once it is there.
+            _pendingSelectionDirectory = Path.Combine(_recordingsRoot, sessionId);
+            Refresh();
+        }
+        else if (ReferenceEquals(target, _selectedMeeting) && _detail is not null)
+        {
+            ApplyPendingOpen(_detail);
+        }
+        else
+        {
+            SelectedMeeting = target;
+        }
+
+        _actions.PlayAt(sessionId, at);
+    }
+
+    private void ShowMeetingsPane()
+    {
+        IsMyTasksVisible = false;
+        IsLibraryVisible = false;
+    }
 
     public string SearchQuery
     {
@@ -566,7 +631,7 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
 
     private void OpenMeeting(string sessionId)
     {
-        IsMyTasksVisible = false;
+        ShowMeetingsPane();
         var target = Meetings.FirstOrDefault(row => string.Equals(row.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
         if (target is null)
         {
@@ -616,7 +681,7 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
     private void OnImported(string sessionDirectory)
     {
         _transcription.Enqueue(sessionDirectory);
-        IsMyTasksVisible = false;
+        ShowMeetingsPane();
         _pendingSelectionDirectory = sessionDirectory;
         StatusText = Loc.Format("Import_Done", Path.GetFileName(sessionDirectory));
         Refresh();
@@ -731,7 +796,7 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
             string.Equals(row.Directory, hit.Directory, StringComparison.OrdinalIgnoreCase));
 
         SearchQuery = string.Empty;
-        IsMyTasksVisible = false;
+        ShowMeetingsPane();
         _pendingOpen = (MeetingDetailViewModel.TranscriptTab, query);
         if (target is null)
         {
@@ -757,7 +822,7 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
         }
 
         // The title editor lives in the detail header.
-        IsMyTasksVisible = false;
+        ShowMeetingsPane();
         SelectedMeeting = row;
         row.BeginRename();
     }
@@ -800,6 +865,7 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
 
                 StatusText = Loc.Format("Meeting_Deleted", displayName);
                 _inFlight.TryRemove(directory, out _);
+                SessionDeleted?.Invoke(Path.GetFileName(directory));
                 if (string.Equals(_selectedMeeting?.Directory, directory, StringComparison.OrdinalIgnoreCase))
                 {
                     SelectedMeeting = null;

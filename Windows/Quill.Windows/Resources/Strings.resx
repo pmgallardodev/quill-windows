@@ -1373,4 +1373,19 @@ Esto no se puede deshacer.</value>
   <data name="InPerson_Hint" xml:space="preserve">
     <value>Separa también las voces del micrófono (varias personas en la misma sala). Tu voz se reconoce por lo aprendido en reuniones online.</value>
   </data>
+  <data name="Summary_Outdated_Message" xml:space="preserve">
+    <value>La transcripción cambió desde que se generó este resumen</value>
+  </data>
+  <data name="Summary_Outdated_Regenerate" xml:space="preserve">
+    <value>Regenerar</value>
+  </data>
+  <data name="Summary_Outdated_RegenerateTooltip" xml:space="preserve">
+    <value>Vuelve a generar el resumen con la transcripción actual. Las tareas marcadas se conservan.</value>
+  </data>
+  <data name="Nav_Library" xml:space="preserve">
+    <value>Buscar</value>
+  </data>
+  <data name="Nav_LibraryTooltip" xml:space="preserve">
+    <value>Buscar y preguntar en todas las reuniones</value>
+  </data>
 </root>

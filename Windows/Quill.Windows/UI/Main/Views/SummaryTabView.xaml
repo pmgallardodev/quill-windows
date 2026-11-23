@@ -37,6 +37,27 @@
             </ui:Button>
         </WrapPanel>
 
+        <!-- The transcript changed after this summary was generated (summary.state.json) -->
+        <Border DockPanel.Dock="Top" Margin="0,0,0,8" Padding="{StaticResource Quill.Padding.Card}"
+                CornerRadius="{StaticResource Quill.Radius.Medium}"
+                Background="{DynamicResource Quill.Brush.WarningSubtle}"
+                AutomationProperties.Name="{loc:Str Summary_Outdated_Message}"
+                Visibility="{Binding ShowOutdatedBanner, Converter={StaticResource BoolToVisibility}}">
+            <DockPanel>
+                <ui:Button DockPanel.Dock="Right" Margin="12,0,0,0" VerticalAlignment="Center"
+                           Content="{loc:Str Summary_Outdated_Regenerate}"
+                           ToolTip="{loc:Str Summary_Outdated_RegenerateTooltip}"
+                           Command="{Binding GenerateCommand}">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="ArrowSync24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+                <ui:SymbolIcon DockPanel.Dock="Left" Margin="0,0,8,0" VerticalAlignment="Center" Symbol="Warning24"
+                               Foreground="{DynamicResource Quill.Brush.Warning}" />
+                <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{loc:Str Summary_Outdated_Message}" />
+            </DockPanel>
+        </Border>
+
         <!-- Copy actions and last result -->
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8"
                    Visibility="{Binding HasSummary, Converter={StaticResource BoolToVisibility}}">

@@ -3,24 +3,35 @@ using System.Text.Json.Nodes;
 
 namespace Quill.Core.Api;
 
+/// <summary>HTTP status and JSON-RPC body (null: 202 Accepted with no body) of one MCP POST.</summary>
+public sealed record McpReply(int Status, string? Json);
+
 /// <summary>
 /// Minimal Model Context Protocol server (JSON-RPC 2.0 over Streamable HTTP, JSON responses only)
 /// exposing read-only tools over <see cref="LocalApiService"/>: <c>list_meetings</c>,
 /// <c>get_meeting_summary</c>, <c>get_transcript</c> and, when a search provider exists,
-/// <c>search_meetings</c>. Supports <c>initialize</c>, <c>ping</c>, <c>tools/list</c>,
-/// <c>tools/call</c> and ignores notifications. No batches (removed in 2025-06-18), no
-/// resources, prompts or sampling: nothing here can write, run code or reach the network.
+/// <c>search_meetings</c>. Supports <c>initialize</c> (version negotiation), <c>ping</c>,
+/// <c>tools/list</c> and <c>tools/call</c>; notifications and client responses get 202.
+/// No resources, prompts or sampling: nothing here can write, run code or reach the network.
 /// </summary>
 /// <remarks>
+/// <para>
+/// Targets MCP 2025-11-25 and also negotiates 2025-06-18, 2025-03-26 and 2024-11-05. Transport
+/// policy (enforced with <see cref="LocalApiRouter"/>): stateless, so no <c>MCP-Session-Id</c> is
+/// issued and one sent by a client is ignored (session ids are optional in the spec; stateless
+/// means a Quill restart never strands a client on an expired session). Requests are answered with
+/// <c>application/json</c>, never an SSE stream, and GET answers 405. JSON-RPC batches get HTTP 400:
+/// a POST body is a single message since 2025-06-18 and current clients never batch.
+/// </para>
 /// Hand-written instead of the ModelContextProtocol NuGet package: that package pulls in
 /// ASP.NET Core hosting for HTTP transport and a dependency tree far larger than the four
 /// methods Quill needs, and it keeps changing with the spec.
 /// </remarks>
 public sealed class McpServer
 {
-    public const string LatestProtocolVersion = "2025-06-18";
+    public const string LatestProtocolVersion = "2025-11-25";
 
-    private static readonly string[] SupportedProtocolVersions = [LatestProtocolVersion, "2025-03-26", "2024-11-05"];
+    private static readonly string[] SupportedProtocolVersions = [LatestProtocolVersion, "2025-06-18", "2025-03-26", "2024-11-05"];
 
     private readonly LocalApiService _service;
     private readonly string _version;
@@ -31,8 +42,23 @@ public sealed class McpServer
         _version = string.IsNullOrWhiteSpace(version) ? "0.0.0" : version;
     }
 
-    /// <summary>Returns the JSON-RPC response, or null when the message is a notification (HTTP 202).</summary>
-    public async Task<string?> HandleAsync(string json, CancellationToken cancellationToken)
+    /// <summary>Whether <paramref name="version"/> (e.g. an <c>MCP-Protocol-Version</c> header) is one this server speaks.</summary>
+    public static bool IsSupportedProtocolVersion(string? version) =>
+        version is not null && SupportedProtocolVersions.Contains(version.Trim(), StringComparer.Ordinal);
+
+    /// <summary>A JSON-RPC error without id, for transport-level rejections (HTTP 4xx bodies).</summary>
+    public static string TransportError(int code, string message) => Error(null, code, message);
+
+    /// <summary>Returns the JSON-RPC response body, or null when the message needs none (HTTP 202).</summary>
+    public async Task<string?> HandleAsync(string json, CancellationToken cancellationToken) =>
+        (await HandleMessageAsync(json, cancellationToken).ConfigureAwait(false)).Json;
+
+    /// <summary>
+    /// One POSTed message. A request gets 200 with its response (JSON-RPC errors included); a
+    /// notification or a client response gets 202 without body; an unparseable body, a batch or a
+    /// malformed message gets 400 with an id-less JSON-RPC error.
+    /// </summary>
+    public async Task<McpReply> HandleMessageAsync(string json, CancellationToken cancellationToken)
     {
         JsonNode? message;
         try
@@ -41,22 +67,35 @@ public sealed class McpServer
         }
         catch (JsonException)
         {
-            return Error(null, -32700, "parse error");
+            return new McpReply(400, Error(null, -32700, "parse error"));
         }
 
-        if (message is not JsonObject request || AsString(request["jsonrpc"]) != "2.0" || AsString(request["method"]) is not { } method)
+        if (message is JsonArray)
         {
-            return Error(Id(message), -32600, "invalid request");
+            return new McpReply(400, Error(null, -32600, "batches are not supported"));
+        }
+
+        if (message is not JsonObject request || AsString(request["jsonrpc"]) != "2.0")
+        {
+            return new McpReply(400, Error(null, -32600, "invalid request"));
+        }
+
+        if (AsString(request["method"]) is not { } method)
+        {
+            // A client's answer to a server request. Quill never sends any; accept and drop it.
+            return request.ContainsKey("id") && (request.ContainsKey("result") || request.ContainsKey("error"))
+                ? new McpReply(202, null)
+                : new McpReply(400, Error(null, -32600, "invalid request"));
+        }
+
+        if (!request.ContainsKey("id"))
+        {
+            return new McpReply(202, null);
         }
 
         var id = Id(request);
-        if (!request.ContainsKey("id"))
-        {
-            return null;
-        }
-
         var parameters = request["params"] as JsonObject;
-        return method switch
+        var response = method switch
         {
             "initialize" => Result(id, Initialize(parameters)),
             "ping" => Result(id, new JsonObject()),
@@ -64,14 +103,15 @@ public sealed class McpServer
             "tools/call" => await CallAsync(id, parameters, cancellationToken).ConfigureAwait(false),
             _ => Error(id, -32601, "method not found"),
         };
+        return new McpReply(200, response);
     }
 
     private JsonObject Initialize(JsonObject? parameters)
     {
-        var requested = AsString(parameters?["protocolVersion"]);
+        var requested = AsString(parameters?["protocolVersion"])?.Trim();
         return new JsonObject
         {
-            ["protocolVersion"] = SupportedProtocolVersions.Contains(requested) ? requested : LatestProtocolVersion,
+            ["protocolVersion"] = IsSupportedProtocolVersion(requested) ? requested : LatestProtocolVersion,
             ["capabilities"] = new JsonObject { ["tools"] = new JsonObject { ["listChanged"] = false } },
             ["serverInfo"] = new JsonObject { ["name"] = "quill", ["version"] = _version },
             ["instructions"] = "Read-only access to the meetings recorded with Quill on this computer.",

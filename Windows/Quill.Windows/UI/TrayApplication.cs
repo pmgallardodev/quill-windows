@@ -138,6 +138,7 @@ internal sealed class TrayController : IDisposable
 
             if (update.State == SessionState.Done)
             {
+                _services.OnTranscriptCompleted(Path.GetFileName(update.SessionDirectory));
                 _ = RunPostTranscriptionAsync(update.SessionDirectory);
             }
 
@@ -161,8 +162,17 @@ internal sealed class TrayController : IDisposable
             recordingsRoot,
             _transcription,
             _application.Dispatcher,
-            _services.Store,
-            _services.SessionActions);
+            _services.UiStore,
+            _services.SessionActions)
+        {
+            SessionDeleted = _services.OnSessionDeleted,
+        };
+        // Ask citations and library search results open the meeting and play the moment.
+        _services.Ask.OpenMoment = (sessionId, at) => Post(() =>
+        {
+            ShowSessions();
+            _sessionsViewModel.OpenMoment(sessionId, at);
+        });
         var recording = ConfigStore.Load().Recording;
         _detectsMeetings = recording.DetectsMeetings;
         _startsMeetingsAutomatically = recording.StartsMeetingsAutomatically;
@@ -186,6 +196,8 @@ internal sealed class TrayController : IDisposable
         }
 
         _transcription.ResumePending();
+        // Local API (no-op while disabled in Settings) and the search index, off the UI thread.
+        _ = Task.Run(_services.StartBackgroundAsync);
         _application.Exit += (_, _) => Dispose();
     }
 
@@ -248,6 +260,7 @@ internal sealed class TrayController : IDisposable
         _notifier.InAppNotification -= OnInAppNotification;
         _notifier.MeetingDetected -= OnMeetingDetected;
         CompanionPanel = null;
+        _services.Ask.OpenMoment = null;
         _services.Companion.Close();
         _hotkeys?.Dispose();
         _sessionsViewModel.Dispose();
@@ -542,6 +555,7 @@ internal sealed class TrayController : IDisposable
         // the valid session just because Stop surfaced that warning to the caller.
         if (File.Exists(Path.Combine(session.Directory, "meta.json")))
         {
+            _services.OnSessionRecorded(Path.GetFileName(session.Directory));
             try
             {
                 queued = _transcription.Enqueue(session.Directory);

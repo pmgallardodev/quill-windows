@@ -1,5 +1,10 @@
 using System.Diagnostics;
+using Quill.Core.Api;
 using Quill.Core.Live;
+using Quill.Core.Search;
+using Quill.Windows.Adapters.Embeddings;
+using Quill.Windows.Ask;
+using Quill.Windows.LocalApi;
 using Quill.Core.Pipeline;
 using Quill.Core.Ports;
 using Quill.Core.Scheduling;
@@ -38,25 +43,53 @@ internal sealed class QuillServices : IDisposable
         Scheduler = new InferenceScheduler();
         AiPack = new SettingsAiPackLocator(() => _settings);
         Store = new FileSessionStore(recordingsRoot);
-        Summaries = new SummariesModule(AiPack, Scheduler, Store, LlamaOptions(settings.Ai));
+        var llama = LlamaOptions(settings.Ai);
+        Summaries = new SummariesModule(AiPack, Scheduler, Store, llama);
         Speakers = new SpeakersModule(Store, AiPack, Scheduler, recordingsRoot: recordingsRoot);
         Companion = new CompanionPanelModule(dispatcher);
 
+        // Same backend options as the LLM: llama.cpp picks its native library once per process.
+        Embeddings = new LlamaSharpEmbeddingModel(() => AiPack.Locate().PathOf(AiPackComponent.TextEmbedding), backend: llama);
+        Ask = new AskModule(
+            Store,
+            Summaries.LanguageModel,
+            Scheduler,
+            recordingsRoot,
+            Embeddings,
+            () => _settings.Summaries.Language,
+            () => Summaries.IsLanguageModelInstalled);
+        Ask.IndexFailed += (_, exception) => Trace.TraceWarning($"quill: search indexing failed: {exception.Message}");
+        AskModule.Current = Ask;
+        // Off by default: StartAsync binds nothing until the user enables the API in Settings.
+        Api = new LocalApiModule(Store, new HybridApiSearch(Ask.SearchAsync));
+        Api.StateChanged += (_, _) =>
+        {
+            if (Api.State == LocalApiState.Failed)
+            {
+                Trace.TraceWarning($"quill: local API could not start: {Api.FailureReason}");
+            }
+        };
+        UiStore = new NotifyingSessionStore(Store, OnSessionContentChanged);
+
+        var summaryState = new FileSummaryStateStore(Store);
         AiServices = new SessionAiServices
         {
             Settings = () => _settings,
             Templates = () => SettingsModule.CreateTemplateCatalog(_settings).Load(),
             IsLanguageModelInstalled = () => Summaries.IsLanguageModelInstalled,
             AreSpeakersAvailable = () => Speakers.IsAvailable,
-            BuildSummary = (sessionId, options, token) => Summaries.FinalSummaries.BuildAsync(sessionId, options, cancellationToken: token),
+            BuildSummary = BuildFinalSummaryAsync,
             ResolveSpeakers = (sessionId, token) => Speakers.ResolveSpeakersAsync(sessionId, cancellationToken: token),
             LoadFinalTranscript = (sessionId, token) => Store.LoadTranscriptAsync(sessionId, Core.Domain.TranscriptPass.Final, token),
             ReassignSegment = Speakers.ReassignAsync,
             AutoExport = (sessionId, token) => SettingsModule.AutoExportAsync(Store, sessionId, token),
+            IsSummaryOutdated = async (sessionId, token) =>
+                (await summaryState.LoadStateAsync(sessionId, token).ConfigureAwait(false)).Outdated,
         };
         SessionActions = new AppSessionActions(AiServices) { Voices = new SpeakersVoiceActions(Speakers) };
-        PostTranscription = new PostTranscriptionPipeline(new AppPostTranscriptionSteps(AiServices), new FileSummaryStateStore(Store));
+        PostTranscription = new PostTranscriptionPipeline(new AppPostTranscriptionSteps(AiServices), summaryState);
         SettingsModule.Saved += OnSettingsSaved;
+        ApiSettingsStore.Saved += OnApiSettingsSaved;
     }
 
     public QuillSettings Settings => _settings;
@@ -80,6 +113,66 @@ internal sealed class QuillServices : IDisposable
     public ISessionActions SessionActions { get; }
 
     public PostTranscriptionPipeline PostTranscription { get; }
+
+    /// <summary>Text embeddings for semantic search (AI pack TextEmbedding GGUF, loaded on first use).</summary>
+    public LlamaSharpEmbeddingModel Embeddings { get; }
+
+    /// <summary>Search index + Ask (F10); also <see cref="AskModule.Current"/> for the views.</summary>
+    public AskModule Ask { get; }
+
+    /// <summary>Local API, webhooks and MCP (F12). Off unless enabled in Settings.</summary>
+    public LocalApiModule Api { get; }
+
+    /// <summary>The store the main window uses: saves made there re-index the meeting.</summary>
+    public ISessionStore UiStore { get; }
+
+    /// <summary>
+    /// Starts the local API (no-op when disabled) and the search index (loads it, then indexes new
+    /// or changed meetings in the background). Call once at startup; never throws.
+    /// </summary>
+    public async Task StartBackgroundAsync()
+    {
+        try
+        {
+            await Api.StartAsync(Lifetime).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            Trace.TraceWarning($"quill: local API start failed: {exception.Message}");
+        }
+
+        try
+        {
+            await Ask.StartAsync(Lifetime).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            Trace.TraceWarning($"quill: search index unavailable: {exception.Message}");
+        }
+    }
+
+    /// <summary>A recording stopped and its audio is on disk.</summary>
+    public void OnSessionRecorded(string sessionId) => Publish(ApiEventTypes.SessionRecorded, sessionId);
+
+    /// <summary>The final transcript (transcript.json) was written.</summary>
+    public void OnTranscriptCompleted(string sessionId)
+    {
+        Publish(ApiEventTypes.TranscriptCompleted, sessionId);
+        IndexInBackground(sessionId);
+    }
+
+    /// <summary>Notes, transcript edits or summary state changed: re-index (cheap when nothing changed).</summary>
+    public void OnSessionContentChanged(string sessionId) => IndexInBackground(sessionId);
+
+    public void OnSessionDeleted(string sessionId)
+    {
+        if (string.IsNullOrWhiteSpace(sessionId))
+        {
+            return;
+        }
+
+        _ = RunQuietlyAsync(() => Ask.RemoveSessionAsync(sessionId, Lifetime), $"removing {sessionId} from the search index");
+    }
 
     /// <summary>Cancelled on shutdown: background pipelines stop with the app.</summary>
     public CancellationToken Lifetime => _lifetime.Token;
@@ -138,6 +231,7 @@ internal sealed class QuillServices : IDisposable
         }
 
         SettingsModule.Saved -= OnSettingsSaved;
+        ApiSettingsStore.Saved -= OnApiSettingsSaved;
         _lifetime.Cancel();
         try
         {
@@ -148,6 +242,10 @@ internal sealed class QuillServices : IDisposable
             // The dispatcher is already gone; the panel went with it.
         }
 
+        // Bounded: the socket must be released, but a stuck background pass must not block exit.
+        WaitQuietly(Api.DisposeAsync(), "local API");
+        WaitQuietly(Ask.DisposeAsync(), "search index");
+        Embeddings.Dispose();
         Summaries.Dispose();
         Scheduler.Dispose();
         _lifetime.Dispose();
@@ -172,6 +270,90 @@ internal sealed class QuillServices : IDisposable
     }
 
     private void OnSettingsSaved(object? sender, QuillSettings saved) => _settings = saved;
+
+    private async void OnApiSettingsSaved(object? sender, ApiSettings saved)
+    {
+        try
+        {
+            await Api.RestartAsync(Lifetime).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            // OperationCanceledException (shutdown) and ObjectDisposedException land here too.
+            Trace.TraceWarning($"quill: local API restart failed: {exception.Message}");
+        }
+    }
+
+    /// <summary>Every final summary save (pipeline or "Regenerar") goes through here.</summary>
+    private async Task<SummaryOutcome> BuildFinalSummaryAsync(string sessionId, SummaryOptions options, CancellationToken token)
+    {
+        var outcome = await Summaries.FinalSummaries.BuildAsync(sessionId, options, cancellationToken: token).ConfigureAwait(false);
+        if (outcome.Status == SummaryStatus.Completed)
+        {
+            Publish(ApiEventTypes.SummaryCompleted, sessionId);
+            IndexInBackground(sessionId);
+        }
+
+        return outcome;
+    }
+
+    private void Publish(string type, string sessionId)
+    {
+        if (string.IsNullOrWhiteSpace(sessionId))
+        {
+            return;
+        }
+
+        try
+        {
+            Api.Publish(type, sessionId);
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            Trace.TraceWarning($"quill: webhook event {type} not queued: {exception.Message}");
+        }
+    }
+
+    private void IndexInBackground(string sessionId)
+    {
+        if (string.IsNullOrWhiteSpace(sessionId) || _disposed != 0)
+        {
+            return;
+        }
+
+        _ = RunQuietlyAsync(() => Ask.IndexSessionAsync(sessionId, Lifetime), $"indexing {sessionId}");
+    }
+
+    private static async Task RunQuietlyAsync(Func<Task> work, string what)
+    {
+        try
+        {
+            await Task.Run(work).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            // Shutting down; the next start catches up.
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            Trace.TraceWarning($"quill: {what} failed: {exception.Message}");
+        }
+    }
+
+    private static void WaitQuietly(ValueTask pending, string what)
+    {
+        try
+        {
+            if (!pending.AsTask().Wait(TimeSpan.FromSeconds(5)))
+            {
+                Trace.TraceWarning($"quill: {what} did not stop in time");
+            }
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            Trace.TraceWarning($"quill: stopping the {what} failed: {exception.Message}");
+        }
+    }
 
     private static LlamaSharpOptions LlamaOptions(AiSettings ai) => new()
     {

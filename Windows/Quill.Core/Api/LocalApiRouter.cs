@@ -38,13 +38,7 @@ public sealed class LocalApiRouter
 
         if (segments is ["mcp"] && _mcp is not null)
         {
-            if (request.Method != "POST")
-            {
-                return ApiResponse.Error(405, "method_not_allowed");
-            }
-
-            var reply = await _mcp.HandleAsync(Encoding.UTF8.GetString(request.Body.Span), cancellationToken).ConfigureAwait(false);
-            return reply is null ? new ApiResponse(202, null) : new ApiResponse(200, reply);
+            return await McpAsync(_mcp, request, cancellationToken).ConfigureAwait(false);
         }
 
         if (segments is not ["v1", ..] || !IsKnown(segments))
@@ -71,6 +65,40 @@ public sealed class LocalApiRouter
             _ => await SearchAsync(query.GetValueOrDefault("q"), limit, cancellationToken).ConfigureAwait(false),
         };
     }
+
+    /// <summary>
+    /// Streamable HTTP transport rules (MCP 2025-11-25): POST only (GET answers 405, no SSE stream is
+    /// offered); an Accept header, when present, must allow JSON (406 otherwise); an
+    /// <c>MCP-Protocol-Version</c> header, when present, must be a supported version (400 otherwise;
+    /// absent means the spec's 2025-03-26 default, which is supported). Stateless: no session id.
+    /// </summary>
+    private static async Task<ApiResponse> McpAsync(McpServer mcp, ApiRequest request, CancellationToken cancellationToken)
+    {
+        if (request.Method != "POST")
+        {
+            return ApiResponse.Error(405, "method_not_allowed") with { Headers = [new("Allow", "POST")] };
+        }
+
+        if (!AcceptsJson(request.Header("accept")))
+        {
+            return ApiResponse.Error(406, "not_acceptable");
+        }
+
+        if (request.Header("mcp-protocol-version") is { } version && !McpServer.IsSupportedProtocolVersion(version))
+        {
+            return new ApiResponse(400, McpServer.TransportError(-32600, "unsupported MCP-Protocol-Version"));
+        }
+
+        var reply = await mcp.HandleMessageAsync(Encoding.UTF8.GetString(request.Body.Span), cancellationToken).ConfigureAwait(false);
+        return new ApiResponse(reply.Status, reply.Json);
+    }
+
+    /// <summary>True when there is no Accept header or it lists application/json, application/* or */*.</summary>
+    private static bool AcceptsJson(string? accept) =>
+        accept is null || accept.Split(',').Select(range => range.Split(';')[0].Trim()).Any(range =>
+            range.Equals("application/json", StringComparison.OrdinalIgnoreCase) ||
+            range.Equals("application/*", StringComparison.OrdinalIgnoreCase) ||
+            range == "*/*");
 
     private async Task<ApiResponse> SearchAsync(string? query, int limit, CancellationToken cancellationToken)
     {
