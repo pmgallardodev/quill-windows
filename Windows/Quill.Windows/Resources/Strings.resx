@@ -190,4 +190,42 @@
   <data name="A11y_AudioLevel" xml:space="preserve">
     <value>Nivel de audio</value>
   </data>
+
+  <!-- Meetings list day groups (main window) -->
+  <data name="Group_Today" xml:space="preserve">
+    <value>Hoy</value>
+  </data>
+  <data name="Group_Yesterday" xml:space="preserve">
+    <value>Ayer</value>
+  </data>
+  <data name="Group_ThisWeek" xml:space="preserve">
+    <value>Esta semana</value>
+  </data>
+  <data name="Group_DateFormat" xml:space="preserve">
+    <value>dddd, d 'de' MMMM</value>
+    <comment>.NET date format for older days of the current year.</comment>
+  </data>
+  <data name="Group_DateFormatWithYear" xml:space="preserve">
+    <value>d 'de' MMMM 'de' yyyy</value>
+    <comment>.NET date format for days of previous years.</comment>
+  </data>
+
+  <!-- Speakers (main window) -->
+  <data name="Speaker_Others" xml:space="preserve">
+    <value>Otros</value>
+    <comment>v1 sessions label everything on the system track "them".</comment>
+  </data>
+
+  <!-- Summary copy as Markdown / email -->
+  <data name="Summary_EmailSubject" xml:space="preserve">
+    <value>Resumen: {0}</value>
+    <comment>{0} = meeting title.</comment>
+  </data>
+  <data name="Summary_Done" xml:space="preserve">
+    <value>hecho</value>
+  </data>
+  <data name="Summary_Due" xml:space="preserve">
+    <value>vence {0}</value>
+    <comment>{0} = due date as written by the model, e.g. "viernes".</comment>
+  </data>
 </root>
