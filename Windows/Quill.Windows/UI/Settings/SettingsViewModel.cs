@@ -56,6 +56,9 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
     private string _exportFolder;
     private bool _autoExport;
     private bool _overwriteEdited;
+    private bool _discreetMode;
+    private bool _neutralTrayIcon;
+    private string _companionHotkey;
     private string _packStatusText = string.Empty;
     private bool _showInstallGuidance;
     private TemplateRow? _selectedTemplate;
@@ -94,6 +97,9 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         _exportFolder = settings.Export.Folder ?? string.Empty;
         _autoExport = settings.Export.AutoExport;
         _overwriteEdited = settings.Export.OverwriteEdited;
+        _discreetMode = settings.Privacy.DiscreetMode;
+        _neutralTrayIcon = settings.Privacy.NeutralTrayIcon;
+        _companionHotkey = settings.Privacy.CompanionHotkey;
 
         GpuChoices =
         [
@@ -173,6 +179,13 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
     public bool AutoExport { get => _autoExport; set => Set(ref _autoExport, value); }
 
     public bool OverwriteEdited { get => _overwriteEdited; set => Set(ref _overwriteEdited, value); }
+
+    public bool DiscreetMode { get => _discreetMode; set => Set(ref _discreetMode, value); }
+
+    /// <summary>Only effective in discreet mode (the checkbox is disabled otherwise).</summary>
+    public bool NeutralTrayIcon { get => _neutralTrayIcon; set => Set(ref _neutralTrayIcon, value); }
+
+    public string CompanionHotkey { get => _companionHotkey; set => Set(ref _companionHotkey, value); }
 
     public string PackStatusText { get => _packStatusText; private set => Set(ref _packStatusText, value); }
 
@@ -338,10 +351,17 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
             return false;
         }
 
+        if (!HotkeyGesture.TryParse(CompanionHotkey, out var hotkey))
+        {
+            Error = Loc.Get("Privacy_Error_Hotkey");
+            return false;
+        }
+
         settings = Current() with
         {
             Ai = Current().Ai with { GpuDevice = device },
             Summaries = Current().Summaries with { LiveCadenceMinutes = cadence, CatchUpMinutes = catchUp },
+            Privacy = Current().Privacy with { CompanionHotkey = hotkey!.ToString() },
         };
         Error = null;
         return true;
@@ -396,6 +416,7 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         },
         Templates = new TemplateSettings { Folder = Blank(TemplatesFolder) },
         Export = new ExportSettings { Folder = Blank(ExportFolder), AutoExport = AutoExport, OverwriteEdited = OverwriteEdited },
+        Privacy = _original.Privacy with { DiscreetMode = DiscreetMode, NeutralTrayIcon = NeutralTrayIcon },
     };
 
     private bool TryMinutes(string text, string labelKey, out int minutes)

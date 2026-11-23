@@ -31,6 +31,8 @@ public sealed record QuillSettings
     public TemplateSettings Templates { get; init; } = new();
 
     public ExportSettings Export { get; init; } = new();
+
+    public PrivacySettings Privacy { get; init; } = new();
 }
 
 /// <summary>config.json "ai" section.</summary>

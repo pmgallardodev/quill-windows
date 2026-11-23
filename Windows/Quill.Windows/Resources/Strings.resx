@@ -1071,4 +1071,34 @@ Esto no se puede deshacer.</value>
   <data name="Companion_Notice_CopyFailed" xml:space="preserve">
     <value>No se pudo copiar el aviso. Inténtalo de nuevo.</value>
   </data>
+  <data name="Privacy_Nav" xml:space="preserve">
+    <value>Privacidad</value>
+  </data>
+  <data name="Privacy_DiscreetMode" xml:space="preserve">
+    <value>Modo discreto</value>
+  </data>
+  <data name="Privacy_DiscreetModeHint" xml:space="preserve">
+    <value>Las ventanas de Quill no aparecen al compartir pantalla. El icono de la bandeja y la barra de tareas sí pueden verse si compartes la pantalla completa: comparte solo una ventana cuando puedas.</value>
+  </data>
+  <data name="Privacy_DiscreetModeDetails" xml:space="preserve">
+    <value>Mientras grabas, las ventanas de Quill tampoco aparecen en la barra de tareas ni en Alt+Tab, y los avisos se muestran dentro de Quill en lugar de como notificaciones de Windows.</value>
+  </data>
+  <data name="Privacy_NeutralTrayIcon" xml:space="preserve">
+    <value>Icono de bandeja neutro durante la grabación</value>
+  </data>
+  <data name="Privacy_NeutralTrayIconHint" xml:space="preserve">
+    <value>El icono no cambia de color y su texto es solo «Quill» mientras grabas.</value>
+  </data>
+  <data name="Privacy_CompanionHotkey" xml:space="preserve">
+    <value>Atajo para mostrar u ocultar el panel</value>
+  </data>
+  <data name="Privacy_CompanionHotkeyHint" xml:space="preserve">
+    <value>Por ejemplo, Ctrl+Shift+Q. Usa Ctrl, Alt o Win con una letra, un número o una tecla F. Ctrl+Shift+R y Ctrl+Shift+M ya están en uso.</value>
+  </data>
+  <data name="Privacy_DisclosureNote" xml:space="preserve">
+    <value>Ocultar Quill no cambia la obligación que puedas tener de informar a los participantes de que grabas la reunión.</value>
+  </data>
+  <data name="Privacy_Error_Hotkey" xml:space="preserve">
+    <value>El atajo del panel no es válido. Usa, por ejemplo, Ctrl+Shift+Q.</value>
+  </data>
 </root>
