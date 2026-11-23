@@ -138,10 +138,13 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       Evidence: 8bd3df5, e912231, 094721d, fabaa71, c593bcf, 1ea0ade, merged clean. Post-merge:
       Core 538/538, Windows 0/0, resx valid. TcpListener on 127.0.0.1 (no http.sys/Kestrel),
       hand-written MCP subset, API off by default. Wiring → I2.
-- [ ] I2 Final wiring: LocalApiModule (start/restart on ApiSettingsStore.Saved, Publish events
+- [x] I2 Final wiring: LocalApiModule (start/restart on ApiSettingsStore.Saved, Publish events
       at recording stop / transcript / summary, dispose), F10 AskModule + IApiSearch for API/MCP,
       "Regenerar" banner when summary.state.json outdated, Core README rows (Api, Search, Ask).
       Route D after F10 + F11/F13 merge.
+      Evidence: 71809e2, 28fc992, c7046be, cf03bbb, 855b88e, merged clean. Post-merge: Core
+      632/632, Windows 0/0, resx valid. MCP targets spec 2025-11-25 (negotiates 2025-06-18,
+      2025-03-26, 2024-11-05), stateless, 202 for notifications, 405 GET; handshake tests RED→GREEN.
 - [x] F13 Opt-in in-person mode (diarize mic track, recognize owner). Route D.
       Evidence: 3fe8acd + 5db2bba, merged. Per-meeting switch in Interlocutores panel; owner =
       saved voice → loudest (≥25% talk time) → most talk. Owner voice learned from first 5 online
