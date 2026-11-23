@@ -1,0 +1,10 @@
+# Benchmark outputs and downloaded/generated binaries never get committed.
+results/
+bin/
+obj/
+*.gguf
+*.bin
+*.onnx
+*.wav
+*.aiff
+__pycache__/
