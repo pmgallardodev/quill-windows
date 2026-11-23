@@ -1302,4 +1302,75 @@ Esto no se puede deshacer.</value>
   <data name="Pipeline_SegmentNotFound" xml:space="preserve">
     <value>No se encontró ese fragmento en la transcripción. Recarga la reunión e inténtalo de nuevo.</value>
   </data>
+  <data name="Voices_PanelTitle" xml:space="preserve">
+    <value>Interlocutores</value>
+  </data>
+  <data name="Voices_SuggestionsBadge" xml:space="preserve">
+    <value>Sugerencias</value>
+    <comment>Badge on the collapsed speakers panel when saved voices suggest names.</comment>
+  </data>
+  <data name="Voices_NoSpeakers" xml:space="preserve">
+    <value>Identifica los interlocutores para poder ponerles nombre (opcional).</value>
+  </data>
+  <data name="Voices_NamePlaceholder" xml:space="preserve">
+    <value>Nombre (opcional)</value>
+  </data>
+  <data name="Voices_SaveName" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="Voices_SuggestionQuestion" xml:space="preserve">
+    <value>¿Es {0}?</value>
+    <comment>{0}: name of a saved voice.</comment>
+  </data>
+  <data name="Voices_Confirm" xml:space="preserve">
+    <value>Confirmar</value>
+  </data>
+  <data name="Voices_Reject" xml:space="preserve">
+    <value>No es</value>
+  </data>
+  <data name="Voices_SavedVoices" xml:space="preserve">
+    <value>Voces guardadas</value>
+  </data>
+  <data name="Voices_PrivacyNote" xml:space="preserve">
+    <value>Quill recuerda las voces a las que pones nombre para sugerirlo en otras reuniones. Se guardan solo en este equipo (voices.json en la carpeta de grabaciones) y nunca se exportan.</value>
+  </data>
+  <data name="Voices_AutoApply" xml:space="preserve">
+    <value>Aplicar automáticamente</value>
+  </data>
+  <data name="Voices_AutoApplyHint" xml:space="preserve">
+    <value>Pone el nombre sin preguntar cuando la voz coincide con mucha seguridad. Desactivado: solo sugiere.</value>
+  </data>
+  <data name="Voices_Empty" xml:space="preserve">
+    <value>Aún no hay voces guardadas. Ponle nombre a un interlocutor en una reunión y Quill lo recordará.</value>
+  </data>
+  <data name="Voices_OwnerVoice" xml:space="preserve">
+    <value>Tu voz</value>
+  </data>
+  <data name="Voices_Detail" xml:space="preserve">
+    <value>Oída en {0} reuniones · última: {1}</value>
+    <comment>{0}: number of meetings; {1}: date.</comment>
+  </data>
+  <data name="Voices_Rename" xml:space="preserve">
+    <value>Renombrar</value>
+  </data>
+  <data name="Voices_Forget" xml:space="preserve">
+    <value>Olvidar voz</value>
+  </data>
+  <data name="Voices_ForgetTitle" xml:space="preserve">
+    <value>Olvidar voz</value>
+  </data>
+  <data name="Voices_ForgetMessage" xml:space="preserve">
+    <value>¿Olvidar la voz de «{0}»? Quill dejará de sugerir este nombre. Los nombres ya puestos en las reuniones no cambian.</value>
+    <comment>{0}: voice name.</comment>
+  </data>
+  <data name="Voices_Failed" xml:space="preserve">
+    <value>No se pudo guardar: {0}</value>
+    <comment>{0}: error message.</comment>
+  </data>
+  <data name="InPerson_Toggle" xml:space="preserve">
+    <value>Reunión presencial</value>
+  </data>
+  <data name="InPerson_Hint" xml:space="preserve">
+    <value>Separa también las voces del micrófono (varias personas en la misma sala). Tu voz se reconoce por lo aprendido en reuniones online.</value>
+  </data>
 </root>

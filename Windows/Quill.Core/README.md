@@ -170,6 +170,30 @@ v2 adds only new files, so older Quill versions keep reading the folder:
 
 `live/` holds only what the recording produced while it ran; the final pass never rewrites it.
 
+### Speakers: naming memory (F11) and in-person mode (F13)
+
+`Quill.Core.Speakers.VoiceMemory` (`VoiceLibrary`, `VoiceMemoryService`, `FileVoiceLibraryStore`,
+`OwnerSelector`, `OwnerVoiceLearner`), wired through the optional `voices` argument of
+`SpeakerResolutionService`. Naming people is optional; nothing leaves the machine.
+
+- `voices.json` lives directly under the recordings root (never in a session folder, so exports
+  never include it): `{ "version": 1, "autoApply": false, "voices": [{ "id", "name"?, "owner"?,
+  "samples": [{ "session", "speaker", "at", "embedding" }] }] }`. A voice print is the mean of its
+  normalized samples (last 30 kept); one sample per named speaker per meeting, so renaming again
+  moves the sample and clearing the name removes it.
+- Renaming a remote speaker learns its cluster centroid under that name. After each resolution,
+  unnamed remote speakers get suggestions when cosine similarity ≥ 0.65 and it beats the
+  runner-up (other voices and the owner's voice) by ≥ 0.10; a voice goes to one speaker at most,
+  names already used in the meeting and "No es" answers are skipped. Suggestions are stored in
+  `speakers.resolution.json` (`suggestions`, `rejections`) and only applied when the user
+  confirms, or when `autoApply` is on and similarity ≥ 0.80.
+- Owner voice: in online meetings genuine (non-echo) mic speech is the owner; the first 5 such
+  meetings with ≥ 20 s of it also diarize the mic and save the cluster covering ≥ 70 % of it.
+- In person (`speakers.resolution.json` `"inPerson": true`, or `DiarizeMicrophone`): the mic
+  track is diarized; "me" is the cluster matching the owner's voice (≥ 0.6, margin 0.05), else
+  the loudest cluster with ≥ 25 % of the top speech, else the one that spoke most. Other mic
+  voices become `speaker-N` and get suggestions like remote ones.
+
 ## Windows wiring (composition root)
 
 `Quill.Windows/Composition/QuillServices` is built once at startup from

@@ -42,6 +42,9 @@ internal interface ISessionActions
     /// </summary>
     Task ReassignSpeakerAsync(string sessionId, TimeSpan segmentStart, string speakerId, CancellationToken cancellationToken) =>
         Task.FromException(new NotSupportedException("Speaker reassignment is not available."));
+
+    /// <summary>Optional speaker naming, saved voices and in-person mode (F11/F13); null hides the speakers panel.</summary>
+    IVoiceActions? Voices => null;
 }
 
 /// <summary>Raised by actions that need the AI pack when it is not installed.</summary>

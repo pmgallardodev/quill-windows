@@ -1,5 +1,6 @@
 using Quill.Core.Domain;
 using Quill.Core.Ports;
+using Quill.Core.Speakers.VoiceMemory;
 
 namespace Quill.Core.Speakers;
 
@@ -7,11 +8,15 @@ namespace Quill.Core.Speakers;
 /// <param name="EchoVerdicts">Verdicts for the microphone segments of <paramref name="Segments"/>, indexed in their order.</param>
 /// <param name="SystemDiarization">Diarization of the system track (turns relative to the session start).</param>
 /// <param name="MicrophoneDiarization">Optional diarization of the mic track (in-person mode, F13).</param>
+/// <param name="OwnerVoice">The owner's saved voice print (F13): picks "me" among the mic clusters.</param>
+/// <param name="MicrophoneEnergy">Mic energy envelope: without a voice-print match the loudest mic cluster is "me".</param>
 public sealed record SpeakerResolutionInput(
     IReadOnlyList<TranscriptSegment> Segments,
     IReadOnlyList<EchoVerdict> EchoVerdicts,
     DiarizationResult SystemDiarization,
-    DiarizationResult? MicrophoneDiarization = null);
+    DiarizationResult? MicrophoneDiarization = null,
+    float[]? OwnerVoice = null,
+    EnergyEnvelope? MicrophoneEnergy = null);
 
 public sealed record SpeakerResolutionOptions
 {
@@ -37,8 +42,8 @@ public sealed record ResolvedSpeakers(
     int EchoSegmentsReattributed);
 
 /// <summary>
-/// Assigns v2 speaker ids. Genuine microphone speech is "me" (or, with mic diarization,
-/// the dominant mic voice is "me" and other mic voices get remote numbers); echo is
+/// Assigns v2 speaker ids. Genuine microphone speech is "me" (or, with mic diarization, the
+/// mic voice chosen by <see cref="OwnerSelector"/> is "me" and other mic voices get remote numbers); echo is
 /// removed when it duplicates a system segment, otherwise re-attributed to the remote
 /// speaker talking at that moment; system turns become "speaker-1..N" numbered by first
 /// appearance in the transcript. Pure: no I/O.
@@ -54,7 +59,9 @@ public static class SpeakerResolver
 
         var system = Clusters.From(input.SystemDiarization, options.MinClusterDuration);
         var microphone = input.MicrophoneDiarization is { } mic ? Clusters.From(mic, options.MinClusterDuration) : null;
-        var ownerCluster = microphone?.Dominant();
+        var ownerCluster = microphone is null
+            ? null
+            : OwnerSelector.Select(microphone.Candidates(input.MicrophoneEnergy), input.OwnerVoice)?.ClusterId;
         var verdicts = input.EchoVerdicts.ToDictionary(verdict => verdict.MicrophoneSegmentIndex);
 
         var segments = input.Segments;
@@ -236,14 +243,15 @@ public static class SpeakerResolver
 
         public float[]? Embedding(int cluster) => _embeddings.GetValueOrDefault(cluster);
 
-        /// <summary>Cluster with the most speech.</summary>
-        public int? Dominant() =>
-            _turns.Count == 0
-                ? null
-                : _turns.GroupBy(turn => turn.ClusterId)
-                    .OrderByDescending(group => group.Sum(turn => (turn.End - turn.Start).Ticks))
-                    .ThenBy(group => group.Key)
-                    .First().Key;
+        /// <summary>Every cluster with its speech, centroid and (with an envelope) mean energy, for owner selection.</summary>
+        public IReadOnlyList<MicrophoneCluster> Candidates(EnergyEnvelope? energy) =>
+            _turns.GroupBy(turn => turn.ClusterId)
+                .Select(group => new MicrophoneCluster(
+                    group.Key,
+                    TimeSpan.FromTicks(group.Sum(turn => (turn.End - turn.Start).Ticks)),
+                    Embedding(group.Key),
+                    OwnerSelector.MeanEnergy(energy, group.Select(turn => (turn.Start, turn.End)))))
+                .ToList();
 
         /// <summary>Cluster overlapping the segment the most; else the nearest turn (when allowed); null without turns.</summary>
         public int? Best(TranscriptSegment segment, bool nearestFallback = true)

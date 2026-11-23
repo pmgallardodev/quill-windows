@@ -128,6 +128,11 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
+            <!-- Speakers: optional names, voice suggestions, in-person mode (F11/F13) -->
+            <Grid Visibility="{Binding HasSpeakersPanel, Converter={StaticResource BoolToVisibility}}">
+                <local:SpeakersPanelView DataContext="{Binding Speakers}" />
+            </Grid>
+
             <TextBlock Margin="0,4,0,0" Text="{Binding StatusText}" Style="{StaticResource Quill.Text.Caption}"
                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
         </StackPanel>
