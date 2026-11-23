@@ -128,7 +128,14 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
 ### Wave C (parallel)
 - [ ] F10 Ask (per meeting + across meetings) + local semantic search. Route D.
 - [ ] F11 Optional speaker-naming memory (local voice embeddings, "Sounds like Juan?"). Route D.
-- [ ] F12 Local API (127.0.0.1 + token), loopback-only webhooks, MCP endpoint. Route D.
+- [x] F12 Local API (127.0.0.1 + token), loopback-only webhooks, MCP endpoint. Route D.
+      Evidence: 8bd3df5, e912231, 094721d, fabaa71, c593bcf, 1ea0ade, merged clean. Post-merge:
+      Core 538/538, Windows 0/0, resx valid. TcpListener on 127.0.0.1 (no http.sys/Kestrel),
+      hand-written MCP subset, API off by default. Wiring → I2.
+- [ ] I2 Final wiring: LocalApiModule (start/restart on ApiSettingsStore.Saved, Publish events
+      at recording stop / transcript / summary, dispose), F10 AskModule + IApiSearch for API/MCP,
+      "Regenerar" banner when summary.state.json outdated, Core README rows (Api, Search, Ask).
+      Route D after F10 + F11/F13 merge.
 - [ ] F13 Opt-in in-person mode (diarize mic track, recognize owner). Route D.
 - [ ] P1 Packaging: app ZIP + AI-pack ZIP, AI-pack detection, README update. Route D.
 
