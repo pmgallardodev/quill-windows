@@ -37,6 +37,9 @@ internal sealed record SessionAiServices
 
     /// <summary>Auto-export after a final summary; null result when export is off.</summary>
     public required Func<string, CancellationToken, Task<Quill.Core.Export.MarkdownExportResult?>> AutoExport { get; init; }
+
+    /// <summary>summary.state.json says the transcript changed after the summary; null: never outdated.</summary>
+    public Func<string, CancellationToken, Task<bool>>? IsSummaryOutdated { get; init; }
 }
 
 /// <summary>
@@ -138,6 +141,23 @@ internal sealed class AppSessionActions(SessionAiServices services) : ISessionAc
         }
 
         await _services.ReassignSegment(sessionId, index, speakerId, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<bool> IsSummaryOutdatedAsync(string sessionId, CancellationToken cancellationToken)
+    {
+        if (_services.IsSummaryOutdated is not { } check)
+        {
+            return false;
+        }
+
+        try
+        {
+            return await check(sessionId, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return false;
+        }
     }
 
     /// <summary>Playback is routed by <see cref="PlaybackSessionActions"/>; never called.</summary>

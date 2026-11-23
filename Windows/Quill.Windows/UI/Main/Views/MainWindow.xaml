@@ -38,6 +38,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
@@ -55,7 +56,15 @@
                             <ui:SymbolIcon Symbol="TaskListLtr24" />
                         </ui:Button.Icon>
                     </ui:Button>
-                    <ui:Button Grid.Column="2" Appearance="Transparent"
+                    <ui:Button Grid.Column="2" HorizontalAlignment="Stretch" Margin="4,0,4,0"
+                               Content="{loc:Str Nav_Library}"
+                               ToolTip="{loc:Str Nav_LibraryTooltip}"
+                               Command="{Binding ShowLibraryCommand}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="Search24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                    <ui:Button Grid.Column="3" Appearance="Transparent"
                                ToolTip="{loc:Str Action_Refresh}"
                                AutomationProperties.Name="{loc:Str Action_Refresh}"
                                Command="{Binding RefreshCommand}">
@@ -63,7 +72,7 @@
                             <ui:SymbolIcon Symbol="ArrowClockwise24" />
                         </ui:Button.Icon>
                     </ui:Button>
-                    <ui:Button Grid.Column="3" Appearance="Transparent"
+                    <ui:Button Grid.Column="4" Appearance="Transparent"
                                ToolTip="{loc:Str Import_Action}"
                                AutomationProperties.Name="{loc:Str Import_Action}"
                                Click="OnImportClick">
@@ -244,6 +253,7 @@
                 </Grid>
                 <local:MyTasksView DataContext="{Binding MyTasks}"
                                    Visibility="{Binding DataContext.IsMyTasksVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}" />
+                <local:LibrarySearchView Visibility="{Binding IsLibraryVisible, Converter={StaticResource BoolToVisibility}}" />
             </Grid>
         </Grid>
     </Grid>

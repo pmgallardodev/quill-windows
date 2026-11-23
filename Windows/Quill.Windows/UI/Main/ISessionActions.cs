@@ -45,6 +45,12 @@ internal interface ISessionActions
 
     /// <summary>Optional speaker naming, saved voices and in-person mode (F11/F13); null hides the speakers panel.</summary>
     IVoiceActions? Voices => null;
+
+    /// <summary>
+    /// True when the transcript changed after the final summary was generated (summary.state.json),
+    /// so the Summary tab offers "Regenerar". Regenerating clears it. Never throws; default false.
+    /// </summary>
+    Task<bool> IsSummaryOutdatedAsync(string sessionId, CancellationToken cancellationToken) => Task.FromResult(false);
 }
 
 /// <summary>Raised by actions that need the AI pack when it is not installed.</summary>

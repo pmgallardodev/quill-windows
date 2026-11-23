@@ -317,6 +317,9 @@ internal sealed class PlaybackSessionActions(ISessionActions inner, PlayerViewMo
     public Task ReassignSpeakerAsync(string sessionId, TimeSpan segmentStart, string speakerId, CancellationToken cancellationToken) =>
         inner.ReassignSpeakerAsync(sessionId, segmentStart, speakerId, cancellationToken);
 
+    public Task<bool> IsSummaryOutdatedAsync(string sessionId, CancellationToken cancellationToken) =>
+        inner.IsSummaryOutdatedAsync(sessionId, cancellationToken);
+
     /// <summary>The inner PlayAt is not called: the window's player is the only audio output.</summary>
     public void PlayAt(string sessionId, TimeSpan time) => _ = player.PlayAtAsync(sessionId, time);
 }
