@@ -1,0 +1,98 @@
+<!--
+  Theme-independent design tokens: spacing, corner radii, typography ramp and elevation.
+  Values follow the Fluent 2 ramp so Quill sits naturally next to WPF-UI controls.
+  Text styles take their foreground from WPF-UI's TextFillColor* brushes, so they follow
+  light/dark automatically.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Spacing: 4 px base grid. Use the doubles for sizes/gaps, the Thickness presets for padding/margins. -->
+    <sys:Double x:Key="Quill.Space.XXS">2</sys:Double>
+    <sys:Double x:Key="Quill.Space.XS">4</sys:Double>
+    <sys:Double x:Key="Quill.Space.S">8</sys:Double>
+    <sys:Double x:Key="Quill.Space.M">12</sys:Double>
+    <sys:Double x:Key="Quill.Space.L">16</sys:Double>
+    <sys:Double x:Key="Quill.Space.XL">24</sys:Double>
+    <sys:Double x:Key="Quill.Space.XXL">32</sys:Double>
+    <sys:Double x:Key="Quill.Space.XXXL">48</sys:Double>
+
+    <Thickness x:Key="Quill.Padding.Window">24,16,24,24</Thickness>
+    <Thickness x:Key="Quill.Padding.Card">16</Thickness>
+    <Thickness x:Key="Quill.Padding.CardCompact">12,8</Thickness>
+    <Thickness x:Key="Quill.Padding.Pill">8,2,10,2</Thickness>
+    <Thickness x:Key="Quill.Padding.Chip">6,2,8,2</Thickness>
+    <Thickness x:Key="Quill.Margin.Stack">0,0,0,8</Thickness>
+    <Thickness x:Key="Quill.Margin.Section">0,0,0,24</Thickness>
+    <Thickness x:Key="Quill.Margin.SectionHeader">0,0,0,8</Thickness>
+
+    <!-- Corner radii -->
+    <CornerRadius x:Key="Quill.Radius.Small">4</CornerRadius>
+    <CornerRadius x:Key="Quill.Radius.Medium">8</CornerRadius>
+    <CornerRadius x:Key="Quill.Radius.Large">12</CornerRadius>
+    <CornerRadius x:Key="Quill.Radius.Pill">999</CornerRadius>
+
+    <!-- Typography: Segoe UI Variable (Windows 11) with Segoe UI fallback (Windows 10). -->
+    <FontFamily x:Key="Quill.Font.Text">Segoe UI Variable Text, Segoe UI</FontFamily>
+    <FontFamily x:Key="Quill.Font.Display">Segoe UI Variable Display, Segoe UI</FontFamily>
+    <FontFamily x:Key="Quill.Font.Mono">Cascadia Mono, Consolas</FontFamily>
+
+    <sys:Double x:Key="Quill.FontSize.Caption">12</sys:Double>
+    <sys:Double x:Key="Quill.FontSize.Body">14</sys:Double>
+    <sys:Double x:Key="Quill.FontSize.BodyLarge">18</sys:Double>
+    <sys:Double x:Key="Quill.FontSize.Subtitle">20</sys:Double>
+    <sys:Double x:Key="Quill.FontSize.Title">28</sys:Double>
+    <sys:Double x:Key="Quill.FontSize.TitleLarge">40</sys:Double>
+
+    <Style x:Key="Quill.Text.Body" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Quill.Font.Text}" />
+        <Setter Property="FontSize" Value="{StaticResource Quill.FontSize.Body}" />
+        <Setter Property="LineHeight" Value="20" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+    </Style>
+    <Style x:Key="Quill.Text.BodyStrong" TargetType="TextBlock" BasedOn="{StaticResource Quill.Text.Body}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style x:Key="Quill.Text.Secondary" TargetType="TextBlock" BasedOn="{StaticResource Quill.Text.Body}">
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    </Style>
+    <Style x:Key="Quill.Text.Caption" TargetType="TextBlock" BasedOn="{StaticResource Quill.Text.Body}">
+        <Setter Property="FontSize" Value="{StaticResource Quill.FontSize.Caption}" />
+        <Setter Property="LineHeight" Value="16" />
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    </Style>
+    <Style x:Key="Quill.Text.BodyLarge" TargetType="TextBlock" BasedOn="{StaticResource Quill.Text.Body}">
+        <Setter Property="FontSize" Value="{StaticResource Quill.FontSize.BodyLarge}" />
+        <Setter Property="LineHeight" Value="24" />
+    </Style>
+    <Style x:Key="Quill.Text.Subtitle" TargetType="TextBlock" BasedOn="{StaticResource Quill.Text.Body}">
+        <Setter Property="FontFamily" Value="{StaticResource Quill.Font.Display}" />
+        <Setter Property="FontSize" Value="{StaticResource Quill.FontSize.Subtitle}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="LineHeight" Value="28" />
+    </Style>
+    <Style x:Key="Quill.Text.Title" TargetType="TextBlock" BasedOn="{StaticResource Quill.Text.Subtitle}">
+        <Setter Property="FontSize" Value="{StaticResource Quill.FontSize.Title}" />
+        <Setter Property="LineHeight" Value="36" />
+    </Style>
+    <Style x:Key="Quill.Text.TitleLarge" TargetType="TextBlock" BasedOn="{StaticResource Quill.Text.Subtitle}">
+        <Setter Property="FontSize" Value="{StaticResource Quill.FontSize.TitleLarge}" />
+        <Setter Property="LineHeight" Value="52" />
+    </Style>
+    <Style x:Key="Quill.Text.Mono" TargetType="TextBlock" BasedOn="{StaticResource Quill.Text.Body}">
+        <Setter Property="FontFamily" Value="{StaticResource Quill.Font.Mono}" />
+        <Setter Property="FontSize" Value="{StaticResource Quill.FontSize.Caption}" />
+    </Style>
+
+    <!-- Elevation: Fluent keeps shadows soft; cards mostly rely on stroke + fill, flyouts float. -->
+    <DropShadowEffect x:Key="Quill.Elevation.Card" BlurRadius="8" ShadowDepth="1" Direction="270" Opacity="0.08" Color="Black" />
+    <DropShadowEffect x:Key="Quill.Elevation.Raised" BlurRadius="16" ShadowDepth="4" Direction="270" Opacity="0.14" Color="Black" />
+    <DropShadowEffect x:Key="Quill.Elevation.Flyout" BlurRadius="32" ShadowDepth="8" Direction="270" Opacity="0.22" Color="Black" />
+
+    <!-- Motion -->
+    <Duration x:Key="Quill.Motion.Fast">0:0:0.083</Duration>
+    <Duration x:Key="Quill.Motion.Normal">0:0:0.167</Duration>
+    <Duration x:Key="Quill.Motion.Slow">0:0:0.333</Duration>
+</ResourceDictionary>

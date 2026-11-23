@@ -1,0 +1,65 @@
+<!--
+  Quill semantic colors, dark theme (also used for high contrast). Twin of
+  Colors.Light.xaml: both files must define exactly the same keys. Colors are lighter
+  so text and dots keep contrast on dark Mica / card surfaces.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Color x:Key="Quill.Color.Recording">#FFFF6B6B</Color>
+    <Color x:Key="Quill.Color.RecordingSubtle">#33FF6B6B</Color>
+    <Color x:Key="Quill.Color.Me">#FF60CDFF</Color>
+    <Color x:Key="Quill.Color.MeSubtle">#2960CDFF</Color>
+    <Color x:Key="Quill.Color.Success">#FF6CCB5F</Color>
+    <Color x:Key="Quill.Color.SuccessSubtle">#296CCB5F</Color>
+    <Color x:Key="Quill.Color.Warning">#FFFCE100</Color>
+    <Color x:Key="Quill.Color.WarningSubtle">#29FCE100</Color>
+    <Color x:Key="Quill.Color.Info">#FF60CDFF</Color>
+    <Color x:Key="Quill.Color.InfoSubtle">#2960CDFF</Color>
+    <Color x:Key="Quill.Color.Ai">#FFC3A6F5</Color>
+    <Color x:Key="Quill.Color.AiSubtle">#29C3A6F5</Color>
+    <Color x:Key="Quill.Color.Neutral">#FFC5C5C5</Color>
+    <Color x:Key="Quill.Color.NeutralSubtle">#1FFFFFFF</Color>
+
+    <!-- Audio level meter -->
+    <Color x:Key="Quill.Color.MeterTrack">#1FFFFFFF</Color>
+    <Color x:Key="Quill.Color.MeterLow">#FF6CCB5F</Color>
+    <Color x:Key="Quill.Color.MeterHigh">#FFFF6B6B</Color>
+
+    <!-- Speaker palette: 8 hues for "Speaker N". Blue and red stay reserved for Me/Recording. -->
+    <Color x:Key="Quill.Color.Speaker1">#FFF0A055</Color>
+    <Color x:Key="Quill.Color.Speaker2">#FF7CCB86</Color>
+    <Color x:Key="Quill.Color.Speaker3">#FFB392F0</Color>
+    <Color x:Key="Quill.Color.Speaker4">#FFF07BB5</Color>
+    <Color x:Key="Quill.Color.Speaker5">#FF4DD0E1</Color>
+    <Color x:Key="Quill.Color.Speaker6">#FFC9A27A</Color>
+    <Color x:Key="Quill.Color.Speaker7">#FFA3B1C2</Color>
+    <Color x:Key="Quill.Color.Speaker8">#FFD4D45A</Color>
+
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="Quill.Brush.Recording" Color="{StaticResource Quill.Color.Recording}" />
+    <SolidColorBrush x:Key="Quill.Brush.RecordingSubtle" Color="{StaticResource Quill.Color.RecordingSubtle}" />
+    <SolidColorBrush x:Key="Quill.Brush.Me" Color="{StaticResource Quill.Color.Me}" />
+    <SolidColorBrush x:Key="Quill.Brush.MeSubtle" Color="{StaticResource Quill.Color.MeSubtle}" />
+    <SolidColorBrush x:Key="Quill.Brush.Success" Color="{StaticResource Quill.Color.Success}" />
+    <SolidColorBrush x:Key="Quill.Brush.SuccessSubtle" Color="{StaticResource Quill.Color.SuccessSubtle}" />
+    <SolidColorBrush x:Key="Quill.Brush.Warning" Color="{StaticResource Quill.Color.Warning}" />
+    <SolidColorBrush x:Key="Quill.Brush.WarningSubtle" Color="{StaticResource Quill.Color.WarningSubtle}" />
+    <SolidColorBrush x:Key="Quill.Brush.Info" Color="{StaticResource Quill.Color.Info}" />
+    <SolidColorBrush x:Key="Quill.Brush.InfoSubtle" Color="{StaticResource Quill.Color.InfoSubtle}" />
+    <SolidColorBrush x:Key="Quill.Brush.Ai" Color="{StaticResource Quill.Color.Ai}" />
+    <SolidColorBrush x:Key="Quill.Brush.AiSubtle" Color="{StaticResource Quill.Color.AiSubtle}" />
+    <SolidColorBrush x:Key="Quill.Brush.Neutral" Color="{StaticResource Quill.Color.Neutral}" />
+    <SolidColorBrush x:Key="Quill.Brush.NeutralSubtle" Color="{StaticResource Quill.Color.NeutralSubtle}" />
+    <SolidColorBrush x:Key="Quill.Brush.MeterTrack" Color="{StaticResource Quill.Color.MeterTrack}" />
+    <SolidColorBrush x:Key="Quill.Brush.MeterLow" Color="{StaticResource Quill.Color.MeterLow}" />
+    <SolidColorBrush x:Key="Quill.Brush.MeterHigh" Color="{StaticResource Quill.Color.MeterHigh}" />
+    <SolidColorBrush x:Key="Quill.Brush.Speaker1" Color="{StaticResource Quill.Color.Speaker1}" />
+    <SolidColorBrush x:Key="Quill.Brush.Speaker2" Color="{StaticResource Quill.Color.Speaker2}" />
+    <SolidColorBrush x:Key="Quill.Brush.Speaker3" Color="{StaticResource Quill.Color.Speaker3}" />
+    <SolidColorBrush x:Key="Quill.Brush.Speaker4" Color="{StaticResource Quill.Color.Speaker4}" />
+    <SolidColorBrush x:Key="Quill.Brush.Speaker5" Color="{StaticResource Quill.Color.Speaker5}" />
+    <SolidColorBrush x:Key="Quill.Brush.Speaker6" Color="{StaticResource Quill.Color.Speaker6}" />
+    <SolidColorBrush x:Key="Quill.Brush.Speaker7" Color="{StaticResource Quill.Color.Speaker7}" />
+    <SolidColorBrush x:Key="Quill.Brush.Speaker8" Color="{StaticResource Quill.Color.Speaker8}" />
+</ResourceDictionary>

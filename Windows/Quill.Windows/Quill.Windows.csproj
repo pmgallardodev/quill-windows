@@ -32,6 +32,9 @@
          esta, asi que anadir Vulkan acelera las maquinas con GPU sin romper las
          que no la tienen. -->
     <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.1" />
+    <!-- Fluent design system used by UI/Theme. Its root namespace is "Wpf", so no file may
+         declare a using alias named Wpf. -->
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
