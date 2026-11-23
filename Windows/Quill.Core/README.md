@@ -25,6 +25,10 @@ on these ports, and are wired in the app composition root.
 | `Quill.Core.AiPack` | `ManifestAiPackLocator` |
 | `Quill.Core.Scheduling` | `InferenceScheduler`: the one app-wide `IInferenceScheduler` (priority queue, one job at a time) |
 | `Quill.Core.Live` | Live transcription: `AudioRingBuffer`, `SpeechChunker` (VAD chunks), `ScheduledStreamingTranscriber`, `LiveTranscriptionPipeline`, `LiveTranscriptBuffer` (`SegmentAdded`), `LiveTranscriptPersistence` (live/transcript.json), `LiveTimeline` |
+| `Quill.Core.Speakers.VoiceMemory` | Optional speaker-naming memory (F11) and in-person owner detection (F13): `VoiceLibrary`, `VoiceMemoryService`, `FileVoiceLibraryStore` (voices.json), `OwnerSelector`, `OwnerVoiceLearner` |
+| `Quill.Core.Search` | Local semantic search (F10): `PassageBuilder` (transcript windows, summary items, notes), `MeetingIndexer`, `SearchCatalog` + `Bm25Index` (lexical), `FileEmbeddingIndex` (`.quill-index/`), `HybridSearch` (BM25 + vectors, reciprocal rank fusion), `HybridApiSearch` (`IApiSearch` for the local API/MCP), `SearchSnippet` |
+| `Quill.Core.Ask` | Ask with citations (F10): `MeetingAsk` (one meeting), `LibraryAsk` (all meetings via `HybridSearch`), `AskPrompts`, `AskCitations`, `AskAnswer` / `AskOptions` |
+| `Quill.Core.Api` | Local API (F12), loopback only: `HttpWire` (strict HTTP/1.x), `ApiRequestGuard` (peer, Host, Origin, bearer token), `ApiConnectionHandler`, `LocalApiRouter` (`/v1/...`, `/mcp`), `LocalApiService` (read-only use cases), `McpServer` (MCP over Streamable HTTP), `ApiEvent` / `ApiEventTypes` (webhooks), `ApiToken`, `LoopbackUrl` |
 | `Quill.Core.Speakers` | `SpeakerResolutionService` (echo → diarization → resolution, rename/merge/reassign), `CrossTrackEchoClassifier`, `SpeakerResolver`, `SpeakerProfile`, `FileSpeakerResolutionStore` (speakers.resolution.json) |
 | `Quill.Core.Settings` | `QuillSettings` (`ai`, `summaries`, `templates`, `export`, `privacy` sections of config.json), `SettingsDocument` (lenient parse + merge) |
 | `Quill.Core.Export` | `MeetingExportService` (single / all / `ExportIfEnabledAsync`), `MarkdownMeetingExporter`, `MarkdownExportWriter` (never overwrites hand edits unless asked) |
@@ -202,6 +206,46 @@ v2 adds only new files, so older Quill versions keep reading the folder:
 the real `ISessionActions`. Recording start → live transcription + live summary loop + companion
 panel; stop → close panel (notes flushed) → finish live text → final transcription →
 `PostTranscriptionPipeline`.
+
+Also built there: `AskModule` (search index in `{recordingsRoot}/.quill-index/` + Ask; a
+`LlamaSharpEmbeddingModel` on the AI pack's TextEmbedding GGUF with the LLM's backend options),
+started in the background at launch and re-indexed after a final transcript, a final summary and
+edits saved from the main window (notes, transcript, ticked tasks); deleting a meeting removes it.
+`LocalApiModule` (off by default) starts with the app when enabled, restarts when the API settings
+are saved, and publishes `session.recorded` (recording stopped), `transcript.completed`
+(transcript.json written) and `summary.completed` (any final summary save) to the webhooks.
+
+### Connect an MCP client
+
+Enable the local API and MCP in Ajustes → "API local", then copy the port and token shown there. The
+endpoint is `http://127.0.0.1:{port}/mcp` (MCP 2025-11-25 Streamable HTTP, JSON responses,
+stateless: no `Mcp-Session-Id`; it also negotiates 2025-06-18, 2025-03-26 and 2024-11-05). Tools:
+`list_meetings`, `get_meeting_summary`, `get_transcript`, `search_meetings` (all read-only).
+
+Claude Code:
+
+```sh
+claude mcp add --transport http quill http://127.0.0.1:PORT/mcp --header "Authorization: Bearer TOKEN"
+```
+
+OpenCode (`opencode.json`):
+
+```json
+{
+  "mcp": {
+    "quill": {
+      "type": "remote",
+      "url": "http://127.0.0.1:PORT/mcp",
+      "headers": { "Authorization": "Bearer TOKEN" }
+    }
+  }
+}
+```
+
+The client must run on the same Windows machine: the API only listens on 127.0.0.1 and rejects
+other hosts and browser origins. The token gives read access to every meeting, so keep it out of
+shared config files. A client backed by a cloud model sends the meeting text it reads (summaries,
+transcripts, search results) to that provider: Quill itself stays local, the client does not.
 
 `transcript.json` segments may carry two optional fields, `"track"` and
 `"edited"`, which v1 readers ignore. When `track` is absent it is derived from

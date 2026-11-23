@@ -63,7 +63,7 @@ public sealed class ApiConnectionHandler
             response = ApiResponse.Error(500, "internal_error");
         }
 
-        await HttpWire.WriteResponseAsync(stream, response.Status, response.Json, headers, cancellationToken).ConfigureAwait(false);
+        await HttpWire.WriteResponseAsync(stream, response.Status, response.Json, headers ?? response.Headers, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<ApiResponse> RouteAsync(Stream stream, HttpRequestHead head, CancellationToken cancellationToken)
@@ -85,6 +85,6 @@ public sealed class ApiConnectionHandler
             body = await HttpWire.ReadBodyAsync(stream, head, cancellationToken).ConfigureAwait(false);
         }
 
-        return await _router.HandleAsync(new ApiRequest(head.Method, head.Target, body), cancellationToken).ConfigureAwait(false);
+        return await _router.HandleAsync(new ApiRequest(head.Method, head.Target, body, head.Headers), cancellationToken).ConfigureAwait(false);
     }
 }

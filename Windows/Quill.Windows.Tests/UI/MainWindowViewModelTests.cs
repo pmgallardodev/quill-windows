@@ -106,6 +106,11 @@ internal sealed class FakeSessionActions : ISessionActions
 
     public void PlayAt(string sessionId, TimeSpan time) => Played.Add((sessionId, time));
 
+    /// <summary>What <see cref="IsSummaryOutdatedAsync"/> answers (summary.state.json "outdated").</summary>
+    public bool Outdated { get; set; }
+
+    public Task<bool> IsSummaryOutdatedAsync(string sessionId, CancellationToken cancellationToken) => Task.FromResult(Outdated);
+
     public bool CanReassignSpeakers { get; set; }
 
     public List<(string SessionId, TimeSpan Start, string SpeakerId)> Reassigned { get; } = new();
@@ -318,6 +323,57 @@ public class SummaryViewModelTests
             summary.Sections.Select(section => section.Title));
         Assert.Equal(new[] { 1, 2, 0, 0, 0, 0, 1 }, summary.Sections.Select(section => section.Count));
         Assert.True(summary.Sections[2].IsEmpty);
+    }
+
+    [Fact]
+    public async Task OutdatedFinalSummary_ShowsTheRegenerateBanner()
+    {
+        _store.Summaries[(Samples.SessionId, SummaryKind.Final)] = Samples.Summary();
+        _actions.Outdated = true;
+
+        var summary = await LoadAsync();
+
+        Assert.True(summary.IsOutdated);
+        Assert.True(summary.ShowOutdatedBanner);
+        Assert.True(summary.GenerateCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task Regenerating_ClearsTheOutdatedBanner()
+    {
+        _store.Summaries[(Samples.SessionId, SummaryKind.Final)] = Samples.Summary();
+        _actions.Outdated = true;
+        _actions.OnGenerate = (_, _, _) =>
+        {
+            _actions.Outdated = false;
+            return Task.CompletedTask;
+        };
+        var summary = await LoadAsync();
+
+        await summary.GenerateAsync();
+
+        Assert.False(summary.ShowOutdatedBanner);
+    }
+
+    [Fact]
+    public async Task UpToDateSummary_HasNoBanner()
+    {
+        _store.Summaries[(Samples.SessionId, SummaryKind.Final)] = Samples.Summary();
+
+        var summary = await LoadAsync();
+
+        Assert.False(summary.ShowOutdatedBanner);
+    }
+
+    [Fact]
+    public async Task LiveSummary_NeverShowsTheOutdatedBanner()
+    {
+        _store.Summaries[(Samples.SessionId, SummaryKind.Live)] = Samples.Summary(SummaryKind.Live);
+        _actions.Outdated = true;
+
+        var summary = await LoadAsync();
+
+        Assert.False(summary.ShowOutdatedBanner);
     }
 
     [Fact]

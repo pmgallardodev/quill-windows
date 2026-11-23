@@ -115,6 +115,7 @@ internal sealed class SummaryViewModel : ObservableObject
     private string _selectedTemplate;
     private SummaryLevel _selectedLevel = SummaryLevel.Brief;
     private bool _canGenerate = true;
+    private bool _isOutdated;
     private int _loadGeneration;
     private CancellationTokenSource? _generation;
 
@@ -171,7 +172,8 @@ internal sealed class SummaryViewModel : ObservableObject
             {
                 Raise(
                     nameof(IsLoading), nameof(HasSummary), nameof(IsLive), nameof(IsGenerating), nameof(IsFailed),
-                    nameof(IsNoSummary), nameof(IsAiPackMissing), nameof(CanGenerateNow), nameof(ShowGenerateBar));
+                    nameof(IsNoSummary), nameof(IsAiPackMissing), nameof(CanGenerateNow), nameof(ShowGenerateBar),
+                    nameof(ShowOutdatedBanner));
             }
         }
     }
@@ -189,6 +191,22 @@ internal sealed class SummaryViewModel : ObservableObject
     public bool IsNoSummary => _state == SummaryState.NoSummary;
 
     public bool IsAiPackMissing => _state == SummaryState.AiPackMissing;
+
+    /// <summary>The transcript changed after this final summary was generated (summary.state.json).</summary>
+    public bool IsOutdated
+    {
+        get => _isOutdated;
+        private set
+        {
+            if (Set(ref _isOutdated, value))
+            {
+                Raise(nameof(ShowOutdatedBanner));
+            }
+        }
+    }
+
+    /// <summary>"La transcripción cambió..." banner with "Regenerar" (<see cref="GenerateCommand"/>).</summary>
+    public bool ShowOutdatedBanner => _isOutdated && _state == SummaryState.Ready;
 
     /// <summary>False while recording or transcribing: the final summary needs the final transcript.</summary>
     public bool CanGenerate
@@ -249,6 +267,7 @@ internal sealed class SummaryViewModel : ObservableObject
         _generation?.Cancel();
         StatusText = string.Empty;
         ErrorText = string.Empty;
+        IsOutdated = false;
         State = SummaryState.Loading;
 
         MeetingSummary? summary;
@@ -275,6 +294,32 @@ internal sealed class SummaryViewModel : ObservableObject
         if (generation == _loadGeneration && !cancellationToken.IsCancellationRequested)
         {
             Show(summary);
+            await RefreshOutdatedAsync(generation, cancellationToken).ConfigureAwait(true);
+        }
+    }
+
+    /// <summary>Reads the outdated flag for the loaded final summary; any failure reads as "not outdated".</summary>
+    private async Task RefreshOutdatedAsync(int generation, CancellationToken cancellationToken)
+    {
+        if (_state != SummaryState.Ready || _sessionId.Length == 0)
+        {
+            IsOutdated = false;
+            return;
+        }
+
+        bool outdated;
+        try
+        {
+            outdated = await _actions.IsSummaryOutdatedAsync(_sessionId, cancellationToken).ConfigureAwait(true);
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            outdated = false;
+        }
+
+        if (generation == _loadGeneration)
+        {
+            IsOutdated = outdated;
         }
     }
 
@@ -306,6 +351,7 @@ internal sealed class SummaryViewModel : ObservableObject
             var summary = await _store.LoadSummaryAsync(sessionId, SummaryKind.Final, CancellationToken.None)
                 .ConfigureAwait(true);
             Show(summary);
+            await RefreshOutdatedAsync(generation, CancellationToken.None).ConfigureAwait(true);
         }
         catch (AiPackMissingException)
         {
