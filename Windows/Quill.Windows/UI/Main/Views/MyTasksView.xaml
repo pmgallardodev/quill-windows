@@ -1,0 +1,63 @@
+<UserControl x:Class="Quill.Windows.UI.MyTasksView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:qc="clr-namespace:Quill.Windows.UI.Theme.Controls"
+             xmlns:loc="clr-namespace:Quill.Windows.Resources"
+             xmlns:local="clr-namespace:Quill.Windows.UI"
+             x:ClassModifier="internal">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+
+        <DataTemplate x:Key="TaskTemplate" DataType="{x:Type local:MyTaskViewModel}">
+            <DockPanel Margin="0,6">
+                <CheckBox DockPanel.Dock="Left" Margin="0,0,4,0" VerticalAlignment="Top" MinWidth="0"
+                          IsChecked="{Binding IsDone, Mode=TwoWay}"
+                          AutomationProperties.Name="{Binding Text}" />
+                <StackPanel>
+                    <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Style="{StaticResource Quill.Text.Body}" />
+                    <WrapPanel>
+                        <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Text="{Binding Due}"
+                                   Style="{StaticResource Quill.Text.Caption}"
+                                   Foreground="{DynamicResource Quill.Brush.Warning}"
+                                   Visibility="{Binding HasDue, Converter={StaticResource BoolToVisibility}}" />
+                        <ui:Button Appearance="Transparent" Padding="4,2"
+                                   Command="{Binding DataContext.OpenMeetingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   CommandParameter="{Binding}">
+                            <TextBlock Style="{StaticResource Quill.Text.Caption}"
+                                       Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}">
+                                <Run Text="{Binding MeetingTitle, Mode=OneWay}" />
+                                <Run Text=" · " />
+                                <Run Text="{Binding MeetingDate, Mode=OneWay}" />
+                            </TextBlock>
+                        </ui:Button>
+                    </WrapPanel>
+                </StackPanel>
+            </DockPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <DockPanel Margin="{StaticResource Quill.Padding.Window}">
+        <TextBlock DockPanel.Dock="Top" Margin="0,0,0,12" Text="{loc:Str Summary_MyTasks}" Style="{StaticResource Quill.Text.Title}" />
+        <TextBlock DockPanel.Dock="Bottom" Margin="2,8,0,0" Text="{Binding Status}" TextWrapping="Wrap"
+                   Style="{StaticResource Quill.Text.Caption}"
+                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+
+        <Grid>
+            <ui:ProgressRing IsIndeterminate="True" HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}" />
+            <qc:EmptyState VerticalAlignment="Center" Text="{loc:Str MyTasks_Empty}" Description="{loc:Str MyTasks_EmptyDescription}"
+                           Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}" />
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <ItemsControl ItemsSource="{Binding Pending}" ItemTemplate="{StaticResource TaskTemplate}" />
+                    <StackPanel Margin="0,16,0,0" Visibility="{Binding HasDone, Converter={StaticResource BoolToVisibility}}">
+                        <qc:SectionHeader Title="{loc:Str MyTasks_Done}" Count="{Binding Done.Count}" />
+                        <ItemsControl ItemsSource="{Binding Done}" ItemTemplate="{StaticResource TaskTemplate}" Opacity="0.7" />
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</UserControl>

@@ -1,0 +1,161 @@
+<UserControl x:Class="Quill.Windows.UI.MeetingDetailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:loc="clr-namespace:Quill.Windows.Resources"
+             xmlns:local="clr-namespace:Quill.Windows.UI"
+             x:ClassModifier="internal">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <local:InverseBooleanToVisibilityConverter x:Key="NotToVisibility" />
+    </UserControl.Resources>
+
+    <DockPanel Margin="{StaticResource Quill.Padding.Window}">
+        <!-- Header -->
+        <StackPanel DockPanel.Dock="Top">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                    <ui:Button Margin="0,0,6,0" Content="{loc:Str Action_IdentifySpeakers}"
+                               Command="{Binding IdentifySpeakersCommand}"
+                               Visibility="{Binding IsAiAvailable, Converter={StaticResource BoolToVisibility}}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="People24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                    <ui:Button Margin="0,0,6,0" Appearance="Transparent"
+                               ToolTip="{loc:Str Action_Rename}"
+                               AutomationProperties.Name="{loc:Str Action_Rename}"
+                               Command="{Binding Commands.Rename}" CommandParameter="{Binding Row}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="Rename24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                    <ui:Button x:Name="MoreButton" Appearance="Transparent"
+                               ToolTip="{loc:Str Action_More}"
+                               AutomationProperties.Name="{loc:Str Action_More}"
+                               Click="OnMoreClick">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="MoreHorizontal24" />
+                        </ui:Button.Icon>
+                        <ui:Button.ContextMenu>
+                            <!-- DataContext is set to the detail when opened (code-behind). -->
+                            <ContextMenu>
+                                <MenuItem Header="{loc:Str Action_CopyTranscript}" Command="{Binding Commands.Copy}" CommandParameter="{Binding Row}" />
+                                <MenuItem Header="{loc:Str Action_ExportSrt}" Command="{Binding Commands.ExportSrt}" CommandParameter="{Binding Row}" />
+                                <MenuItem Header="{loc:Str Action_ExportVtt}" Command="{Binding Commands.ExportVtt}" CommandParameter="{Binding Row}" />
+                                <Separator />
+                                <MenuItem Header="{loc:Str Action_OpenFolder}" Command="{Binding Commands.OpenFolder}" CommandParameter="{Binding Row}" />
+                                <MenuItem Header="{loc:Str Action_OpenTranscript}" Command="{Binding Commands.OpenTranscript}" CommandParameter="{Binding Row}" />
+                                <MenuItem Header="{loc:Str Action_OpenLog}" Command="{Binding Commands.OpenLog}" CommandParameter="{Binding Row}" />
+                                <MenuItem Header="{loc:Str Action_Retry}" Command="{Binding Commands.Retry}" CommandParameter="{Binding Row}" />
+                                <Separator />
+                                <MenuItem Header="{loc:Str Action_Delete}" Command="{Binding Commands.Delete}" CommandParameter="{Binding Row}" />
+                            </ContextMenu>
+                        </ui:Button.ContextMenu>
+                    </ui:Button>
+                </StackPanel>
+
+                <Grid Margin="0,0,12,0">
+                    <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"
+                               Style="{StaticResource Quill.Text.Title}"
+                               Visibility="{Binding Row.IsNotEditingTitle, Converter={StaticResource BoolToVisibility}}" />
+                    <ui:TextBox x:Name="TitleEditor"
+                                Text="{Binding Row.TitleDraft, UpdateSourceTrigger=PropertyChanged}"
+                                AutomationProperties.Name="{loc:Str Action_Rename}"
+                                Visibility="{Binding Row.IsEditingTitle, Converter={StaticResource BoolToVisibility}}"
+                                IsVisibleChanged="OnTitleEditorVisibleChanged"
+                                KeyDown="OnTitleKeyDown"
+                                LostFocus="OnTitleLostFocus" />
+                </Grid>
+            </DockPanel>
+
+            <TextBlock Margin="0,4,0,0" Style="{StaticResource Quill.Text.Secondary}">
+                <Run Text="{Binding DateText, Mode=OneWay}" />
+                <Run Text=" · " />
+                <Run Text="{Binding DurationText, Mode=OneWay}" />
+            </TextBlock>
+            <TextBlock Margin="0,2,0,0" Text="{Binding Row.FolderText}" Style="{StaticResource Quill.Text.Caption}"
+                       Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                       Visibility="{Binding Row.HasTitle, Converter={StaticResource BoolToVisibility}}" />
+
+            <!-- Participation: bar (me vs others) and timeline -->
+            <StackPanel Margin="0,12,0,0" Visibility="{Binding HasParticipation, Converter={StaticResource BoolToVisibility}}">
+                <ProgressBar Height="6" Maximum="100" Value="{Binding MeShare, Mode=OneWay}"
+                             Foreground="{DynamicResource Quill.Brush.Me}"
+                             Background="{DynamicResource Quill.Brush.Speaker1}"
+                             AutomationProperties.Name="{Binding ParticipationText}" />
+                <TextBlock Margin="0,4,0,0" Text="{Binding ParticipationText}" Style="{StaticResource Quill.Text.Caption}"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                <ItemsControl Margin="0,6,0,0" ItemsSource="{Binding Timeline}" Height="14"
+                              Visibility="{Binding HasTimeline, Converter={StaticResource BoolToVisibility}}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="1" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type local:ParticipationSlotViewModel}">
+                            <Grid Margin="0,0,1,0" ToolTip="{Binding Tooltip}" Background="{DynamicResource Quill.Brush.NeutralSubtle}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" Background="{DynamicResource Quill.Brush.Me}"
+                                        Visibility="{Binding Me, Converter={StaticResource BoolToVisibility}}" />
+                                <Border Grid.Row="1" Background="{DynamicResource Quill.Brush.Speaker1}"
+                                        Visibility="{Binding Others, Converter={StaticResource BoolToVisibility}}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <!-- Warnings -->
+            <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding Warnings}"
+                          Visibility="{Binding HasWarnings, Converter={StaticResource BoolToVisibility}}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,0,0,4" Padding="{StaticResource Quill.Padding.CardCompact}"
+                                CornerRadius="{StaticResource Quill.Radius.Medium}"
+                                Background="{DynamicResource Quill.Brush.WarningSubtle}">
+                            <DockPanel>
+                                <ui:SymbolIcon DockPanel.Dock="Left" Margin="0,0,8,0" Symbol="Warning24"
+                                               Foreground="{DynamicResource Quill.Brush.Warning}" />
+                                <TextBlock Text="{Binding}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Margin="0,4,0,0" Text="{Binding StatusText}" Style="{StaticResource Quill.Text.Caption}"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+
+        <!-- Tabs -->
+        <TabControl Margin="0,12,0,0" SelectedIndex="{Binding SelectedTab, Mode=TwoWay}">
+            <TabItem Header="{loc:Str Tab_Summary}">
+                <local:SummaryTabView DataContext="{Binding Summary}" />
+            </TabItem>
+            <TabItem Header="{loc:Str Tab_Transcript}">
+                <local:TranscriptTabView DataContext="{Binding Transcript}" />
+            </TabItem>
+            <TabItem Header="{loc:Str Tab_Notes}">
+                <DockPanel Margin="0,8,0,0" DataContext="{Binding Notes}">
+                    <TextBlock DockPanel.Dock="Bottom" Margin="2,6,0,0" Text="{Binding Status}"
+                               Style="{StaticResource Quill.Text.Caption}"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <ui:TextBox Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
+                                PlaceholderText="{loc:Str Notes_Placeholder}"
+                                AutomationProperties.Name="{loc:Str Tab_Notes}"
+                                IsEnabled="{Binding IsLoaded}"
+                                AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap"
+                                VerticalContentAlignment="Top"
+                                VerticalScrollBarVisibility="Auto"
+                                FontFamily="{StaticResource Quill.Font.Mono}"
+                                LostFocus="OnNotesLostFocus" />
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</UserControl>

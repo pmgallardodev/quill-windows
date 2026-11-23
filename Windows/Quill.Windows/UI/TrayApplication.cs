@@ -52,8 +52,8 @@ internal sealed class TrayController : IDisposable
     private readonly DispatcherTimer _ticker;
     private readonly TranscriptionCoordinator _transcription;
     private readonly Action<TranscriptionUpdate> _transcriptionStateHandler;
-    private readonly SessionsViewModel _sessionsViewModel;
-    private SessionsWindow? _sessionsWindow;
+    private readonly MainViewModel _sessionsViewModel;
+    private MainWindow? _sessionsWindow;
     private RecordingSession? _session;
     /// <summary>Serializes live Whisper (and later the LLM) so jobs never fight over the GPU.</summary>
     private readonly InferenceScheduler _inference = new();
@@ -136,7 +136,7 @@ internal sealed class TrayController : IDisposable
             }
         };
         _transcription.StateChanged += _transcriptionStateHandler;
-        _sessionsViewModel = new SessionsViewModel(recordingsRoot, _transcription, _application.Dispatcher);
+        _sessionsViewModel = new MainViewModel(recordingsRoot, _transcription, _application.Dispatcher);
         var recording = ConfigStore.Load().Recording;
         _detectsMeetings = recording.DetectsMeetings;
         _startsMeetingsAutomatically = recording.StartsMeetingsAutomatically;
@@ -739,7 +739,7 @@ internal sealed class TrayController : IDisposable
 
     private void ShowSessions()
     {
-        _sessionsWindow ??= new SessionsWindow(_sessionsViewModel);
+        _sessionsWindow ??= new MainWindow(_sessionsViewModel);
         _sessionsWindow.ShowRefreshed();
     }
 
