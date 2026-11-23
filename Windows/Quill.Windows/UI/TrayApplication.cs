@@ -27,6 +27,7 @@ internal static class TrayApplication
         {
             ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown,
         };
+        Theme.ThemeBootstrapper.Initialize(application);
         using var controller = new TrayController(application, recordingsRoot);
         var exitCode = application.Run();
         controller.WaitForCleanup();

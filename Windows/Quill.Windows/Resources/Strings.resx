@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Quill UI copy. This neutral resource file is Spanish (see NeutralResourcesLanguage in
+  Strings.cs). Every new UI string goes here; translations go in Strings.<culture>.resx.
+  Key convention: <Area>_<Name>. Composite strings use {0} placeholders and Strings.Format.
+-->
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Summary sections (MeetingSummary contract, design §7.1) -->
+  <data name="Summary_ExecutiveSummary" xml:space="preserve">
+    <value>Resumen ejecutivo</value>
+  </data>
+  <data name="Summary_Decisions" xml:space="preserve">
+    <value>Decisiones</value>
+  </data>
+  <data name="Summary_ActionItems" xml:space="preserve">
+    <value>Tareas</value>
+  </data>
+  <data name="Summary_OpenQuestions" xml:space="preserve">
+    <value>Preguntas abiertas</value>
+  </data>
+  <data name="Summary_Topics" xml:space="preserve">
+    <value>Temas</value>
+  </data>
+  <data name="Summary_Risks" xml:space="preserve">
+    <value>Riesgos y bloqueos</value>
+  </data>
+  <data name="Summary_KeyFacts" xml:space="preserve">
+    <value>Datos clave</value>
+  </data>
+  <data name="Summary_NextSteps" xml:space="preserve">
+    <value>Próximos pasos</value>
+  </data>
+  <data name="Summary_MyTasks" xml:space="preserve">
+    <value>Mis tareas</value>
+  </data>
+  <data name="Common_None" xml:space="preserve">
+    <value>Ninguno</value>
+    <comment>Shown for an empty summary section.</comment>
+  </data>
+
+  <!-- Recording and processing states -->
+  <data name="Status_Ready" xml:space="preserve">
+    <value>Listo</value>
+  </data>
+  <data name="Status_Recording" xml:space="preserve">
+    <value>Grabando</value>
+  </data>
+  <data name="Status_Paused" xml:space="preserve">
+    <value>En pausa</value>
+  </data>
+  <data name="Status_Transcribing" xml:space="preserve">
+    <value>Transcribiendo</value>
+  </data>
+  <data name="Status_Summarizing" xml:space="preserve">
+    <value>Resumiendo</value>
+  </data>
+  <data name="Status_SummaryDelayed" xml:space="preserve">
+    <value>Resumen con retraso</value>
+    <comment>Live summary skipped because inference fell behind (design §7.2).</comment>
+  </data>
+  <data name="Status_Completed" xml:space="preserve">
+    <value>Completada</value>
+  </data>
+  <data name="Status_Failed" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Status_AiPackMissing" xml:space="preserve">
+    <value>Instala el paquete de IA</value>
+    <comment>AI features unavailable until quill-ai-pack is extracted next to the app.</comment>
+  </data>
+
+  <!-- Common actions -->
+  <data name="Action_StartRecording" xml:space="preserve">
+    <value>Iniciar grabación</value>
+  </data>
+  <data name="Action_StopRecording" xml:space="preserve">
+    <value>Detener grabación</value>
+  </data>
+  <data name="Action_Pause" xml:space="preserve">
+    <value>Pausar</value>
+  </data>
+  <data name="Action_Resume" xml:space="preserve">
+    <value>Reanudar</value>
+  </data>
+  <data name="Action_AddMarker" xml:space="preserve">
+    <value>Añadir marca</value>
+  </data>
+  <data name="Action_AddNote" xml:space="preserve">
+    <value>Añadir nota</value>
+  </data>
+  <data name="Action_WhatDidIMiss" xml:space="preserve">
+    <value>¿Qué me he perdido?</value>
+  </data>
+  <data name="Action_GenerateSummary" xml:space="preserve">
+    <value>Generar resumen</value>
+  </data>
+  <data name="Action_IdentifySpeakers" xml:space="preserve">
+    <value>Identificar interlocutores</value>
+  </data>
+  <data name="Action_Copy" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="Action_Export" xml:space="preserve">
+    <value>Exportar</value>
+  </data>
+  <data name="Action_OpenFolder" xml:space="preserve">
+    <value>Abrir carpeta</value>
+  </data>
+  <data name="Action_Rename" xml:space="preserve">
+    <value>Cambiar nombre</value>
+  </data>
+  <data name="Action_Retry" xml:space="preserve">
+    <value>Reintentar</value>
+  </data>
+  <data name="Action_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="Action_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Action_Close" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="Action_Expand" xml:space="preserve">
+    <value>Expandir</value>
+  </data>
+  <data name="Action_Collapse" xml:space="preserve">
+    <value>Contraer</value>
+  </data>
+
+  <!-- Speakers -->
+  <data name="Speaker_Me" xml:space="preserve">
+    <value>Yo</value>
+  </data>
+  <data name="Speaker_Numbered" xml:space="preserve">
+    <value>Interlocutor {0}</value>
+    <comment>{0} = speaker number, 1-based.</comment>
+  </data>
+  <data name="Speaker_Unknown" xml:space="preserve">
+    <value>Desconocido</value>
+  </data>
+
+  <!-- Accessibility names -->
+  <data name="A11y_JumpToTimestamp" xml:space="preserve">
+    <value>Ir a {0}</value>
+    <comment>{0} = timestamp such as 12:34.</comment>
+  </data>
+  <data name="A11y_AudioLevel" xml:space="preserve">
+    <value>Nivel de audio</value>
+  </data>
+</root>
