@@ -51,7 +51,11 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       Pending: Windows runtime check (theme switch, Mica, high contrast). API: UI/Theme/README.md.
 
 ### Wave A (parallel, after F1)
-- [ ] F3 Live transcription pipeline (ring buffer → VAD → Whisper small chunks). Route D.
+- [x] F3 Live transcription pipeline (ring buffer → VAD → Whisper small chunks). Route D.
+      Evidence: 9483115, 93f2708, 23b5e5a, 38e2162, c752721, merged. Post-merge: Core 230/230
+      green, win-x64 build 0/0. Chunks 6-9 s (≤10 s lag). App-wide InferenceScheduler lives in
+      TrayApplication (F3 added minimal wiring there, +56 lines) — F4 module must reuse it.
+      Pending: 13 Windows tests + manual live checks on owner's PC.
 - [x] F4 LLM engine + summary use cases (live loop, final, catch-up, templates, level, language,
       map-reduce, citation validation). Route D.
       Evidence: d381a20, 48289c7, 9cc799d, merged. Core 170/170 green (post-merge, macOS);
