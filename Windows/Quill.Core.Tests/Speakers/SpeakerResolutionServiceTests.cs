@@ -1,5 +1,6 @@
 using Quill.Core.Domain;
 using Quill.Core.Ports;
+using Quill.Core.Pipeline;
 using Quill.Core.Speakers;
 using Quill.Core.Storage;
 using Xunit;
@@ -175,6 +176,51 @@ public sealed class SpeakerResolutionServiceTests : IDisposable
             service.ReassignAsync(SessionId, 99, "speaker-1", CancellationToken.None));
         await Assert.ThrowsAsync<ArgumentException>(() =>
             service.ReassignAsync(SessionId, 0, "them", CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task ReassignRefusesAmbiguousSameTrackStartsWithoutPersistingAnEdit()
+    {
+        var path = Path.Combine(_folder, "transcript.json");
+        var json = File.ReadAllText(path).Replace(
+            "{ \"speaker\": \"them\", \"start_ms\": 10000, \"end_ms\": 14000, \"text\": \"And I have a question about hiring\" }",
+            "{ \"speaker\": \"them\", \"start_ms\": 4000, \"end_ms\": 14000, \"text\": \"And I have a question about hiring\" }");
+        File.WriteAllText(path, json);
+        var service = Service();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.ReassignAsync(SessionId, 1, "speaker-2", CancellationToken.None));
+
+        Assert.Equal("them", (await Final())[1].SpeakerId);
+        Assert.False(File.Exists(Path.Combine(_folder, "speakers.resolution.json")));
+    }
+
+    [Fact]
+    public void SelectedSegmentIdentityMatchesTheTrimmedTranscriptDisplay()
+    {
+        IReadOnlyList<TranscriptSegment> segments =
+        [
+            new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), " first ", " speaker-1 ", Track.System),
+            new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), " second ", " speaker-1 ", Track.System),
+        ];
+
+        Assert.Equal(1, TranscriptSegmentLocator.IndexOf(segments, 1, TimeSpan.FromSeconds(1), "speaker-1", "second"));
+    }
+
+    [Fact]
+    public void ReassignEditRefusesAmbiguousSameTrackStartInsteadOfChangingTheFirstSegment()
+    {
+        IReadOnlyList<TranscriptSegment> segments =
+        [
+            new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), "first", "speaker-1", Track.System),
+            new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), "second", "speaker-1", Track.System),
+        ];
+        IReadOnlyList<SpeakerProfile> speakers =
+        [new("speaker-1", Track.System, null, 1, null), new("speaker-2", Track.System, null, 2, null)];
+
+        var edited = SpeakerEdits.Apply(segments, speakers, [new ReassignSegment(Track.System, TimeSpan.FromSeconds(1), "speaker-2")]);
+
+        Assert.Equal(["speaker-1", "speaker-1"], edited.Segments.Select(segment => segment.SpeakerId));
     }
 
     [Fact]

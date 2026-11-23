@@ -594,10 +594,22 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
             return;
         }
 
-        Detail = null;
         if (previous is not null)
         {
+            if (!await previous.FlushNotesBeforeCloseAsync().ConfigureAwait(true))
+            {
+                // Keep the old editor visible and selected so a conflicted draft stays accessible.
+                _selectedMeeting = previous.Row;
+                Raise(nameof(SelectedMeeting));
+                return;
+            }
+
+            Detail = null;
             await previous.CloseAsync().ConfigureAwait(true);
+        }
+        else
+        {
+            Detail = null;
         }
 
         if (row is null || !ReferenceEquals(row, _selectedMeeting) || _disposed)

@@ -267,6 +267,12 @@ internal sealed class MeetingDetailViewModel : ObservableObject
     }
 
     /// <summary>Saves the notes and stops pending loads. The detail is not used afterwards.</summary>
+    public async Task<bool> FlushNotesBeforeCloseAsync()
+    {
+        await Notes.FlushAsync().ConfigureAwait(true);
+        return !Notes.IsDirty;
+    }
+
     public async Task CloseAsync()
     {
         Row.PropertyChanged -= OnRowPropertyChanged;

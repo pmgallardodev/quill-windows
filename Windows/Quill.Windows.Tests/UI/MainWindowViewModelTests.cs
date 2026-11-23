@@ -684,6 +684,26 @@ public class NotesViewModelTests
         Assert.Equal("my draft", notes.Text);
         Assert.True(notes.IsDirty);
     }
+
+    [Fact]
+    public async Task DetailCloseGateRefusesNavigationWhenNotesDraftConflicts()
+    {
+        _store.Notes["a"] = "baseline";
+        var now = new DateTimeOffset(2026, 11, 25, 12, 0, 0, TimeSpan.FromHours(1));
+        var row = new MeetingRowViewModel(
+            Samples.Snapshot(SessionState.Done, now.AddHours(-2)), MeetingRowDetails.None, now);
+        var detail = new MeetingDetailViewModel(row, _store, new FakeSessionActions(), new FakeUiShell(), null!);
+        await detail.Notes.LoadAsync("a", CancellationToken.None);
+        detail.Notes.Text = "my draft";
+        _store.Notes["a"] = "another editor's notes";
+
+        var mayClose = await detail.FlushNotesBeforeCloseAsync();
+
+        Assert.False(mayClose);
+        Assert.Equal("my draft", detail.Notes.Text);
+        Assert.True(detail.Notes.IsDirty);
+        Assert.Equal("another editor's notes", _store.Notes["a"]);
+    }
 }
 
 public class MyTasksViewModelTests

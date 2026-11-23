@@ -102,6 +102,26 @@ public class CompanionViewModelTests
     }
 
     [Fact]
+    public async Task ShutdownKeepsPanelDraftAvailableWhenNotesConflict()
+    {
+        var harness = new Harness();
+        harness.Store.Notes = "baseline";
+        var vm = Create(harness);
+        await vm.InitializeAsync();
+        vm.NotesText = "my draft";
+        harness.Store.Notes = "another editor's notes";
+
+        var closed = await vm.ShutdownAsync();
+
+        Assert.False(closed);
+        Assert.True(vm.IsNotesEditable);
+        Assert.True(vm.IsNotesProblem);
+        Assert.Equal("my draft", vm.NotesText);
+        Assert.Equal("another editor's notes", harness.Store.Notes);
+        Assert.Equal(0, harness.Store.Saves);
+    }
+
+    [Fact]
     public async Task MarkCallsTheHostAndShowsAToastThatExpires()
     {
         var harness = new Harness { Elapsed = TimeSpan.FromMinutes(12) };

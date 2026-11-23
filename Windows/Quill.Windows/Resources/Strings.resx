@@ -1053,7 +1053,7 @@ Esto no se puede deshacer.</value>
     <value>Guardando…</value>
   </data>
   <data name="Companion_Notes_Failed" xml:space="preserve">
-    <value>No se pudieron guardar las notas. Se volverá a intentar.</value>
+    <value>No se guardaron las notas. El borrador permanece aquí; cópialo antes de cerrar el panel.</value>
   </data>
   <data name="Companion_Notice_Button" xml:space="preserve">
     <value>Aviso de grabación</value>

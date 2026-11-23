@@ -43,18 +43,24 @@ public static class SpeakerEdits
             .ThenBy(profile => profile.Id, StringComparer.Ordinal)
             .ToList();
 
-    /// <summary>Index of the segment an edit targets, or -1.</summary>
+    /// <summary>Index of the uniquely matching segment an edit targets, or -1 when absent or ambiguous.</summary>
     public static int FindSegment(IReadOnlyList<TranscriptSegment> segments, Track track, TimeSpan start)
     {
+        var found = -1;
         for (var i = 0; i < segments.Count; i++)
         {
             if (segments[i].Track == track && (segments[i].Start - start).Duration() < SameStart)
             {
-                return i;
+                if (found >= 0)
+                {
+                    return -1;
+                }
+
+                found = i;
             }
         }
 
-        return -1;
+        return found;
     }
 
     private static void Merge(List<TranscriptSegment> segments, List<SpeakerProfile> profiles, MergeSpeakers merge)

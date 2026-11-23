@@ -193,6 +193,11 @@ public sealed class SpeakerResolutionService(
             }
 
             var segment = transcript[segmentIndex];
+            if (SpeakerEdits.FindSegment(transcript, segment.Track, segment.Start) < 0)
+            {
+                throw new InvalidOperationException("The selected transcript segment is ambiguous; no speaker was changed.");
+            }
+
             var edit = new ReassignSegment(segment.Track, TimeSpan.FromMilliseconds((long)segment.Start.TotalMilliseconds), speakerId);
             var profiles = await LoadSpeakersAsync(sessionId, cancellationToken).ConfigureAwait(false);
             await ApplyEditAsync(

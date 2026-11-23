@@ -40,7 +40,7 @@ internal sealed class NotesAutosaver
     public NotesAutosaver(Func<string, CancellationToken, Task> save, TimeSpan? delay = null)
     {
         ArgumentNullException.ThrowIfNull(save);
-        _save = (text, _, token) => save(text, token);
+        _save = (_, text, token) => save(text, token);
         _delay = delay ?? DefaultDelay;
     }
 

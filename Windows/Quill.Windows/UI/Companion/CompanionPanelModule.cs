@@ -38,9 +38,15 @@ internal sealed class CompanionPanelModule
 
         if (_window is not null)
         {
-            _ = CloseAsync();
+            _ = ReplaceAsync(context);
+            return;
         }
 
+        Open(context);
+    }
+
+    private void Open(CompanionContext context)
+    {
         try
         {
             _feed = context.LiveSummary is { } loop ? new LiveSummaryLoopFeed(loop) : null;
@@ -58,6 +64,15 @@ internal sealed class CompanionPanelModule
             // The panel is a convenience: a failure here must never affect the recording.
             Trace.TraceWarning($"quill: companion panel not shown: {exception.Message}");
             _ = CloseAsync();
+        }
+    }
+
+    private async Task ReplaceAsync(CompanionContext context)
+    {
+        await CloseAsync().ConfigureAwait(true);
+        if (_window is null)
+        {
+            Open(context);
         }
     }
 
@@ -103,10 +118,10 @@ internal sealed class CompanionPanelModule
         return true;
     }
 
-    /// <summary>Closes the panel; pending notes are written in the background.</summary>
+    /// <summary>Closes the panel after pending notes have been saved.</summary>
     public void Close() => _ = CloseAsync();
 
-    /// <summary>Closes the panel and waits until pending notes are on disk. Never throws.</summary>
+    /// <summary>Closes the panel after pending notes are on disk; leaves it open on a save conflict.</summary>
     public async Task CloseAsync()
     {
         if (!_dispatcher.CheckAccess())
@@ -118,6 +133,12 @@ internal sealed class CompanionPanelModule
         var window = _window;
         var viewModel = _viewModel;
         var feed = _feed;
+        if (viewModel is not null && !await viewModel.ShutdownAsync().ConfigureAwait(true))
+        {
+            // Keep the live editor accessible; closing here would discard its only copy of the draft.
+            return;
+        }
+
         _window = null;
         _viewModel = null;
         _feed = null;
@@ -130,10 +151,6 @@ internal sealed class CompanionPanelModule
                 window.Close();
             }
 
-            if (viewModel is not null)
-            {
-                await viewModel.ShutdownAsync();
-            }
         }
         catch (Exception exception) when (exception is not OutOfMemoryException)
         {

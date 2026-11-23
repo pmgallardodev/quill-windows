@@ -93,16 +93,21 @@ public sealed class HybridSearch
 
         var results = Fuse(lexical, vector ?? [], RrfK)
             .Take(query.TopK)
-            .Select(rank => (Rank: rank, Passage: _catalog.FindPassage(rank.Id)))
+            .Select(rank =>
+            {
+                var passage = _catalog.FindPassage(rank.Id);
+                var session = passage is null ? null : _catalog.Get(passage.SessionId);
+                return (Rank: rank, Passage: passage, Session: session);
+            })
             // Catalog entries can be removed while query embedding is in flight. Re-resolve
             // every candidate against the live catalog before building a result.
-            .Where(candidate => candidate.Passage is not null && Include(candidate.Passage) &&
-                _catalog.Get(candidate.Passage.SessionId) is not null)
-            .Select(candidate => (candidate.Rank, Passage: candidate.Passage!, Session: _catalog.Get(candidate.Passage!.SessionId)!))
+            .Where(candidate => candidate.Passage is not null && candidate.Session is not null && Include(candidate.Passage))
             .Select(candidate =>
             {
                 var rank = candidate.Rank;
-                return new SearchResult(candidate.Passage, candidate.Session.Title, candidate.Session.Started, rank.Score, rank.LexicalRank, rank.VectorRank);
+                var passage = candidate.Passage!;
+                var session = candidate.Session!;
+                return new SearchResult(passage, session.Title, session.Started, rank.Score, rank.LexicalRank, rank.VectorRank);
             })
             .ToList();
         return new SearchResponse(results, UsedVectors: vector is not null);

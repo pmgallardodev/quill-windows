@@ -411,11 +411,18 @@ internal sealed class CompanionViewModel : INotifyPropertyChanged
     }
 
     /// <summary>Unsubscribes, cancels a running catch-up and writes pending notes. Never throws.</summary>
-    public async Task ShutdownAsync()
+    public async Task<bool> ShutdownAsync()
     {
         if (_closed)
         {
-            return;
+            return true;
+        }
+
+        await _notes.FlushAsync().ConfigureAwait(false);
+        if (_notes.State == NotesSaveState.Failed)
+        {
+            OnNotesChanged();
+            return false;
         }
 
         _closed = true;
@@ -431,8 +438,8 @@ internal sealed class CompanionViewModel : INotifyPropertyChanged
         }
 
         _catchUp?.Cancel();
-        await _notes.FlushAsync().ConfigureAwait(false);
         _notes.StateChanged -= OnNotesStateChanged;
+        return true;
     }
 
     /// <summary>"¿Qué me perdí?": recap of the last <see cref="CatchUpWindow"/>.</summary>

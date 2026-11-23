@@ -96,6 +96,24 @@ public class AppSessionActionsTests
     }
 
     [Fact]
+    public async Task ReassignMatchesTheTrimmedIdentityShownByTheTranscript()
+    {
+        var harness = new Harness();
+        var actions = new AppSessionActions(harness.Services() with
+        {
+            LoadFinalTranscript = (_, _) => Task.FromResult<IReadOnlyList<TranscriptSegment>>(
+            [
+                new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), " first ", " speaker-1 ", Track.System),
+                new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), " second ", " speaker-1 ", Track.System),
+            ]),
+        });
+
+        await actions.ReassignSpeakerAsync("s1", 1, TimeSpan.FromSeconds(1), "speaker-1", "second", "speaker-2", CancellationToken.None);
+
+        Assert.Equal(["reassign:s1:1:speaker-2"], harness.Calls);
+    }
+
+    [Fact]
     public async Task IdentifySpeakersWithoutModelsReportsAiPackMissing()
     {
         var harness = new Harness { Speakers = new SpeakersResolveResult(SpeakersResolveState.Unavailable) };

@@ -163,6 +163,19 @@ public class NotesAutosaverTests
     }
 
     [Fact]
+    public async Task LegacySaveCallbackReceivesTheDraftRatherThanItsBaseline()
+    {
+        var saved = new List<string>();
+        var autosaver = new NotesAutosaver((text, _) => { saved.Add(text); return Task.CompletedTask; }, TimeSpan.FromMinutes(5));
+        autosaver.SetBaseline("original");
+
+        autosaver.Update("edited draft");
+        await autosaver.FlushAsync();
+
+        Assert.Equal(["edited draft"], saved);
+    }
+
+    [Fact]
     public async Task AFailedSaveIsRetriedOnFlush()
     {
         var attempts = 0;

@@ -43,8 +43,8 @@ public static class TranscriptSegmentLocator
 
         var segment = segments[selectedIndex];
         return (segment.Start - start).Duration() <= Tolerance &&
-            string.Equals(segment.SpeakerId, speakerId, StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(segment.Text, text, StringComparison.Ordinal)
+            string.Equals(segment.SpeakerId?.Trim(), speakerId.Trim(), StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(segment.Text?.Trim(), text.Trim(), StringComparison.Ordinal)
                 ? selectedIndex
                 : -1;
     }
