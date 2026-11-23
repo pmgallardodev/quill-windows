@@ -26,6 +26,7 @@ internal partial class SettingsWindow
         InitializeComponent();
         DataContext = _viewModel;
         InitializeApiPage();
+        InitializeAiPackDownload();
         ThemeBootstrapper.Attach(this);
         Closed += (_, _) => _closing.Cancel();
     }
@@ -54,10 +55,15 @@ internal partial class SettingsWindow
         {
             _viewModel.PackPath = folder;
             _viewModel.RefreshPackStatus();
+            _aiPackDownload.Refresh();
         }
     }
 
-    private void OnCheckPack(object sender, RoutedEventArgs e) => _viewModel.RefreshPackStatus();
+    private void OnCheckPack(object sender, RoutedEventArgs e)
+    {
+        _viewModel.RefreshPackStatus();
+        _aiPackDownload.Refresh();
+    }
 
     private void OnBrowseLlmModel(object sender, RoutedEventArgs e)
     {

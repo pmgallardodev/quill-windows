@@ -129,6 +129,19 @@ internal static class ConfigStore
         File.Move(temporary, ConfigPath, overwrite: true);
     }
 
+    /// <summary>
+    /// Saves "ai.pack_path", keeping every other setting. Used after the in-app AI-pack download
+    /// installs into %LOCALAPPDATA%\Quill\ai-pack because the app folder is read-only.
+    /// </summary>
+    public static QuillSettings SaveAiPackPath(string packRoot)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(packRoot);
+        var current = LoadSettings();
+        var updated = current with { Ai = current.Ai with { PackPath = packRoot } };
+        SaveSettings(updated);
+        return updated;
+    }
+
     /// <summary>The "api" section of config.json (local API). Lenient like <see cref="LoadSettings"/>: off on any problem.</summary>
     public static ApiSettings LoadApiSettings()
     {

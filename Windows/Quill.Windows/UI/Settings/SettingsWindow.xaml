@@ -100,6 +100,42 @@
                             </StackPanel>
                         </qc:Card>
 
+                        <!-- In-app AI-pack download (P2): only on the button press. DataContext: AiPackDownloadViewModel. -->
+                        <qc:Card x:Name="AiPackDownloadCard" Margin="0,12,0,0">
+                            <StackPanel>
+                                <qc:SectionHeader Title="{loc:Str AiPackDownload_Header}" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{Binding DestinationText}" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{Binding FreeSpaceText}" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str AiPackDownload_Confirm}"
+                                           Visibility="{Binding ShowStart, Converter={StaticResource BoolToVisibility}}" />
+                                <WrapPanel Margin="0,12,0,0">
+                                    <ui:Button Margin="0,0,8,0" Appearance="Primary" Content="{Binding StartText}" Click="OnAiPackDownload"
+                                               IsEnabled="{Binding CanStart}"
+                                               Visibility="{Binding ShowStart, Converter={StaticResource BoolToVisibility}}" />
+                                    <ui:Button Margin="0,0,8,0" Content="{loc:Str AiPackDownload_Cancel}" Click="OnAiPackCancel"
+                                               Visibility="{Binding IsDownloading, Converter={StaticResource BoolToVisibility}}" />
+                                    <ui:Button Margin="0,0,8,0" Content="{loc:Str AiPackDownload_CheckAgain}" Click="OnAiPackCheckAgain"
+                                               Visibility="{Binding ShowCheckAgain, Converter={StaticResource BoolToVisibility}}" />
+                                </WrapPanel>
+                                <StackPanel Margin="0,12,0,0" Visibility="{Binding ShowProgress, Converter={StaticResource BoolToVisibility}}">
+                                    <TextBlock Style="{StaticResource Quill.Text.Body}" Text="{Binding TotalText}" />
+                                    <ProgressBar Height="6" Margin="0,4,0,0" Maximum="100" Value="{Binding TotalPercent, Mode=OneWay}" />
+                                    <ItemsControl ItemsSource="{Binding Components}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Margin="0,8,0,0">
+                                                    <TextBlock Style="{StaticResource Hint}" Text="{Binding Text}" />
+                                                    <ProgressBar Height="4" Margin="0,2,0,0" Maximum="100" Value="{Binding Percent, Mode=OneWay}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                                <TextBlock Style="{StaticResource Quill.Text.Body}" TextWrapping="Wrap" Margin="0,12,0,0" Text="{Binding StatusText}" />
+                                <TextBlock Style="{StaticResource Hint}" Text="{loc:Str AiPackDownload_Alternative}" />
+                            </StackPanel>
+                        </qc:Card>
+
                         <qc:Card Margin="0,12,0,0">
                             <StackPanel>
                                 <qc:SectionHeader Title="{loc:Str Settings_Ai_ModelsHeader}" />
