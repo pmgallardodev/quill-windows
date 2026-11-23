@@ -3,6 +3,10 @@ using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Threading;
+using Quill.Core.AiPack;
+using Quill.Core.Ports;
+using Quill.Core.Scheduling;
+using Quill.Core.Storage;
 using Quill.Windows.Audio;
 using Quill.Windows.Infrastructure;
 using Quill.Windows.Sessions;
@@ -51,6 +55,10 @@ internal sealed class TrayController : IDisposable
     private readonly SessionsViewModel _sessionsViewModel;
     private SessionsWindow? _sessionsWindow;
     private RecordingSession? _session;
+    /// <summary>Serializes live Whisper (and later the LLM) so jobs never fight over the GPU.</summary>
+    private readonly InferenceScheduler _inference = new();
+    private readonly IAiPackLocator _aiPack = new ManifestAiPackLocator(AppContext.BaseDirectory);
+    private LiveTranscriptionModule? _live;
     private DateTimeOffset? _recordingStartedAt;
     private readonly GlobalHotkeys? _hotkeys;
     private readonly bool _detectsMeetings;
@@ -209,6 +217,13 @@ internal sealed class TrayController : IDisposable
         _sessionsViewModel.Dispose();
         _transcription.StateChanged -= _transcriptionStateHandler;
         _transcription.Dispose();
+        if (_live is { } live)
+        {
+            _live = null;
+            _ = live.DisposeAsync().AsTask();
+        }
+
+        _inference.Dispose();
         _icon.Visible = false;
         _icon.Dispose();
         _recordingIcon?.Dispose();
@@ -322,10 +337,18 @@ internal sealed class TrayController : IDisposable
         }
 
         _recordingGeneration++;
+        var live = CreateLiveTranscription();
         try
         {
-            _session = RecordingSession.Start(_recordingsRoot);
+            _session = RecordingSession.Start(_recordingsRoot, live?.Tap);
             _session.CaptureFailed += OnCaptureFailed;
+            if (live is not null)
+            {
+                live.Start(new FileSessionStore(_recordingsRoot), Path.GetFileName(_session.Directory));
+                _live = live;
+                live = null;
+            }
+
             _recordingStartedAt = DateTimeOffset.UtcNow;
             _toggle.Text = "Detener grabacion";
             _pause.Text = "Pausar grabacion";
@@ -370,7 +393,31 @@ internal sealed class TrayController : IDisposable
                 // Preserve the original startup error for the user.
             }
 
+            if (live is not null)
+            {
+                _ = live.DisposeAsync().AsTask();
+            }
+
             _icon.ShowBalloonTip(6_000, "quill - error", exception.Message, Forms.ToolTipIcon.Error);
+        }
+    }
+
+    /// <summary>Null when the AI pack has no live model: recording then works without live text.</summary>
+    private LiveTranscriptionModule? CreateLiveTranscription()
+    {
+        try
+        {
+            var config = ConfigStore.Load().Transcription;
+            var language = string.IsNullOrWhiteSpace(config.Language) ? "auto" : config.Language.Trim();
+            var threads = WhisperStreamingTranscriber.LiveThreads(Environment.ProcessorCount);
+            return LiveTranscriptionModule.TryCreate(
+                _aiPack.Locate(),
+                modelPath => WhisperStreamingTranscriber.Create(modelPath, language, threads, _inference));
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            Trace.TraceWarning($"quill: live transcription unavailable: {exception.Message}");
+            return null;
         }
     }
 
@@ -416,6 +463,14 @@ internal sealed class TrayController : IDisposable
         finally
         {
             session.CaptureFailed -= OnCaptureFailed;
+        }
+
+        // Capture has stopped, so the tap holds everything. Finish live text before the final
+        // pass starts so both never compete for the GPU; StopAsync never throws.
+        if (_live is { } live)
+        {
+            _live = null;
+            await live.StopAsync(TimeSpan.FromSeconds(15));
         }
 
         // A capture error can be reported after metadata was written. Do not lose

@@ -1,6 +1,7 @@
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using Quill.Core.Domain;
 using Quill.Windows.Infrastructure;
 using Quill.Windows.Sessions;
 
@@ -33,7 +34,8 @@ internal sealed class RecordingSession : IDisposable
         string directory,
         MMDeviceEnumerator devices,
         MMDevice microphone,
-        MMDevice speakers)
+        MMDevice speakers,
+        LiveCaptureTap? liveTap)
     {
         Directory = directory;
         _devices = devices;
@@ -54,11 +56,13 @@ internal sealed class RecordingSession : IDisposable
             microphoneWriter = new TrackWriter(
                 microphoneCapture,
                 Path.Combine(directory, "mic.wav"),
-                voiceQuality);
+                voiceQuality,
+                liveTap?.AddTrack(Track.Microphone, microphoneCapture.WaveFormat));
             systemAudioWriter = new TrackWriter(
                 systemAudioCapture,
                 Path.Combine(directory, "system.wav"),
-                voiceQuality);
+                voiceQuality,
+                liveTap?.AddTrack(Track.System, systemAudioCapture.WaveFormat));
             microphoneWriter.CaptureStopped += OnCaptureStopped;
             systemAudioWriter.CaptureStopped += OnCaptureStopped;
         }
@@ -150,7 +154,12 @@ internal sealed class RecordingSession : IDisposable
         }
     }
 
-    public static RecordingSession Start(string recordingsRoot)
+    /// <param name="liveTap">
+    /// Optional live transcription tap. It receives exactly the buffers the WAV files get (nothing
+    /// while paused), in the device format, so live timestamps follow the WAV timeline. The caller
+    /// owns it and completes it after <see cref="Stop"/>.
+    /// </param>
+    public static RecordingSession Start(string recordingsRoot, LiveCaptureTap? liveTap = null)
     {
         System.IO.Directory.CreateDirectory(recordingsRoot);
         var directory = CreateSessionDirectory(recordingsRoot);
@@ -162,7 +171,7 @@ internal sealed class RecordingSession : IDisposable
             devices = new MMDeviceEnumerator();
             microphone = devices.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Multimedia);
             speakers = devices.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            var session = new RecordingSession(directory, devices, microphone, speakers);
+            var session = new RecordingSession(directory, devices, microphone, speakers, liveTap);
             microphone = null;
             speakers = null;
             try
@@ -462,6 +471,7 @@ internal sealed class RecordingSession : IDisposable
 
         private readonly IWaveIn _capture;
         private readonly WaveFileWriter _writer;
+        private readonly LiveTrackInput? _live;
         private readonly object _writeLock = new();
         private readonly BufferedWaveProvider? _pending;
         private readonly ISampleProvider? _converted;
@@ -474,9 +484,10 @@ internal sealed class RecordingSession : IDisposable
         private bool _captureSignalDisposed;
         private Exception? _captureError;
 
-        public TrackWriter(IWaveIn capture, string outputPath, bool voiceQuality)
+        public TrackWriter(IWaveIn capture, string outputPath, bool voiceQuality, LiveTrackInput? live)
         {
             _capture = capture;
+            _live = live;
             if (!voiceQuality)
             {
                 _writer = new WaveFileWriter(outputPath, capture.WaveFormat);
@@ -615,6 +626,10 @@ internal sealed class RecordingSession : IDisposable
                 }
 
                 Interlocked.CompareExchange(ref _firstBufferTicks, DateTimeOffset.UtcNow.Ticks, 0);
+
+                // Raw device bytes: the tap converts on its own thread, whether or not this
+                // writer converts to voice quality. It never blocks or throws.
+                _live?.Write(FirstBufferAt!.Value, eventArgs.Buffer, eventArgs.BytesRecorded);
 
                 try
                 {

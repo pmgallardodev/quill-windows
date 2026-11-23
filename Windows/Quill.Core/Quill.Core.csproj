@@ -12,6 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Built-in summary templates, read by Templates/DefaultTemplates.cs. -->
+    <EmbeddedResource Include="Templates/Defaults/*.md" LogicalName="Quill.Core.Templates.Defaults.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- The Windows app assembly is named "quill". -->
     <InternalsVisibleTo Include="quill" />
     <InternalsVisibleTo Include="Quill.Windows.Tests" />

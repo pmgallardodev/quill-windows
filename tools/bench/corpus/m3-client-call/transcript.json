@@ -1,0 +1,1531 @@
+{
+ "engine": "synthetic",
+ "model": "quill-bench-corpus-v1",
+ "created_at": "2026-11-23T09:00:00+00:00",
+ "segments": [
+  {
+   "speaker": "speaker-1",
+   "start_ms": 2000,
+   "end_ms": 7097,
+   "text": "Total, cuando lo explicas así se entiende mucho mejor en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 8377,
+   "end_ms": 14266,
+   "text": "Total, el tono de los textos encaja con lo que buscáis digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 14660,
+   "end_ms": 19712,
+   "text": "Y nada, nuestro equipo tiene experiencia con portales parecidos digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 20834,
+   "end_ms": 25900,
+   "text": "Eh, cuando lo explicas así se entiende mucho mejor o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 26390,
+   "end_ms": 32348,
+   "text": "Claro, lo he estado pensando durante el fin de semana y sigo opinando igual."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 32850,
+   "end_ms": 38056,
+   "text": "Y nada, el contexto ha cambiado un poco desde la última vez ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 39030,
+   "end_ms": 43265,
+   "text": "Fíjate que nuestro equipo tiene experiencia con portales parecidos vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 43740,
+   "end_ms": 49092,
+   "text": "Fíjate que a veces nos complicamos más de la cuenta con estas cosas."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 49533,
+   "end_ms": 54630,
+   "text": "La identidad visual de la marca está bien recogida en el diseño."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 55593,
+   "end_ms": 62430,
+   "text": "Pues la parte de informes es la que más usan los jefes de planta digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 63413,
+   "end_ms": 67468,
+   "text": "Claro, en resumen es lo que estábamos comentando digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 68703,
+   "end_ms": 74687,
+   "text": "Sí, la identidad visual de la marca está bien recogida en el diseño en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 76047,
+   "end_ms": 83026,
+   "text": "Ya, lo he estado pensando durante el fin de semana y sigo opinando igual digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 84265,
+   "end_ms": 89883,
+   "text": "Buenos días, señor Ramírez, Marta. Hoy queríamos cerrar el alcance de la primera fase."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 90312,
+   "end_ms": 96031,
+   "text": "Exacto, eso encaja con lo que vimos en los números del trimestre ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 97113,
+   "end_ms": 101949,
+   "text": "Total, la navegación quedó más clara tras la última iteración vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 102849,
+   "end_ms": 108760,
+   "text": "Ya, lo he estado pensando durante el fin de semana y sigo opinando igual."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 109596,
+   "end_ms": 115522,
+   "text": "O sea, la gente con la que he hablado tiene una impresión parecida vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 116526,
+   "end_ms": 118904,
+   "text": "Y nada, eso es."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 119180,
+   "end_ms": 123812,
+   "text": "Bueno, los usuarios internos llevan años pidiendo algo así ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 124302,
+   "end_ms": 130721,
+   "text": "A ver, la parte de informes es la que más usan los jefes de planta ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 130993,
+   "end_ms": 133154,
+   "text": "O sea, vale, entendido."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 133451,
+   "end_ms": 139637,
+   "text": "Exacto, eso lo hablamos en su momento y la idea sigue siendo la misma."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 140316,
+   "end_ms": 145221,
+   "text": "Sí, en otros equipos lo han resuelto de forma similar la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 146493,
+   "end_ms": 151990,
+   "text": "Esto ya nos pasó en el proyecto anterior y al final salió bien."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 152913,
+   "end_ms": 157739,
+   "text": "Eh, las pantallas que vimos en la última reunión gustaron mucho."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 159004,
+   "end_ms": 163257,
+   "text": "A ver, cuando lo explicas así se entiende mucho mejor."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 163769,
+   "end_ms": 169493,
+   "text": "Hmm, las pantallas que vimos en la última reunión gustaron mucho o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 170728,
+   "end_ms": 176552,
+   "text": "Eh, el sistema actual es una hoja de cálculo compartida muy frágil en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 176816,
+   "end_ms": 181615,
+   "text": "Vale, los usuarios internos llevan años pidiendo algo así la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 182382,
+   "end_ms": 187425,
+   "text": "La navegación quedó más clara tras la última iteración digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 188459,
+   "end_ms": 192283,
+   "text": "Mira, cuando lo explicas así se entiende mucho mejor."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 193339,
+   "end_ms": 197412,
+   "text": "Perfecto. Nuestra prioridad es tener algo en marcha cuanto antes."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 198370,
+   "end_ms": 204343,
+   "text": "Pues lo veo como una evolución natural de lo que ya teníamos la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 204677,
+   "end_ms": 211277,
+   "text": "Y nada, eso lo hablamos en su momento y la idea sigue siendo la misma."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 211685,
+   "end_ms": 214482,
+   "text": "A ver, te sigo, te sigo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 215309,
+   "end_ms": 220423,
+   "text": "Hmm, tampoco es que haya una única forma correcta de hacerlo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 221448,
+   "end_ms": 225945,
+   "text": "Pues yo no le daría más vueltas de las necesarias."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 226519,
+   "end_ms": 231341,
+   "text": "Sí, el equipo de operaciones está muy ilusionado con el portal."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 232265,
+   "end_ms": 236794,
+   "text": "Hmm, las pantallas que vimos en la última reunión gustaron mucho."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 237321,
+   "end_ms": 242229,
+   "text": "Vale, eso me recuerda a una conversación que tuvimos hace meses ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 243294,
+   "end_ms": 251666,
+   "text": "Nuestra propuesta es que la fase uno sea solo la aplicación web y dejar la aplicación móvil para la fase dos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 253003,
+   "end_ms": 257951,
+   "text": "Exacto, los usuarios internos llevan años pidiendo algo así digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 258837,
+   "end_ms": 264121,
+   "text": "Hmm, el tono de los textos encaja con lo que buscáis ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 264854,
+   "end_ms": 269594,
+   "text": "Claro, el equipo de operaciones está muy ilusionado con el portal."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 269873,
+   "end_ms": 275113,
+   "text": "A ver, tampoco es que haya una única forma correcta de hacerlo ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 275866,
+   "end_ms": 282726,
+   "text": "Y nada, en la planta de Zaragoza son unas cuarenta personas usando el sistema actual la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 283380,
+   "end_ms": 290020,
+   "text": "Mira, la identidad visual de la marca está bien recogida en el diseño o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 290942,
+   "end_ms": 295874,
+   "text": "O sea, es más una cuestión de costumbre que de otra cosa."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 296499,
+   "end_ms": 302146,
+   "text": "No es algo nuevo pero sí conviene tenerlo presente por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 303251,
+   "end_ms": 309515,
+   "text": "Sí, la identidad visual de la marca está bien recogida en el diseño vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 310494,
+   "end_ms": 314938,
+   "text": "Mira, hay que reconocer que el equipo ha respondido muy bien."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 316277,
+   "end_ms": 320403,
+   "text": "Bueno, creo que en lo general estamos alineados digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 321319,
+   "end_ms": 327345,
+   "text": "Me parece bien. Fase uno solo web, la app móvil en fase dos. Adelante."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 328278,
+   "end_ms": 332889,
+   "text": "Claro, las pantallas que vimos en la última reunión gustaron mucho."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 334095,
+   "end_ms": 339972,
+   "text": "O sea, a veces nos complicamos más de la cuenta con estas cosas ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 340888,
+   "end_ms": 345382,
+   "text": "Claro, yo lo veo bastante parecido a lo que comentabas antes."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 346482,
+   "end_ms": 351033,
+   "text": "Eh, la navegación quedó más clara tras la última iteración."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 351540,
+   "end_ms": 356795,
+   "text": "Claro, las pantallas que vimos en la última reunión gustaron mucho ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 358135,
+   "end_ms": 360905,
+   "text": "Sí, te sigo, te sigo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 361547,
+   "end_ms": 366849,
+   "text": "Bueno, el tono de los textos encaja con lo que buscáis ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 367809,
+   "end_ms": 373093,
+   "text": "Ya, nuestro equipo tiene experiencia con portales parecidos por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 373572,
+   "end_ms": 379839,
+   "text": "Ya, esto ya nos pasó en el proyecto anterior y al final salió bien."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 380908,
+   "end_ms": 384972,
+   "text": "Total, los usuarios internos llevan años pidiendo algo así ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 386362,
+   "end_ms": 390812,
+   "text": "Es curioso porque al principio pensaba lo contrario o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 391983,
+   "end_ms": 399231,
+   "text": "Vale, lo veo como una evolución natural de lo que ya teníamos por lo que he visto."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 400071,
+   "end_ms": 408492,
+   "text": "O sea, lo he estado pensando durante el fin de semana y sigo opinando igual por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 409043,
+   "end_ms": 414423,
+   "text": "A ver, las pantallas que vimos en la última reunión gustaron mucho."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 415180,
+   "end_ms": 420611,
+   "text": "Eso lo hablamos en su momento y la idea sigue siendo la misma."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 421980,
+   "end_ms": 427971,
+   "text": "Entonces os mando el presupuesto actualizado con la división en fases antes del lunes."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 429159,
+   "end_ms": 434892,
+   "text": "Bueno, a veces nos complicamos más de la cuenta con estas cosas vamos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 436179,
+   "end_ms": 442428,
+   "text": "O sea, la parte de informes es la que más usan los jefes de planta."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 443080,
+   "end_ms": 447930,
+   "text": "Sí, a mí me cuadra lo que estáis contando en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 448461,
+   "end_ms": 454529,
+   "text": "Fíjate que es un tema que da para mucho pero no quiero alargarme en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 454841,
+   "end_ms": 461197,
+   "text": "Eh, en la planta de Zaragoza son unas cuarenta personas usando el sistema actual ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 462152,
+   "end_ms": 467140,
+   "text": "Y nada, los usuarios internos llevan años pidiendo algo así la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 467596,
+   "end_ms": 472185,
+   "text": "Fíjate que nuestro equipo tiene experiencia con portales parecidos ¿no?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 472791,
+   "end_ms": 476956,
+   "text": "Exacto, ya sabemos cómo suelen ir estas cosas vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 477370,
+   "end_ms": 482343,
+   "text": "Y nada, la navegación quedó más clara tras la última iteración vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 483352,
+   "end_ms": 489707,
+   "text": "Fíjate que la gente con la que he hablado tiene una impresión parecida la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 490617,
+   "end_ms": 495811,
+   "text": "Claro, es verdad que el último mes ha sido bastante intenso ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 496482,
+   "end_ms": 501138,
+   "text": "Tampoco es que haya una única forma correcta de hacerlo vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 501846,
+   "end_ms": 508354,
+   "text": "Sobre el alojamiento: preferimos que esté en nuestra cuenta de Azure, no en la vuestra."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 509663,
+   "end_ms": 515917,
+   "text": "Y nada, las pantallas que vimos en la última reunión gustaron mucho o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 516768,
+   "end_ms": 518782,
+   "text": "Mira, eso es."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 519838,
+   "end_ms": 525287,
+   "text": "Pues hay que reconocer que el equipo ha respondido muy bien ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 526410,
+   "end_ms": 532067,
+   "text": "A veces nos complicamos más de la cuenta con estas cosas en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 532594,
+   "end_ms": 537203,
+   "text": "O sea, lo importante es que todos tengamos el mismo contexto."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 538355,
+   "end_ms": 543431,
+   "text": "Yo lo veo bastante parecido a lo que comentabas antes digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 543965,
+   "end_ms": 551161,
+   "text": "O sea, el tono de los textos encaja con lo que buscáis por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 552291,
+   "end_ms": 556358,
+   "text": "Ahí hay matices pero en el fondo coincido digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 557135,
+   "end_ms": 560931,
+   "text": "Sin problema, lo alojamos en vuestra cuenta de Azure."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 561898,
+   "end_ms": 567264,
+   "text": "A ver, el equipo de operaciones está muy ilusionado con el portal ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 567677,
+   "end_ms": 571675,
+   "text": "Eh, los usuarios internos llevan años pidiendo algo así."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 572020,
+   "end_ms": 577082,
+   "text": "El sistema actual es una hoja de cálculo compartida muy frágil."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 577613,
+   "end_ms": 579908,
+   "text": "Pues vale, entendido en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 580289,
+   "end_ms": 585171,
+   "text": "Exacto, el tono de los textos encaja con lo que buscáis."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 586270,
+   "end_ms": 592930,
+   "text": "Fíjate que a veces nos complicamos más de la cuenta con estas cosas digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 593325,
+   "end_ms": 599966,
+   "text": "A ver, eso lo hablamos en su momento y la idea sigue siendo la misma vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 601273,
+   "end_ms": 606843,
+   "text": "A ver, es curioso porque al principio pensaba lo contrario o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 608209,
+   "end_ms": 614573,
+   "text": "Pues esto ya nos pasó en el proyecto anterior y al final salió bien la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 614837,
+   "end_ms": 620841,
+   "text": "Sí, la identidad visual de la marca está bien recogida en el diseño ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 621861,
+   "end_ms": 624802,
+   "text": "Bueno, te sigo, te sigo la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 625815,
+   "end_ms": 631039,
+   "text": "O sea, es verdad que el último mes ha sido bastante intenso."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 631979,
+   "end_ms": 638061,
+   "text": "En la planta de Zaragoza son unas cuarenta personas usando el sistema actual la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 638946,
+   "end_ms": 643984,
+   "text": "Ya, el feedback que nos llegó fue bastante positivo en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 644347,
+   "end_ms": 652459,
+   "text": "Ya, eso lo hablamos en su momento y la idea sigue siendo la misma por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 653488,
+   "end_ms": 659885,
+   "text": "Total, las pantallas que vimos en la última reunión gustaron mucho por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 660979,
+   "end_ms": 666424,
+   "text": "Bueno, hay que reconocer que el equipo ha respondido muy bien en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 667361,
+   "end_ms": 673631,
+   "text": "Yo os envío el acceso a Azure y la documentación del SSO esta semana."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 674251,
+   "end_ms": 680363,
+   "text": "Total, la identidad visual de la marca está bien recogida en el diseño la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 681705,
+   "end_ms": 686784,
+   "text": "Claro, el feedback que nos llegó fue bastante positivo en general ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 687779,
+   "end_ms": 691664,
+   "text": "Hmm, creo que en lo general estamos alineados."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 692397,
+   "end_ms": 696724,
+   "text": "Sí, nuestro equipo tiene experiencia con portales parecidos digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 697222,
+   "end_ms": 701473,
+   "text": "Total, la navegación quedó más clara tras la última iteración."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 702211,
+   "end_ms": 707423,
+   "text": "A veces nos complicamos más de la cuenta con estas cosas en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 708309,
+   "end_ms": 713194,
+   "text": "Pues los usuarios internos llevan años pidiendo algo así o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 713575,
+   "end_ms": 718857,
+   "text": "Ya, el tono de los textos encaja con lo que buscáis ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 719634,
+   "end_ms": 724929,
+   "text": "Sí, es verdad que el último mes ha sido bastante intenso digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 725265,
+   "end_ms": 731783,
+   "text": "Hmm, la parte de informes es la que más usan los jefes de planta en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 732932,
+   "end_ms": 738426,
+   "text": "Exacto, la identidad visual de la marca está bien recogida en el diseño."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 739311,
+   "end_ms": 743933,
+   "text": "Ahí hay matices pero en el fondo coincido o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 744604,
+   "end_ms": 749342,
+   "text": "El contexto ha cambiado un poco desde la última vez."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 749631,
+   "end_ms": 751989,
+   "text": "Ya, ya veo vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 752631,
+   "end_ms": 757951,
+   "text": "Hmm, las pantallas que vimos en la última reunión gustaron mucho ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 758790,
+   "end_ms": 763630,
+   "text": "Pues me parece razonable el enfoque tal y como está planteado."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 764326,
+   "end_ms": 769082,
+   "text": "Eh, tampoco es que haya una única forma correcta de hacerlo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 770006,
+   "end_ms": 777445,
+   "text": "Eso sí, aviso: el SSO depende de nuestro equipo de IT, que está con poca gente hasta marzo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 778615,
+   "end_ms": 782616,
+   "text": "A ver, nuestro equipo tiene experiencia con portales parecidos."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 783640,
+   "end_ms": 790099,
+   "text": "A ver, esto ya nos pasó en el proyecto anterior y al final salió bien ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 790701,
+   "end_ms": 797497,
+   "text": "Fíjate que la identidad visual de la marca está bien recogida en el diseño o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 798003,
+   "end_ms": 800680,
+   "text": "Claro, vale, entendido en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 801259,
+   "end_ms": 807285,
+   "text": "Total, en la planta de Zaragoza son unas cuarenta personas usando el sistema actual."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 808035,
+   "end_ms": 814093,
+   "text": "O sea, el feedback que nos llegó fue bastante positivo en general en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 815093,
+   "end_ms": 819633,
+   "text": "Pues en resumen es lo que estábamos comentando o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 821012,
+   "end_ms": 826624,
+   "text": "Por mi parte, comparto las nuevas maquetas del panel de control el miércoles."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 827441,
+   "end_ms": 831251,
+   "text": "Total, nuestro equipo tiene experiencia con portales parecidos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 832616,
+   "end_ms": 837724,
+   "text": "Y nada, nuestro equipo tiene experiencia con portales parecidos en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 838182,
+   "end_ms": 843554,
+   "text": "El sistema actual es una hoja de cálculo compartida muy frágil la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 844796,
+   "end_ms": 849914,
+   "text": "Vale, el sistema actual es una hoja de cálculo compartida muy frágil."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 851219,
+   "end_ms": 857883,
+   "text": "Exacto, en la planta de Zaragoza son unas cuarenta personas usando el sistema actual la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 858268,
+   "end_ms": 863428,
+   "text": "Ya, el sistema actual es una hoja de cálculo compartida muy frágil."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 864187,
+   "end_ms": 869739,
+   "text": "O sea, el tono de los textos encaja con lo que buscáis ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 870253,
+   "end_ms": 875223,
+   "text": "Bueno, eso encaja con lo que vimos en los números del trimestre."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 875477,
+   "end_ms": 881265,
+   "text": "O sea, yo lo veo bastante parecido a lo que comentabas antes vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 882428,
+   "end_ms": 891998,
+   "text": "Pregunta importante: si los datos están en nuestro Azure, ¿hace falta un contrato de encargado del tratamiento por el RGPD? ¿Quién lo firma?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 892622,
+   "end_ms": 898759,
+   "text": "Y nada, el sistema actual es una hoja de cálculo compartida muy frágil ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 899851,
+   "end_ms": 905982,
+   "text": "Bueno, cuando lo explicas así se entiende mucho mejor por lo que he visto."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 906795,
+   "end_ms": 911835,
+   "text": "Exacto, la navegación quedó más clara tras la última iteración ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 912761,
+   "end_ms": 919016,
+   "text": "Pues la identidad visual de la marca está bien recogida en el diseño la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 919449,
+   "end_ms": 923698,
+   "text": "En otros equipos lo han resuelto de forma similar."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 924237,
+   "end_ms": 929777,
+   "text": "Eh, el sistema actual es una hoja de cálculo compartida muy frágil ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 930990,
+   "end_ms": 937347,
+   "text": "A ver, la parte de informes es la que más usan los jefes de planta ¿sabes?"
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 937726,
+   "end_ms": 942246,
+   "text": "Nuestro equipo tiene experiencia con portales parecidos o eso creo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 943640,
+   "end_ms": 949045,
+   "text": "Claro, el equipo de operaciones está muy ilusionado con el portal vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 949353,
+   "end_ms": 955178,
+   "text": "Total, la identidad visual de la marca está bien recogida en el diseño."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 955675,
+   "end_ms": 959198,
+   "text": "Nuestro equipo tiene experiencia con portales parecidos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 960378,
+   "end_ms": 966918,
+   "text": "Y nada, el contexto ha cambiado un poco desde la última vez o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 967906,
+   "end_ms": 976343,
+   "text": "O sea, la parte de informes es la que más usan los jefes de planta por lo que he visto."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 976883,
+   "end_ms": 980435,
+   "text": "Mira, nuestro equipo tiene experiencia con portales parecidos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 981709,
+   "end_ms": 987583,
+   "text": "Pues la identidad visual de la marca está bien recogida en el diseño ¿sabes?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 988282,
+   "end_ms": 994002,
+   "text": "Lo tenemos que consultar con nuestro departamento legal, ahora mismo no lo sé."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 994563,
+   "end_ms": 1000865,
+   "text": "Fíjate que la parte de informes es la que más usan los jefes de planta."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1001819,
+   "end_ms": 1008045,
+   "text": "Hmm, en la planta de Zaragoza son unas cuarenta personas usando el sistema actual."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1008753,
+   "end_ms": 1013822,
+   "text": "Bueno, el equipo de operaciones está muy ilusionado con el portal."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1014188,
+   "end_ms": 1017919,
+   "text": "Bueno, ahí hay matices pero en el fondo coincido."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1019173,
+   "end_ms": 1024659,
+   "text": "O sea, el tono de los textos encaja con lo que buscáis."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1025419,
+   "end_ms": 1029536,
+   "text": "Sí, la navegación quedó más clara tras la última iteración."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1030335,
+   "end_ms": 1034887,
+   "text": "Exacto, el tono de los textos encaja con lo que buscáis."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1035342,
+   "end_ms": 1040353,
+   "text": "La identidad visual de la marca está bien recogida en el diseño."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1040720,
+   "end_ms": 1046603,
+   "text": "Claro, eso encaja con lo que vimos en los números del trimestre ¿no?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1047158,
+   "end_ms": 1054974,
+   "text": "Y nada, el sistema actual es una hoja de cálculo compartida muy frágil por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1055383,
+   "end_ms": 1062741,
+   "text": "A ver, la parte de informes es la que más usan los jefes de planta o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1063758,
+   "end_ms": 1070795,
+   "text": "Y nada, en la planta de Zaragoza son unas cuarenta personas usando el sistema actual en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1072100,
+   "end_ms": 1076271,
+   "text": "Vale, nuestro equipo tiene experiencia con portales parecidos en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1077052,
+   "end_ms": 1081123,
+   "text": "El tono de los textos encaja con lo que buscáis."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1081859,
+   "end_ms": 1088286,
+   "text": "La parte de informes es la que más usan los jefes de planta digo yo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1088731,
+   "end_ms": 1091041,
+   "text": "Ya veo en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1091601,
+   "end_ms": 1096815,
+   "text": "El sistema actual es una hoja de cálculo compartida muy frágil en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1097775,
+   "end_ms": 1104604,
+   "text": "Y la integración con el ERP, que es SAP: no sé qué versión de API tenemos disponible."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1104957,
+   "end_ms": 1109487,
+   "text": "O sea, perfecto, me sirve por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1110666,
+   "end_ms": 1117640,
+   "text": "Y nada, la identidad visual de la marca está bien recogida en el diseño la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1118078,
+   "end_ms": 1123471,
+   "text": "Mira, las pantallas que vimos en la última reunión gustaron mucho digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1123728,
+   "end_ms": 1128226,
+   "text": "Eh, lo importante es que todos tengamos el mismo contexto vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1128642,
+   "end_ms": 1135019,
+   "text": "Y nada, la identidad visual de la marca está bien recogida en el diseño digo yo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1136331,
+   "end_ms": 1144878,
+   "text": "A ver, la parte de informes es la que más usan los jefes de planta por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1145358,
+   "end_ms": 1147697,
+   "text": "Mira, perfecto, me sirve."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1148476,
+   "end_ms": 1153517,
+   "text": "Claro, es verdad que el último mes ha sido bastante intenso."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1154269,
+   "end_ms": 1162205,
+   "text": "Si la integración con SAP entra en alcance, la fecha de salida del uno de junio queda muy justa."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1162802,
+   "end_ms": 1169418,
+   "text": "Hmm, en la planta de Zaragoza son unas cuarenta personas usando el sistema actual vamos."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1170483,
+   "end_ms": 1176502,
+   "text": "Exacto, eso encaja con lo que vimos en los números del trimestre la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1177573,
+   "end_ms": 1184342,
+   "text": "Eh, la parte de informes es la que más usan los jefes de planta o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1185141,
+   "end_ms": 1192145,
+   "text": "Bueno, en la planta de Zaragoza son unas cuarenta personas usando el sistema actual digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1193100,
+   "end_ms": 1199661,
+   "text": "Eh, la navegación quedó más clara tras la última iteración por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1200707,
+   "end_ms": 1204593,
+   "text": "En resumen es lo que estábamos comentando en general."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1205012,
+   "end_ms": 1210051,
+   "text": "Ya, tampoco es que haya una única forma correcta de hacerlo."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1210350,
+   "end_ms": 1216615,
+   "text": "Claro, el sistema actual es una hoja de cálculo compartida muy frágil en general."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1217943,
+   "end_ms": 1223235,
+   "text": "Exacto, las pantallas que vimos en la última reunión gustaron mucho ¿sabes?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1224010,
+   "end_ms": 1227617,
+   "text": "Eh, ya sabemos cómo suelen ir estas cosas."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1228162,
+   "end_ms": 1234341,
+   "text": "En la planta de Zaragoza son unas cuarenta personas usando el sistema actual la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1234681,
+   "end_ms": 1241085,
+   "text": "Hmm, en la planta de Zaragoza son unas cuarenta personas usando el sistema actual ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1241924,
+   "end_ms": 1247776,
+   "text": "Entendido. Lo del anticipo del treinta por ciento lo confirmo yo con finanzas."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1248829,
+   "end_ms": 1253992,
+   "text": "Bueno, perdona que vuelva un momento sobre lo de antes digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1254510,
+   "end_ms": 1261822,
+   "text": "O sea, la parte de informes es la que más usan los jefes de planta la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1262572,
+   "end_ms": 1268658,
+   "text": "Exacto, la parte de informes es la que más usan los jefes de planta."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1269927,
+   "end_ms": 1277042,
+   "text": "Hmm, eso encaja con lo que vimos en los números del trimestre por lo que he visto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1277825,
+   "end_ms": 1282190,
+   "text": "A ver, es curioso porque al principio pensaba lo contrario."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1282772,
+   "end_ms": 1287924,
+   "text": "Las pantallas que vimos en la última reunión gustaron mucho digo yo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1288204,
+   "end_ms": 1294163,
+   "text": "Vale, la parte de informes es la que más usan los jefes de planta."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1295301,
+   "end_ms": 1300995,
+   "text": "Vale, es un tema que da para mucho pero no quiero alargarme ¿no?"
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1301313,
+   "end_ms": 1306273,
+   "text": "Genial. ¿Y hacemos una demo semanal los viernes a las doce?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1306870,
+   "end_ms": 1310752,
+   "text": "Ya, ya sabemos cómo suelen ir estas cosas."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1311187,
+   "end_ms": 1316219,
+   "text": "Total, yo no le daría más vueltas de las necesarias la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1317286,
+   "end_ms": 1323945,
+   "text": "Eh, en la planta de Zaragoza son unas cuarenta personas usando el sistema actual vamos."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1325159,
+   "end_ms": 1330487,
+   "text": "Total, el sistema actual es una hoja de cálculo compartida muy frágil."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1331561,
+   "end_ms": 1338522,
+   "text": "O sea, la parte de informes es la que más usan los jefes de planta la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1339024,
+   "end_ms": 1342324,
+   "text": "Eh, en resumen es lo que estábamos comentando."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1343264,
+   "end_ms": 1349071,
+   "text": "Mira, el sistema actual es una hoja de cálculo compartida muy frágil la verdad."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1349390,
+   "end_ms": 1355084,
+   "text": "Ya, en la planta de Zaragoza son unas cuarenta personas usando el sistema actual."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1356018,
+   "end_ms": 1362078,
+   "text": "Exacto, eso encaja con lo que vimos en los números del trimestre o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1362747,
+   "end_ms": 1370187,
+   "text": "Mira, me acuerdo de cuando lo montamos la primera vez y era mucho más lento o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1371275,
+   "end_ms": 1375318,
+   "text": "Eh, sí, sí, eso está claro o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1375802,
+   "end_ms": 1379861,
+   "text": "Sí, demo semanal los viernes a las doce, perfecto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1380886,
+   "end_ms": 1385463,
+   "text": "Ya, me parece razonable el enfoque tal y como está planteado."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1385936,
+   "end_ms": 1391932,
+   "text": "Fíjate que el sistema actual es una hoja de cálculo compartida muy frágil ¿sabes?"
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1393061,
+   "end_ms": 1400165,
+   "text": "Y nada, yo lo veo bastante parecido a lo que comentabas antes por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1400659,
+   "end_ms": 1404435,
+   "text": "Eh, los usuarios internos llevan años pidiendo algo así."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1405467,
+   "end_ms": 1411469,
+   "text": "O sea, es más una cuestión de costumbre que de otra cosa o eso creo."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1412794,
+   "end_ms": 1415954,
+   "text": "Y nada, te sigo, te sigo ¿no?"
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1417115,
+   "end_ms": 1418490,
+   "text": "Sí, ajá."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1419573,
+   "end_ms": 1425397,
+   "text": "Eh, el equipo de operaciones está muy ilusionado con el portal en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1426155,
+   "end_ms": 1431541,
+   "text": "A ver, es un tema que da para mucho pero no quiero alargarme."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1432351,
+   "end_ms": 1439137,
+   "text": "Total, la parte de informes es la que más usan los jefes de planta la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1439905,
+   "end_ms": 1446235,
+   "text": "Bueno, la identidad visual de la marca está bien recogida en el diseño digo yo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1446503,
+   "end_ms": 1450576,
+   "text": "Los usuarios internos llevan años pidiendo algo así en general."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1451014,
+   "end_ms": 1455714,
+   "text": "Eso encaja con lo que vimos en los números del trimestre."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1455974,
+   "end_ms": 1462014,
+   "text": "Y nada, lo he estado pensando durante el fin de semana y sigo opinando igual."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1463405,
+   "end_ms": 1469995,
+   "text": "La parte de informes es la que más usan los jefes de planta la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1470487,
+   "end_ms": 1476336,
+   "text": "Fíjate que la identidad visual de la marca está bien recogida en el diseño."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1477511,
+   "end_ms": 1481199,
+   "text": "Creo que en lo general estamos alineados en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1481870,
+   "end_ms": 1486504,
+   "text": "Es curioso porque al principio pensaba lo contrario la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1487417,
+   "end_ms": 1490433,
+   "text": "Muchas gracias a todos, seguimos en contacto."
+  },
+  {
+   "speaker": "speaker-3",
+   "start_ms": 1491653,
+   "end_ms": 1495591,
+   "text": "Bueno, sí, sí, eso está claro en general."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1496772,
+   "end_ms": 1502626,
+   "text": "Ya, el tono de los textos encaja con lo que buscáis o eso creo."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1502878,
+   "end_ms": 1506719,
+   "text": "Vale, los usuarios internos llevan años pidiendo algo así."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1507914,
+   "end_ms": 1513357,
+   "text": "Los usuarios internos llevan años pidiendo algo así por lo que he visto."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1514698,
+   "end_ms": 1519510,
+   "text": "No es algo nuevo pero sí conviene tenerlo presente la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1520221,
+   "end_ms": 1527640,
+   "text": "Y nada, la identidad visual de la marca está bien recogida en el diseño o eso creo."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1528569,
+   "end_ms": 1534640,
+   "text": "Vale, eso encaja con lo que vimos en los números del trimestre la verdad."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1535573,
+   "end_ms": 1541723,
+   "text": "A ver, el sistema actual es una hoja de cálculo compartida muy frágil vamos."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1542272,
+   "end_ms": 1548069,
+   "text": "Bueno, yo lo veo bastante parecido a lo que comentabas antes la verdad."
+  },
+  {
+   "speaker": "speaker-2",
+   "start_ms": 1548724,
+   "end_ms": 1554197,
+   "text": "A ver, el tono de los textos encaja con lo que buscáis."
+  },
+  {
+   "speaker": "speaker-1",
+   "start_ms": 1555527,
+   "end_ms": 1561327,
+   "text": "Sí, me parece razonable el enfoque tal y como está planteado la verdad."
+  },
+  {
+   "speaker": "me",
+   "start_ms": 1561970,
+   "end_ms": 1569277,
+   "text": "Y nada, la gente con la que he hablado tiene una impresión parecida por lo que he visto."
+  }
+ ]
+}
