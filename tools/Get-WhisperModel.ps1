@@ -22,6 +22,24 @@ $minimumVadBytes = 500KB
 $baseUri = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main"
 $vadBaseUri = "https://huggingface.co/sandrohanea/whisper.net/resolve/v4/vad"
 
+# SHA-256 pinned from the Hugging Face LFS metadata of each file. A model not listed here
+# is only checked for a minimum size.
+$knownSha256 = @{
+    "ggml-large-v3-turbo-q5_0.bin" = "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2"
+    "ggml-silero-v5.1.2.bin"       = "29940d98d42b91fbd05ce489f3ecf7c72f0a42f027e4875919a28fb4c04ea2cf"
+}
+
+function Test-ModelHash {
+    param([string]$Name, [string]$Path)
+
+    if (-not $knownSha256.ContainsKey($Name)) {
+        return $true
+    }
+
+    $actual = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+    return $actual -eq $knownSha256[$Name]
+}
+
 function Get-Model {
     param(
         [string]$Name,
@@ -31,8 +49,12 @@ function Get-Model {
     )
 
     if ((Test-Path -LiteralPath $Target) -and ((Get-Item -LiteralPath $Target).Length -ge $Minimum)) {
-        Write-Host "Ya disponible: $Target"
-        return
+        if (Test-ModelHash -Name $Name -Path $Target) {
+            Write-Host "Ya disponible: $Target"
+            return
+        }
+
+        Write-Warning "El hash de $Target no coincide; se descarga de nuevo."
     }
 
     New-Item -ItemType Directory -Path (Split-Path -Parent $Target) -Force | Out-Null
@@ -40,11 +62,19 @@ function Get-Model {
     Remove-Item -LiteralPath $partial -Force -ErrorAction SilentlyContinue
 
     Write-Host "Descargando $Name..."
-    Invoke-WebRequest -Uri "$BaseUri/$Name" -OutFile $partial
+    # Windows PowerShell 5.1 can default to TLS 1.0; Hugging Face requires TLS 1.2+.
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+    $ProgressPreference = "SilentlyContinue"
+    Invoke-WebRequest -Uri "$BaseUri/$Name" -OutFile $partial -UseBasicParsing
 
     if ((Get-Item -LiteralPath $partial).Length -lt $Minimum) {
         Remove-Item -LiteralPath $partial -Force
         throw "La descarga de $Name esta incompleta."
+    }
+
+    if (-not (Test-ModelHash -Name $Name -Path $partial)) {
+        Remove-Item -LiteralPath $partial -Force
+        throw "El SHA-256 de $Name no coincide con el valor fijado."
     }
 
     Move-Item -LiteralPath $partial -Destination $Target -Force
