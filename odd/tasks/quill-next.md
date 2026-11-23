@@ -86,12 +86,15 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
       need per-track peak/RMS from RecordingSession, Windows checks.
 
 ### Discreet mode (owner request 2026-11-23, default ON)
-- [ ] F14 Discreet mode: all Quill windows excluded from screen capture
+- [x] F14 Discreet mode: all Quill windows excluded from screen capture
       (SetWindowDisplayAffinity WDA_EXCLUDEFROMCAPTURE, fallback WDA_MONITOR) via
       ThemeBootstrapper.Attach; no taskbar buttons / Alt+Tab while recording; neutral tray icon
       option (no red recording dot); all balloon/toast notifications suppressed (shown in the
       excluded panel instead); global hotkey to show/hide the companion panel; setting
       `privacy.discreet_mode` (default true). Route D (parallel with F8).
+      Evidence: 8584ef0, 9f564fe, b9008c1, merged clean. Post-merge: Core 354/354, Windows 0/0.
+      Cannot hide: tray icon/tooltip (neutral instead), shell balloons (suppressed), common
+      dialogs/MessageBox. I1: set TrayController.CompanionPanel, show Notifier events in panel.
 
 ### Integration (after Wave B)
 - [ ] I1 Composition root: real ISessionActions (F4 summaries, F5 speakers, F8 playback), one
