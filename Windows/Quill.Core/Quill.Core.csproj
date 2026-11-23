@@ -14,6 +14,8 @@
   <ItemGroup>
     <!-- Built-in summary templates, read by Templates/DefaultTemplates.cs. -->
     <EmbeddedResource Include="Templates/Defaults/*.md" LogicalName="Quill.Core.Templates.Defaults.%(Filename)%(Extension)" />
+    <!-- In-app AI-pack download catalog, read by AiPack/Download/AiPackCatalog.cs. -->
+    <EmbeddedResource Include="AiPack/Download/ai-pack.catalog.json" LogicalName="Quill.Core.AiPack.Download.ai-pack.catalog.json" />
   </ItemGroup>
 
   <ItemGroup>
