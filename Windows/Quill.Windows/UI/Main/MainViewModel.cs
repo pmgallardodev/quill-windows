@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Quill.Core.Ports;
 using Quill.Core.Storage;
+using Quill.Windows.Import;
 using Quill.Windows.Resources;
 using Quill.Windows.Sessions;
 using Quill.Windows.Transcription;
@@ -57,6 +58,7 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
     private readonly ISessionActions _actions;
     private readonly IUiShell _shell;
     private readonly IClock _clock;
+    private readonly IRecordingImporter _importer;
     private readonly DispatcherTimer _pump;
     private readonly DispatcherTimer _searchDebounce;
     private readonly ConcurrentDictionary<string, TranscriptionUpdate> _inFlight = new(StringComparer.OrdinalIgnoreCase);
@@ -88,8 +90,10 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
         ISessionStore? store = null,
         ISessionActions? actions = null,
         IUiShell? shell = null,
-        IClock? clock = null)
+        IClock? clock = null,
+        IRecordingImporter? importer = null)
     {
+        _importer = importer ?? new RecordingImporter(recordingsRoot);
         _recordingsRoot = recordingsRoot;
         _transcription = transcription;
         _dispatcher = dispatcher;
@@ -554,6 +558,22 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
 
     private void OnUpdate(TranscriptionUpdate update) =>
         _inFlight[update.SessionDirectory] = update;
+
+    /// <summary>
+    /// The "Importar grabación" dialog for the picked files. A finished import is queued for
+    /// transcription right away and opened in the list.
+    /// </summary>
+    public ImportViewModel CreateImport(IReadOnlyList<string> paths) =>
+        new(paths, _importer, OnImported);
+
+    private void OnImported(string sessionDirectory)
+    {
+        _transcription.Enqueue(sessionDirectory);
+        IsMyTasksVisible = false;
+        _pendingSelectionDirectory = sessionDirectory;
+        StatusText = Loc.Format("Import_Done", Path.GetFileName(sessionDirectory));
+        Refresh();
+    }
 
     private void Retry(MeetingRowViewModel row)
     {
