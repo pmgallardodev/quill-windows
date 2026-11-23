@@ -66,7 +66,7 @@ Say "threads used: $Threads"
 if (-not (Test-Path "$env:WINDIR\System32\vulkan-1.dll")) { Say "WARNING: vulkan-1.dll not found; GPU runs will fall back or fail" }
 
 $sdk = & dotnet --list-sdks 2>$null
-if (-not ($sdk -match "^8\.")) { throw ".NET 8 SDK is required (dotnet --list-sdks shows: $sdk)" }
+if (-not ($sdk -match "^10\.")) { throw ".NET 10 SDK is required (dotnet --list-sdks shows: $sdk)" }
 
 # ---------------------------------------------------------------- models
 $HF = "https://huggingface.co"
@@ -116,7 +116,7 @@ Say "diarization voices: $v1 / $v2"
 Say "== build"
 & dotnet build "$BenchDir\Quill.Bench" -c Release -r win-x64 -nologo -v q | Out-Null
 if ($LASTEXITCODE -ne 0) { throw "build failed" }
-$Exe = "$BenchDir\Quill.Bench\bin\Release\net8.0\win-x64\Quill.Bench.exe"
+$Exe = "$BenchDir\Quill.Bench\bin\Release\net10.0\win-x64\Quill.Bench.exe"
 
 # ---------------------------------------------------------------- whisper
 Say "== whisper live chunks (target: live transcript <= 10 s behind speech)"

@@ -6,6 +6,7 @@ using LLama.Common;
 using LLama.Native;
 using LLama.Sampling;
 using Quill.Core.Ports;
+using Quill.Core.Settings;
 using Quill.Core.Summaries;
 
 namespace Quill.Windows.Summaries;
@@ -16,20 +17,49 @@ public sealed record LlamaSharpOptions
     /// <summary>Context window in tokens. Summary use cases size their chunks below it.</summary>
     public int ContextTokens { get; init; } = 8192;
 
-    /// <summary>Prefer the Vulkan backend. CPU is used when false or when Vulkan cannot load.</summary>
-    public bool UseGpu { get; init; } = true;
+    /// <summary>
+    /// Backend preference (settings <c>ai.gpu</c>). <see cref="GpuPreference.Auto"/> and
+    /// <see cref="GpuPreference.Vulkan"/> load the Vulkan build of llama.cpp and fall back to the
+    /// CPU builds when it cannot load; <see cref="GpuPreference.Cpu"/> never touches the GPU.
+    /// </summary>
+    public GpuPreference Gpu { get; init; } = GpuPreference.Auto;
 
-    /// <summary>Layers offloaded to the GPU when <see cref="UseGpu"/>; a large value means all.</summary>
+    /// <summary>Vulkan device index used as the main GPU (settings <c>ai.gpu_device</c>); null lets llama.cpp choose.</summary>
+    public int? GpuDevice { get; init; }
+
+    /// <summary>Layers offloaded to the GPU unless <see cref="Gpu"/> is CPU; a large value means all.</summary>
     public int GpuLayers { get; init; } = 999;
+
+    /// <summary>
+    /// GGUF file that replaces the AI pack's model (settings <c>ai.llm_model</c>). Null or blank
+    /// uses the AI pack; a path that does not exist makes the model unavailable, as a missing pack does.
+    /// </summary>
+    public string? ModelPath { get; init; }
 
     /// <summary>Fixed sampling seed so the same transcript gives the same summary.</summary>
     public uint Seed { get; init; } = 42;
 }
 
+/// <summary>How the native llama.cpp library and the model are set up for one <see cref="LlamaSharpOptions"/>.</summary>
+/// <param name="UseVulkan">Ask LLamaSharp for its Vulkan build.</param>
+/// <param name="AutoFallback">Let LLamaSharp fall back to the CPU builds when the requested one cannot load.</param>
+/// <param name="GpuLayers">Layers to offload; 0 keeps everything on the CPU.</param>
+/// <param name="MainGpu">Main GPU device index, or null for the llama.cpp default.</param>
+internal readonly record struct LlamaBackendPlan(bool UseVulkan, bool AutoFallback, int GpuLayers, int? MainGpu)
+{
+    public static LlamaBackendPlan For(LlamaSharpOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        return options.Gpu == GpuPreference.Cpu
+            ? new LlamaBackendPlan(UseVulkan: false, AutoFallback: true, GpuLayers: 0, MainGpu: null)
+            : new LlamaBackendPlan(UseVulkan: true, AutoFallback: true, Math.Max(0, options.GpuLayers), options.GpuDevice is >= 0 ? options.GpuDevice : null);
+    }
+}
+
 /// <summary>
 /// <see cref="ILanguageModel"/> over LLamaSharp (llama.cpp). The GGUF file comes from the AI pack
-/// and is resolved and loaded on first use, so installing the pack while the app runs works without
-/// a restart. A missing file, or weights or native libraries that fail to load, surface as
+/// (or from <see cref="LlamaSharpOptions.ModelPath"/>) and is resolved and loaded on first use, so
+/// installing the pack while the app runs works without a restart. A missing file, or weights or native libraries that fail to load, surface as
 /// <see cref="LanguageModelUnavailableException"/>, which the use cases report as "AI pack missing".
 /// Requests run one at a time; each one gets a fresh context (stateless).
 /// </summary>
@@ -51,8 +81,10 @@ public sealed class LlamaSharpLanguageModel : ILanguageModel, IDisposable
     /// <param name="resolveModelPath">Returns the GGUF path, or null when the AI pack has no model.</param>
     public LlamaSharpLanguageModel(Func<string?> resolveModelPath, LlamaSharpOptions? options = null)
     {
-        _resolveModelPath = resolveModelPath ?? throw new ArgumentNullException(nameof(resolveModelPath));
+        ArgumentNullException.ThrowIfNull(resolveModelPath);
         _options = options ?? new LlamaSharpOptions();
+        var overridePath = _options.ModelPath;
+        _resolveModelPath = string.IsNullOrWhiteSpace(overridePath) ? resolveModelPath : () => overridePath;
         if (_options.ContextTokens < 512)
         {
             throw new ArgumentOutOfRangeException(nameof(options), _options.ContextTokens, "context must be at least 512 tokens");
@@ -156,12 +188,17 @@ public sealed class LlamaSharpLanguageModel : ILanguageModel, IDisposable
                 string.IsNullOrWhiteSpace(path) ? "the AI pack has no language model" : $"language model not found: {path}");
         }
 
-        ConfigureNativeLibrary(_options.UseGpu);
+        var plan = LlamaBackendPlan.For(_options);
+        ConfigureNativeLibrary(plan);
         var parameters = new ModelParams(path)
         {
             ContextSize = (uint)_options.ContextTokens,
-            GpuLayerCount = _options.UseGpu ? _options.GpuLayers : 0,
+            GpuLayerCount = plan.GpuLayers,
         };
+        if (plan.MainGpu is { } mainGpu)
+        {
+            parameters.MainGpu = mainGpu;
+        }
 
         try
         {
@@ -178,10 +215,11 @@ public sealed class LlamaSharpLanguageModel : ILanguageModel, IDisposable
     }
 
     /// <summary>
-    /// Picks the Vulkan build of llama.cpp when asked, falling back to the CPU builds (AVX2/AVX...)
-    /// when Vulkan is unavailable. Must run before the first native call; later calls are ignored.
+    /// Picks the Vulkan build of llama.cpp when asked, falling back to the CPU builds (the best AVX
+    /// level the processor supports is auto-detected) when Vulkan is unavailable. The choice is
+    /// process-wide: it must run before the first native call, and later calls are ignored.
     /// </summary>
-    private static void ConfigureNativeLibrary(bool useGpu)
+    private static void ConfigureNativeLibrary(LlamaBackendPlan plan)
     {
         lock (NativeGate)
         {
@@ -193,7 +231,7 @@ public sealed class LlamaSharpLanguageModel : ILanguageModel, IDisposable
             _nativeConfigured = true;
             try
             {
-                NativeLibraryConfig.All.WithVulkan(useGpu).WithAutoFallback(true);
+                NativeLibraryConfig.All.WithVulkan(plan.UseVulkan).WithAutoFallback(plan.AutoFallback);
             }
             catch (InvalidOperationException)
             {

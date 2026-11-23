@@ -22,7 +22,7 @@ public sealed class MeetingExportServiceTests
 
         Assert.Equal(MarkdownExportStatus.Created, result.Status);
         Assert.Equal(Path.Combine(temp.Path, "2026-11-23-daily.md"), result.Path);
-        var text = File.ReadAllText(result.Path);
+        var text = File.ReadAllText(result.Path!);
         Assert.Contains("template: \"client-call\"", text);
         Assert.Contains("**[00:00] Yo:** Solo en vivo.", text);
     }

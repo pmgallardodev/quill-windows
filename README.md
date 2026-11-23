@@ -10,7 +10,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Windows-11-0078D4?logo=windows&logoColor=white&style=flat-square" alt="Windows 11" />
-  <img src="https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet&logoColor=white&style=flat-square" alt=".NET 8" />
+  <img src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white&style=flat-square" alt=".NET 10" />
   <img src="https://img.shields.io/badge/Whisper-large--v3--turbo-412991?style=flat-square" alt="Whisper large-v3-turbo" />
   <img src="https://img.shields.io/badge/Audio-WASAPI-0078D4?style=flat-square" alt="WASAPI" />
   <img src="https://img.shields.io/badge/Transcription-local-0F766E?style=flat-square" alt="Local transcription" />
@@ -162,7 +162,7 @@ The published ZIP is self-contained: it does not require the .NET SDK or runtime
 ### To develop or publish
 
 - Windows 11 x64.
-- .NET SDK 8.
+- .NET SDK 10 (10.0.404 or a later 10.0 feature band, pinned by `global.json`).
 - PowerShell.
 - Internet access only for the initial release build to retrieve the model from the configured source.
 
@@ -349,6 +349,8 @@ The sessions window records which model produced each transcript and how long it
 ### GPU acceleration
 
 The package includes both the CPU and the Vulkan runtimes. Whisper.net probes them in order and falls back to the next one when a driver is missing, so a machine without a usable GPU keeps working on CPU with no configuration. `transcribe.log` records the thread count used for each track.
+
+The local language model used for summaries (LLamaSharp / llama.cpp) follows the same rule: it loads the Vulkan build when it can and falls back to the CPU build otherwise. `ai.gpu` in `config.json` accepts `auto` (default), `vulkan` or `cpu`; `ai.gpu_device` picks the Vulkan device index, and `ai.llm_model` points at a GGUF file that replaces the AI pack's model.
 
 ## Local data
 

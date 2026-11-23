@@ -31,7 +31,7 @@ MODELS=(
 )
 
 dotnet build "$HERE/Quill.Bench" -c Release -nologo -v q || exit 1
-BIN="$HERE/Quill.Bench/bin/Release/net8.0/Quill.Bench"
+BIN="$HERE/Quill.Bench/bin/Release/net10.0/Quill.Bench"
 
 for entry in "${MODELS[@]}"; do
   label="${entry%%|*}"
