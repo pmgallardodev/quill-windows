@@ -106,14 +106,20 @@ internal sealed class MeetingDetailViewModel : ObservableObject
         ISessionActions actions,
         IUiShell shell,
         MeetingCommands commands,
-        Func<TimeSpan, CancellationToken, Task>? delay = null)
+        Func<TimeSpan, CancellationToken, Task>? delay = null,
+        PlayerViewModel? player = null)
     {
         Row = row;
         _store = store;
         _actions = actions;
         Commands = commands;
         Summary = new SummaryViewModel(store, actions, shell);
-        Transcript = new TranscriptViewModel(actions);
+        player?.SetSession(row.SessionId);
+        Transcript = new TranscriptViewModel(actions, player, store)
+        {
+            ResummarizeHandler = ResummarizeAsync,
+            ReloadHandler = LoadAsync,
+        };
         Notes = new NotesViewModel(store, delay);
         DateText = row.Started == default ? string.Empty : UiFormat.Date(row.Started, "Format_MeetingDate");
         IdentifySpeakersCommand = new RelayCommand(
@@ -255,6 +261,7 @@ internal sealed class MeetingDetailViewModel : ObservableObject
     public async Task CloseAsync()
     {
         Row.PropertyChanged -= OnRowPropertyChanged;
+        Transcript.Detach();
         _lifetime.Cancel();
         await Notes.FlushAsync().ConfigureAwait(true);
     }
@@ -306,6 +313,7 @@ internal sealed class MeetingDetailViewModel : ObservableObject
         }
 
         Transcript.Load(Row.SessionId, load.Entries, load.EmptyStatus);
+        await MarkEditedLinesAsync(generation, token).ConfigureAwait(true);
 
         var participation = load.Participation;
         if (participation.HasSpeech)
@@ -356,6 +364,38 @@ internal sealed class MeetingDetailViewModel : ObservableObject
         var markers = SessionMetadata.TryRead(directory)?.Markers ?? new List<long>();
         var entries = TranscriptViewModel.BuildEntries(transcript.Segments, markers, labels, token);
         return new TranscriptLoad(entries, emptyStatus, ParticipationResult.Compute(transcript.Segments, duration));
+    }
+
+    /// <summary>
+    /// The list reads the v1 shape, which has no "edited" field: read the store's view of the
+    /// same transcript.json to mark corrected lines. Failing only loses the mark.
+    /// </summary>
+    private async Task MarkEditedLinesAsync(int generation, CancellationToken token)
+    {
+        try
+        {
+            var segments = await _store.LoadTranscriptAsync(Row.SessionId, Quill.Core.Domain.TranscriptPass.Final, token).ConfigureAwait(true);
+            if (generation == _loadGeneration && !token.IsCancellationRequested)
+            {
+                Transcript.ApplyEditedFlags(segments);
+            }
+        }
+        catch (Exception exception) when (exception is OperationCanceledException or IOException or UnauthorizedAccessException or ArgumentException)
+        {
+        }
+    }
+
+    /// <summary>"Volver a resumir": the Summary tab generates again; null when it worked.</summary>
+    private async Task<string?> ResummarizeAsync()
+    {
+        if (!Summary.GenerateCommand.CanExecute(null))
+        {
+            return Loc.Get(_actions.IsAiAvailable ? "Transcript_InProgress" : "Status_AiPackMissing");
+        }
+
+        SelectedTab = SummaryTab;
+        await Summary.GenerateAsync().ConfigureAwait(true);
+        return Summary.IsFailed ? Summary.ErrorText : null;
     }
 
     private async Task IdentifySpeakersAsync()

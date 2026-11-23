@@ -540,6 +540,14 @@ internal sealed class TranscriptionCoordinator : IDisposable
         {
             if (!metadata.Files.TryGetValue(name, out var fileName))
             {
+                // An imported single-file session lists only the track it has. Only a
+                // session that lists no track at all is broken.
+                if (metadata.Files.ContainsKey("mic") || metadata.Files.ContainsKey("system"))
+                {
+                    Log(sessionDirectory, $"track not recorded: {name}");
+                    continue;
+                }
+
                 allTracksSucceeded = false;
                 Log(sessionDirectory, $"missing track entry: {name}");
                 continue;

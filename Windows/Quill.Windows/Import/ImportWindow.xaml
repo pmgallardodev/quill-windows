@@ -1,0 +1,73 @@
+<ui:FluentWindow x:Class="Quill.Windows.Import.ImportWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:loc="clr-namespace:Quill.Windows.Resources"
+                 xmlns:main="clr-namespace:Quill.Windows.UI"
+                 x:ClassModifier="internal"
+                 Title="{loc:Str Import_Title}"
+                 Width="520" SizeToContent="Height"
+                 ResizeMode="NoResize"
+                 WindowStartupLocation="CenterOwner"
+                 ShowInTaskbar="False"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica">
+    <ui:FluentWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <main:InverseBooleanToVisibilityConverter x:Key="NotToVisibility" />
+    </ui:FluentWindow.Resources>
+
+    <StackPanel>
+        <ui:TitleBar Title="{loc:Str Import_Title}" ShowMinimize="False" ShowMaximize="False" />
+
+        <StackPanel Margin="{StaticResource Quill.Padding.Window}">
+            <TextBlock Text="{loc:Str Import_Description}" TextWrapping="Wrap"
+                       Style="{StaticResource Quill.Text.Secondary}" Margin="0,0,0,12" />
+
+            <!-- One file: who speaks in it -->
+            <StackPanel Visibility="{Binding IsSingle, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,12">
+                <TextBlock Text="{Binding FileName}" Style="{StaticResource Quill.Text.BodyStrong}" Margin="0,0,0,8" />
+                <TextBlock Text="{loc:Str Import_WhoSpeaks}" Margin="0,0,0,4" />
+                <ComboBox ItemsSource="{Binding Roles}" SelectedItem="{Binding SelectedRole, Mode=TwoWay}"
+                          DisplayMemberPath="Label"
+                          AutomationProperties.Name="{loc:Str Import_WhoSpeaks}" />
+            </StackPanel>
+
+            <!-- Two files: microphone and system -->
+            <DockPanel Visibility="{Binding IsPair, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,12">
+                <ui:Button DockPanel.Dock="Right" VerticalAlignment="Center" Margin="8,0,0,0"
+                           Appearance="Transparent"
+                           ToolTip="{loc:Str Import_Swap}"
+                           AutomationProperties.Name="{loc:Str Import_Swap}"
+                           Command="{Binding SwapCommand}">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="ArrowSwap24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+                <StackPanel>
+                    <TextBlock Text="{Binding MicrophoneText}" TextTrimming="CharacterEllipsis" Margin="0,0,0,4" />
+                    <TextBlock Text="{Binding SystemText}" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </DockPanel>
+
+            <StackPanel Visibility="{Binding HasPlan, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,12">
+                <TextBlock Text="{Binding TitleText}" TextTrimming="CharacterEllipsis" Style="{StaticResource Quill.Text.Caption}" />
+                <TextBlock Text="{Binding StartedText}" Style="{StaticResource Quill.Text.Caption}" />
+            </StackPanel>
+
+            <StackPanel Visibility="{Binding IsImporting, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,12">
+                <ProgressBar Height="4" Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}" Margin="0,0,0,4" />
+                <TextBlock Text="{Binding ProgressText}" Style="{StaticResource Quill.Text.Caption}" />
+            </StackPanel>
+
+            <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" Margin="0,0,0,12"
+                       Foreground="{DynamicResource Quill.Brush.Recording}"
+                       Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <ui:Button Content="{loc:Str Action_Cancel}" Margin="0,0,8,0" Command="{Binding CancelCommand}" IsCancel="True" />
+                <ui:Button Content="{loc:Str Import_Start}" Appearance="Primary" Command="{Binding ImportCommand}" IsDefault="True" />
+            </StackPanel>
+        </StackPanel>
+    </StackPanel>
+</ui:FluentWindow>

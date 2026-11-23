@@ -833,6 +833,129 @@ Esto no se puede deshacer.</value>
   <data name="MyTasks_Done" xml:space="preserve">
     <value>Hechas</value>
   </data>
+  <data name="Import_Action" xml:space="preserve">
+    <value>Importar grabación</value>
+  </data>
+  <data name="Import_Title" xml:space="preserve">
+    <value>Importar grabación</value>
+  </data>
+  <data name="Import_PickerTitle" xml:space="preserve">
+    <value>Elige una o dos grabaciones</value>
+  </data>
+  <data name="Import_FileFilter" xml:space="preserve">
+    <value>Audio y vídeo</value>
+  </data>
+  <data name="Import_Description" xml:space="preserve">
+    <value>Con un archivo se crea una reunión de una sola pista. Con dos archivos, uno es tu micrófono y el otro el audio del sistema.</value>
+  </data>
+  <data name="Import_WhoSpeaks" xml:space="preserve">
+    <value>¿Quién habla en la grabación?</value>
+  </data>
+  <data name="Import_RoleOthers" xml:space="preserve">
+    <value>Otras personas (una llamada)</value>
+  </data>
+  <data name="Import_RoleMe" xml:space="preserve">
+    <value>Solo yo</value>
+  </data>
+  <data name="Import_RoleMixed" xml:space="preserve">
+    <value>Varias personas, incluido yo</value>
+  </data>
+  <data name="Import_Microphone" xml:space="preserve">
+    <value>Micrófono (yo): {0}</value>
+  </data>
+  <data name="Import_System" xml:space="preserve">
+    <value>Sistema (otros): {0}</value>
+  </data>
+  <data name="Import_Swap" xml:space="preserve">
+    <value>Intercambiar pistas</value>
+  </data>
+  <data name="Import_MeetingTitle" xml:space="preserve">
+    <value>Título: {0}</value>
+  </data>
+  <data name="Import_Started" xml:space="preserve">
+    <value>Inicio: {0}</value>
+  </data>
+  <data name="Import_Start" xml:space="preserve">
+    <value>Importar</value>
+  </data>
+  <data name="Import_Converting" xml:space="preserve">
+    <value>Convirtiendo el audio... {0} %</value>
+  </data>
+  <data name="Import_Failed" xml:space="preserve">
+    <value>No se pudo importar: {0}</value>
+  </data>
+  <data name="Import_Unsupported" xml:space="preserve">
+    <value>Formato no admitido: {0}</value>
+  </data>
+  <data name="Import_FileCount" xml:space="preserve">
+    <value>Elige uno o dos archivos.</value>
+  </data>
+  <data name="Import_SameFile" xml:space="preserve">
+    <value>Has elegido el mismo archivo dos veces.</value>
+  </data>
+  <data name="Import_Done" xml:space="preserve">
+    <value>Grabación importada ({0}). Se transcribirá en segundo plano.</value>
+  </data>
+  <data name="Player_Play" xml:space="preserve">
+    <value>Reproducir</value>
+  </data>
+  <data name="Player_Pause" xml:space="preserve">
+    <value>Pausar</value>
+  </data>
+  <data name="Player_Position" xml:space="preserve">
+    <value>Posición de reproducción</value>
+  </data>
+  <data name="Player_Speed" xml:space="preserve">
+    <value>Velocidad de reproducción</value>
+  </data>
+  <data name="Player_Follow" xml:space="preserve">
+    <value>Seguir la reproducción</value>
+  </data>
+  <data name="Player_NoAudio" xml:space="preserve">
+    <value>El audio de esta reunión no está disponible.</value>
+  </data>
+  <data name="Player_Failed" xml:space="preserve">
+    <value>No se pudo reproducir el audio: {0}</value>
+  </data>
+  <data name="Edit_Edit" xml:space="preserve">
+    <value>Editar texto</value>
+  </data>
+  <data name="Edit_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="Edit_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Edit_Hint" xml:space="preserve">
+    <value>Intro guarda · Esc cancela</value>
+  </data>
+  <data name="Edit_Edited" xml:space="preserve">
+    <value>Editado</value>
+  </data>
+  <data name="Edit_SaveFailed" xml:space="preserve">
+    <value>No se pudo guardar la corrección: {0}</value>
+  </data>
+  <data name="Edit_Resummarize" xml:space="preserve">
+    <value>Volver a resumir</value>
+  </data>
+  <data name="Edit_ResummarizeHint" xml:space="preserve">
+    <value>Has corregido el transcript. Vuelve a generar el resumen para incluir los cambios.</value>
+  </data>
+  <data name="Edit_Resummarizing" xml:space="preserve">
+    <value>Generando el resumen...</value>
+  </data>
+  <data name="Edit_Resummarized" xml:space="preserve">
+    <value>Resumen actualizado.</value>
+  </data>
+  <data name="Edit_ResummarizeFailed" xml:space="preserve">
+    <value>No se pudo volver a resumir: {0}</value>
+  </data>
+  <data name="Edit_ReassignSpeaker" xml:space="preserve">
+    <value>Cambiar interlocutor</value>
+  </data>
+  <data name="Edit_ReassignFailed" xml:space="preserve">
+    <value>No se pudo cambiar el interlocutor: {0}</value>
+  </data>
   <!-- Companion panel (F7): floating window shown while recording -->
   <data name="Companion_Title" xml:space="preserve">
     <value>Quill en vivo</value>

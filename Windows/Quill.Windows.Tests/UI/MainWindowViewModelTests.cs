@@ -33,11 +33,24 @@ internal sealed class FakeSessionStore : ISessionStore
     public Task<Session?> LoadSessionAsync(string sessionId, CancellationToken cancellationToken) =>
         Task.FromResult<Session?>(null);
 
-    public Task<IReadOnlyList<TranscriptSegment>> LoadTranscriptAsync(string sessionId, TranscriptPass pass, CancellationToken cancellationToken) =>
-        Task.FromResult<IReadOnlyList<TranscriptSegment>>(Array.Empty<TranscriptSegment>());
+    public Dictionary<string, IReadOnlyList<TranscriptSegment>> Transcripts { get; } = new();
 
-    public Task SaveTranscriptAsync(string sessionId, TranscriptPass pass, TranscriptInfo info, IReadOnlyList<TranscriptSegment> segments, CancellationToken cancellationToken) =>
-        Task.CompletedTask;
+    public List<(string Id, TranscriptInfo Info, IReadOnlyList<TranscriptSegment> Segments)> SavedTranscripts { get; } = new();
+
+    public Task<IReadOnlyList<TranscriptSegment>> LoadTranscriptAsync(string sessionId, TranscriptPass pass, CancellationToken cancellationToken) =>
+        Task.FromResult(Transcripts.TryGetValue(sessionId, out var segments) ? segments : (IReadOnlyList<TranscriptSegment>)Array.Empty<TranscriptSegment>());
+
+    public Task SaveTranscriptAsync(string sessionId, TranscriptPass pass, TranscriptInfo info, IReadOnlyList<TranscriptSegment> segments, CancellationToken cancellationToken)
+    {
+        if (FailSaves)
+        {
+            return Task.FromException(new IOException("disk full"));
+        }
+
+        Transcripts[sessionId] = segments;
+        SavedTranscripts.Add((sessionId, info, segments));
+        return Task.CompletedTask;
+    }
 
     public Task<MeetingSummary?> LoadSummaryAsync(string sessionId, SummaryKind kind, CancellationToken cancellationToken) =>
         Task.FromResult(Summaries.TryGetValue((sessionId, kind), out var summary) ? summary : null);
@@ -92,6 +105,16 @@ internal sealed class FakeSessionActions : ISessionActions
     public Task IdentifySpeakersAsync(string sessionId, CancellationToken cancellationToken) => Task.CompletedTask;
 
     public void PlayAt(string sessionId, TimeSpan time) => Played.Add((sessionId, time));
+
+    public bool CanReassignSpeakers { get; set; }
+
+    public List<(string SessionId, TimeSpan Start, string SpeakerId)> Reassigned { get; } = new();
+
+    public Task ReassignSpeakerAsync(string sessionId, TimeSpan segmentStart, string speakerId, CancellationToken cancellationToken)
+    {
+        Reassigned.Add((sessionId, segmentStart, speakerId));
+        return Task.CompletedTask;
+    }
 }
 
 internal sealed class FakeUiShell : IUiShell

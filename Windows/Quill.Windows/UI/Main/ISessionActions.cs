@@ -27,6 +27,21 @@ internal interface ISessionActions
 
     /// <summary>Request to play the session audio from <paramref name="time"/> (session clock). Fire and forget.</summary>
     void PlayAt(string sessionId, TimeSpan time);
+
+    /// <summary>
+    /// True when <see cref="ReassignSpeakerAsync"/> works (speaker correction wired, F5).
+    /// The transcript only offers "Cambiar interlocutor" when it is.
+    /// </summary>
+    bool CanReassignSpeakers => false;
+
+    /// <summary>
+    /// Moves the transcript segment that starts at <paramref name="segmentStart"/> to
+    /// <paramref name="speakerId"/> and saves the transcript (and speaker corrections).
+    /// Completes when saved; the window then reloads. Throws on failure.
+    /// Default: not available (<see cref="NotSupportedException"/>).
+    /// </summary>
+    Task ReassignSpeakerAsync(string sessionId, TimeSpan segmentStart, string speakerId, CancellationToken cancellationToken) =>
+        Task.FromException(new NotSupportedException("Speaker reassignment is not available."));
 }
 
 /// <summary>Raised by actions that need the AI pack when it is not installed.</summary>

@@ -1,6 +1,9 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
+using Quill.Core.Import;
+using Quill.Windows.Import;
+using Quill.Windows.Resources;
 using Quill.Windows.UI.Theme;
 using Wpf.Ui.Controls;
 
@@ -40,6 +43,26 @@ internal sealed partial class MainWindow : FluentWindow
         }
 
         Activate();
+    }
+
+    /// <summary>"Importar grabación": pick one or two files, then the import dialog.</summary>
+    private void OnImportClick(object sender, RoutedEventArgs e)
+    {
+        var extensions = string.Join(";", ImportPlan.SupportedExtensions.Select(extension => $"*{extension}"));
+        var picker = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = Loc.Get("Import_PickerTitle"),
+            Filter = $"{Loc.Get("Import_FileFilter")} ({extensions})|{extensions}",
+            Multiselect = true,
+            CheckFileExists = true,
+        };
+        if (picker.ShowDialog(this) != true)
+        {
+            return;
+        }
+
+        var dialog = new ImportWindow(_viewModel.CreateImport(picker.FileNames)) { Owner = this };
+        dialog.ShowDialog();
     }
 
     /// <summary>Closing hides: the tray keeps the app alive.</summary>

@@ -9,9 +9,68 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <local:InverseBooleanToVisibilityConverter x:Key="NotToVisibility" />
+
+        <!-- Per-line menu; its DataContext is the line (TranscriptEntryViewModel). -->
+        <ContextMenu x:Key="LineMenu" x:Shared="False">
+            <MenuItem Header="{loc:Str Edit_Edit}" Click="OnEditMenuClick" IsEnabled="{Binding CanEdit}" />
+            <MenuItem Header="{loc:Str Edit_ReassignSpeaker}" ItemsSource="{Binding ReassignOptions}"
+                      Visibility="{Binding CanReassign, Converter={StaticResource BoolToVisibility}}">
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="Header" Value="{Binding Label}" />
+                        <Setter Property="Command" Value="{Binding Command}" />
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+            </MenuItem>
+        </ContextMenu>
     </UserControl.Resources>
 
     <DockPanel Margin="0,8,0,0">
+        <!-- Player bar: audio of this meeting on the session clock -->
+        <Border DockPanel.Dock="Bottom" Margin="0,8,0,0" Padding="8,4"
+                CornerRadius="{StaticResource Quill.Radius.Medium}"
+                Background="{DynamicResource Quill.Brush.NeutralSubtle}"
+                DataContext="{Binding Player}"
+                Visibility="{Binding DataContext.HasPlayer, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisibility}}">
+            <DockPanel>
+                <ui:Button DockPanel.Dock="Left" Appearance="Transparent"
+                           ToolTip="{loc:Str Player_Play}" AutomationProperties.Name="{loc:Str Player_Play}"
+                           Command="{Binding PlayPauseCommand}"
+                           Visibility="{Binding IsPlaying, Converter={StaticResource NotToVisibility}}">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="Play24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+                <ui:Button DockPanel.Dock="Left" Appearance="Transparent"
+                           ToolTip="{loc:Str Player_Pause}" AutomationProperties.Name="{loc:Str Player_Pause}"
+                           Command="{Binding PlayPauseCommand}"
+                           Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVisibility}}">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="Pause24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+                <CheckBox DockPanel.Dock="Right" Margin="8,0,0,0" VerticalAlignment="Center"
+                          Content="{loc:Str Player_Follow}"
+                          IsChecked="{Binding DataContext.FollowPlayback, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}" />
+                <ComboBox DockPanel.Dock="Right" Margin="8,0,0,0" MinWidth="72" VerticalAlignment="Center"
+                          ItemsSource="{Binding Speeds}" SelectedItem="{Binding SelectedSpeed, Mode=TwoWay}"
+                          DisplayMemberPath="Label"
+                          ToolTip="{loc:Str Player_Speed}" AutomationProperties.Name="{loc:Str Player_Speed}" />
+                <TextBlock DockPanel.Dock="Right" Margin="8,0,0,0" VerticalAlignment="Center"
+                           Text="{Binding TimeText}" Style="{StaticResource Quill.Text.Mono}" />
+                <Grid VerticalAlignment="Center" Margin="4,0,0,0">
+                    <Slider Minimum="0" Maximum="{Binding DurationSeconds}"
+                            Value="{Binding PositionSeconds, Mode=TwoWay}"
+                            IsMoveToPointEnabled="True"
+                            AutomationProperties.Name="{loc:Str Player_Position}"
+                            Visibility="{Binding HasStatus, Converter={StaticResource NotToVisibility}}" />
+                    <TextBlock Text="{Binding Status}" TextTrimming="CharacterEllipsis"
+                               Style="{StaticResource Quill.Text.Caption}"
+                               Visibility="{Binding HasStatus, Converter={StaticResource BoolToVisibility}}" />
+                </Grid>
+            </DockPanel>
+        </Border>
+
         <!-- Search inside this meeting -->
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="8,0,0,0">
@@ -53,6 +112,27 @@
             </ui:TextBox>
         </DockPanel>
 
+        <!-- After corrections: regenerate the summary; result of the last correction -->
+        <StackPanel DockPanel.Dock="Top">
+            <Border Margin="0,0,0,8" Padding="12,8"
+                    CornerRadius="{StaticResource Quill.Radius.Medium}"
+                    Background="{DynamicResource Quill.Brush.AiSubtle}"
+                    Visibility="{Binding CanResummarize, Converter={StaticResource BoolToVisibility}}">
+                <DockPanel>
+                    <ui:Button DockPanel.Dock="Right" Margin="8,0,0,0" VerticalAlignment="Center"
+                               Content="{loc:Str Edit_Resummarize}" Command="{Binding ResummarizeCommand}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="Sparkle24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                    <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{loc:Str Edit_ResummarizeHint}" />
+                </DockPanel>
+            </Border>
+            <TextBlock Margin="0,0,0,8" TextWrapping="Wrap" Text="{Binding EditStatus}"
+                       Style="{StaticResource Quill.Text.Caption}"
+                       Visibility="{Binding HasEditStatus, Converter={StaticResource BoolToVisibility}}" />
+        </StackPanel>
+
         <Grid>
             <TextBlock Margin="0,16,0,0" HorizontalAlignment="Center" Text="{Binding Status}"
                        Style="{StaticResource Quill.Text.Secondary}"
@@ -70,7 +150,11 @@
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="ContextMenu" Value="{StaticResource LineMenu}" />
                         <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource Quill.Brush.MeSubtle}" />
+                            </DataTrigger>
                             <DataTrigger Binding="{Binding IsCurrentMatch}" Value="True">
                                 <Setter Property="Background" Value="{DynamicResource Quill.Brush.InfoSubtle}" />
                             </DataTrigger>
@@ -84,6 +168,7 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="Speaker" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <qc:TimestampLink Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Top"
                                               Time="{Binding At}"
@@ -95,8 +180,33 @@
                             <ui:SymbolIcon Grid.Column="1" Margin="0,0,8,0" Symbol="Bookmark24"
                                            Foreground="{DynamicResource Quill.Brush.Info}"
                                            Visibility="{Binding IsMarker, Converter={StaticResource BoolToVisibility}}" />
-                            <TextBlock Grid.Column="2" TextWrapping="Wrap" VerticalAlignment="Top"
-                                       local:HighlightedText.Runs="{Binding Runs}" />
+                            <StackPanel Grid.Column="2" VerticalAlignment="Top"
+                                        Visibility="{Binding IsEditing, Converter={StaticResource NotToVisibility}}">
+                                <TextBlock TextWrapping="Wrap"
+                                           local:HighlightedText.Runs="{Binding Runs}"
+                                           MouseLeftButtonDown="OnLineTextMouseDown" />
+                                <TextBlock Text="{loc:Str Edit_Edited}" Style="{StaticResource Quill.Text.Caption}"
+                                           Visibility="{Binding IsEdited, Converter={StaticResource BoolToVisibility}}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" VerticalAlignment="Top"
+                                        Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibility}}">
+                                <ui:TextBox Text="{Binding EditText, UpdateSourceTrigger=PropertyChanged}"
+                                            TextWrapping="Wrap" AcceptsReturn="False"
+                                            AutomationProperties.Name="{loc:Str Edit_Edit}"
+                                            KeyDown="OnEditorKeyDown"
+                                            IsVisibleChanged="OnEditorVisibleChanged" />
+                                <TextBlock Margin="0,2,0,0" Text="{loc:Str Edit_Hint}" Style="{StaticResource Quill.Text.Caption}" />
+                            </StackPanel>
+                            <ui:Button Grid.Column="3" Margin="4,0,0,0" VerticalAlignment="Top"
+                                       Appearance="Transparent" Padding="4"
+                                       ToolTip="{loc:Str Edit_Edit}" AutomationProperties.Name="{loc:Str Edit_Edit}"
+                                       Command="{Binding DataContext.BeginEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                       CommandParameter="{Binding}"
+                                       Visibility="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource BoolToVisibility}}">
+                                <ui:Button.Icon>
+                                    <ui:SymbolIcon Symbol="Edit24" />
+                                </ui:Button.Icon>
+                            </ui:Button>
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
