@@ -1388,4 +1388,96 @@ Esto no se puede deshacer.</value>
   <data name="Nav_LibraryTooltip" xml:space="preserve">
     <value>Buscar y preguntar en todas las reuniones</value>
   </data>
+  <data name="AiPackDownload_Header" xml:space="preserve">
+    <value>Descargar pack de IA</value>
+  </data>
+  <data name="AiPackDownload_Button" xml:space="preserve">
+    <value>Descargar pack de IA (≈{0})</value>
+    <comment>{0}: total download size, e.g. 3,4 GB.</comment>
+  </data>
+  <data name="AiPackDownload_Confirm" xml:space="preserve">
+    <value>Se descargará de huggingface.co solo ahora, al pulsar el botón. Quill no se conecta a internet para nada más.</value>
+  </data>
+  <data name="AiPackDownload_Destination" xml:space="preserve">
+    <value>Destino: {0}</value>
+    <comment>{0}: AI pack folder.</comment>
+  </data>
+  <data name="AiPackDownload_FreeSpace" xml:space="preserve">
+    <value>Espacio libre: {0} (se necesitan {1})</value>
+    <comment>{0}: free space on the drive; {1}: remaining download plus 10 %.</comment>
+  </data>
+  <data name="AiPackDownload_FreeSpaceUnknown" xml:space="preserve">
+    <value>Se necesitan {0} libres</value>
+    <comment>{0}: remaining download plus 10 %.</comment>
+  </data>
+  <data name="AiPackDownload_NotEnoughSpace" xml:space="preserve">
+    <value>No hay espacio suficiente en {0}: hacen falta {1} libres. Libera espacio o elige arriba otra carpeta del pack.</value>
+    <comment>{0}: AI pack folder; {1}: required free space.</comment>
+  </data>
+  <data name="AiPackDownload_NothingToDownload" xml:space="preserve">
+    <value>El pack de IA ya está completo.</value>
+  </data>
+  <data name="AiPackDownload_Alternative" xml:space="preserve">
+    <value>O descomprime los ZIP del pack junto a Quill, sin conexión.</value>
+  </data>
+  <data name="AiPackDownload_Starting" xml:space="preserve">
+    <value>Conectando con huggingface.co…</value>
+  </data>
+  <data name="AiPackDownload_Total" xml:space="preserve">
+    <value>{0} de {1} · {2}/s</value>
+    <comment>{0}: bytes done; {1}: total; {2}: speed.</comment>
+  </data>
+  <data name="AiPackDownload_Component" xml:space="preserve">
+    <value>{0}: {1} de {2}</value>
+    <comment>{0}: component name; {1}: bytes done; {2}: component size.</comment>
+  </data>
+  <data name="AiPackDownload_Verifying" xml:space="preserve">
+    <value>{0}: comprobando la huella SHA-256…</value>
+    <comment>{0}: component name.</comment>
+  </data>
+  <data name="AiPackDownload_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="AiPackDownload_Resume" xml:space="preserve">
+    <value>Reanudar descarga</value>
+  </data>
+  <data name="AiPackDownload_Retry" xml:space="preserve">
+    <value>Reintentar</value>
+  </data>
+  <data name="AiPackDownload_CheckAgain" xml:space="preserve">
+    <value>Comprobar de nuevo</value>
+  </data>
+  <data name="AiPackDownload_Paused" xml:space="preserve">
+    <value>Descarga en pausa. Lo descargado se conserva: pulsa Reanudar descarga para continuar.</value>
+  </data>
+  <data name="AiPackDownload_Done" xml:space="preserve">
+    <value>Pack de IA descargado y verificado en {0}.</value>
+    <comment>{0}: AI pack folder.</comment>
+  </data>
+  <data name="AiPackDownload_Error_HashMismatch" xml:space="preserve">
+    <value>{0} llegó dañado (la huella SHA-256 no coincide) y se ha borrado. Pulsa Reintentar.</value>
+    <comment>{0}: component name.</comment>
+  </data>
+  <data name="AiPackDownload_Error_SizeMismatch" xml:space="preserve">
+    <value>{0} no tiene el tamaño esperado y se ha descartado. Pulsa Reintentar.</value>
+    <comment>{0}: component name.</comment>
+  </data>
+  <data name="AiPackDownload_Error_HostNotAllowed" xml:space="preserve">
+    <value>La descarga intentó salir de huggingface.co y se ha bloqueado.</value>
+  </data>
+  <data name="AiPackDownload_Error_Http" xml:space="preserve">
+    <value>huggingface.co respondió con el error {0}. Inténtalo más tarde.</value>
+    <comment>{0}: HTTP status code.</comment>
+  </data>
+  <data name="AiPackDownload_Error_Interrupted" xml:space="preserve">
+    <value>La conexión se cortó. Lo descargado se conserva: pulsa Reintentar para continuar.</value>
+  </data>
+  <data name="AiPackDownload_Error_Network" xml:space="preserve">
+    <value>No se pudo conectar con huggingface.co: {0}</value>
+    <comment>{0}: error message.</comment>
+  </data>
+  <data name="AiPackDownload_Error_Disk" xml:space="preserve">
+    <value>No se pudo escribir en {0}: {1}</value>
+    <comment>{0}: folder; {1}: error message.</comment>
+  </data>
 </root>

@@ -58,6 +58,11 @@ internal static class SettingsModule
     public static Task<MarkdownExportResult?> AutoExportAsync(ISessionStore store, string sessionId, CancellationToken cancellationToken) =>
         new MeetingExportService(store).ExportIfEnabledAsync(sessionId, Current.Export, cancellationToken);
 
+    /// <summary>Saves "ai.pack_path" after an in-app AI-pack download outside the app folder and
+    /// notifies <see cref="Saved"/> so running services locate the new pack. UI thread.</summary>
+    internal static void PersistAiPackPath(string packRoot) =>
+        Saved?.Invoke(null, ConfigStore.SaveAiPackPath(packRoot));
+
     private static void Save(QuillSettings settings)
     {
         ConfigStore.SaveSettings(settings);
