@@ -170,6 +170,9 @@ internal sealed class PlayerViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>Invalidates an outstanding audio open without unloading already-owned audio.</summary>
+    public void CancelPendingOpen() => _openGeneration++;
+
     /// <summary>Reads the position from the device. The timer calls it while playing.</summary>
     public void Tick()
     {
@@ -220,7 +223,11 @@ internal sealed class PlayerViewModel : ObservableObject, IDisposable
 
         if (generation != _openGeneration || !string.Equals(sessionId, _sessionId, StringComparison.Ordinal))
         {
-            audio?.Dispose();
+            if (audio is not null && !ReferenceEquals(audio, _audio))
+            {
+                audio.Dispose();
+            }
+
             return null;
         }
 
@@ -314,8 +321,15 @@ internal sealed class PlaybackSessionActions(ISessionActions inner, PlayerViewMo
     public Task IdentifySpeakersAsync(string sessionId, CancellationToken cancellationToken) =>
         inner.IdentifySpeakersAsync(sessionId, cancellationToken);
 
-    public Task ReassignSpeakerAsync(string sessionId, TimeSpan segmentStart, string speakerId, CancellationToken cancellationToken) =>
-        inner.ReassignSpeakerAsync(sessionId, segmentStart, speakerId, cancellationToken);
+    public Task ReassignSpeakerAsync(
+        string sessionId,
+        int segmentIndex,
+        TimeSpan segmentStart,
+        string expectedSpeakerId,
+        string expectedText,
+        string speakerId,
+        CancellationToken cancellationToken) =>
+        inner.ReassignSpeakerAsync(sessionId, segmentIndex, segmentStart, expectedSpeakerId, expectedText, speakerId, cancellationToken);
 
     public Task<bool> IsSummaryOutdatedAsync(string sessionId, CancellationToken cancellationToken) =>
         inner.IsSummaryOutdatedAsync(sessionId, cancellationToken);

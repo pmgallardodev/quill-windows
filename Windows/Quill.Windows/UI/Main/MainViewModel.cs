@@ -353,6 +353,7 @@ internal sealed class MainViewModel : ObservableObject, IDisposable
     /// <summary>Window hidden: stop timers and pending reads, save the notes being edited.</summary>
     public void Stop()
     {
+        Player.CancelPendingOpen();
         if (Player.IsPlaying)
         {
             _ = Player.PlayPauseAsync();

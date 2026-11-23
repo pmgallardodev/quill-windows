@@ -21,7 +21,7 @@ internal sealed class LiveRecording : IAsyncDisposable
 {
     private readonly LiveTranscriptionModule? _transcription;
     private readonly object _forwardGate = new();
-    private int _forwarded;
+    private readonly HashSet<TranscriptSegment> _forwarded = new(ReferenceEqualityComparer.Instance);
     private bool _forwarding;
     private int _stopped;
 
@@ -122,19 +122,32 @@ internal sealed class LiveRecording : IAsyncDisposable
                 return;
             }
 
-            var all = Transcript.Snapshot();
-            if (all.Count <= _forwarded)
+            var batch = SelectUnforwarded(Transcript.Snapshot(), _forwarded);
+            if (batch.Count == 0)
             {
                 return;
             }
-
-            var batch = all.Skip(_forwarded).ToList();
-            _forwarded = all.Count;
 
             // Called under the lock so batches keep their order. Cheap: the loop appends
             // synchronously and a due refresh runs on the scheduler's worker, not here.
             _ = ForwardAsync(Summary, batch);
         }
+    }
+
+    internal static IReadOnlyList<TranscriptSegment> SelectUnforwarded(
+        IReadOnlyList<TranscriptSegment> snapshot,
+        HashSet<TranscriptSegment> forwarded)
+    {
+        var batch = new List<TranscriptSegment>();
+        foreach (var segment in snapshot)
+        {
+            if (forwarded.Add(segment))
+            {
+                batch.Add(segment);
+            }
+        }
+
+        return batch;
     }
 
     private static async Task ForwardAsync(LiveSummaryLoop loop, IReadOnlyList<TranscriptSegment> batch)

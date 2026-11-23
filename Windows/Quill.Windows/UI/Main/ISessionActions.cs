@@ -35,12 +35,19 @@ internal interface ISessionActions
     bool CanReassignSpeakers => false;
 
     /// <summary>
-    /// Moves the transcript segment that starts at <paramref name="segmentStart"/> to
+    /// Moves the transcript segment still matching the selected index and displayed identity to
     /// <paramref name="speakerId"/> and saves the transcript (and speaker corrections).
     /// Completes when saved; the window then reloads. Throws on failure.
     /// Default: not available (<see cref="NotSupportedException"/>).
     /// </summary>
-    Task ReassignSpeakerAsync(string sessionId, TimeSpan segmentStart, string speakerId, CancellationToken cancellationToken) =>
+    Task ReassignSpeakerAsync(
+        string sessionId,
+        int segmentIndex,
+        TimeSpan segmentStart,
+        string expectedSpeakerId,
+        string expectedText,
+        string speakerId,
+        CancellationToken cancellationToken) =>
         Task.FromException(new NotSupportedException("Speaker reassignment is not available."));
 
     /// <summary>Optional speaker naming, saved voices and in-person mode (F11/F13); null hides the speakers panel.</summary>

@@ -670,7 +670,14 @@ internal sealed class TranscriptViewModel : ObservableObject
         EditStatus = string.Empty;
         try
         {
-            await _actions.ReassignSpeakerAsync(_sessionId, entry.At, speakerId, CancellationToken.None).ConfigureAwait(true);
+            await _actions.ReassignSpeakerAsync(
+                _sessionId,
+                entry.SegmentIndex,
+                entry.At,
+                entry.SpeakerId,
+                entry.Text,
+                speakerId,
+                CancellationToken.None).ConfigureAwait(true);
             HasPendingEdits = true;
         }
         catch (Exception exception) when (exception is not OutOfMemoryException)

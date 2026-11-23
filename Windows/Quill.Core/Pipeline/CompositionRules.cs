@@ -24,6 +24,30 @@ public static class TranscriptSegmentLocator
 
         return -1;
     }
+
+    /// <summary>Returns the selected index only when its timestamp, speaker, and text still identify that segment.</summary>
+    public static int IndexOf(
+        IReadOnlyList<TranscriptSegment> segments,
+        int selectedIndex,
+        TimeSpan start,
+        string speakerId,
+        string text)
+    {
+        ArgumentNullException.ThrowIfNull(segments);
+        ArgumentNullException.ThrowIfNull(speakerId);
+        ArgumentNullException.ThrowIfNull(text);
+        if ((uint)selectedIndex >= (uint)segments.Count)
+        {
+            return -1;
+        }
+
+        var segment = segments[selectedIndex];
+        return (segment.Start - start).Duration() <= Tolerance &&
+            string.Equals(segment.SpeakerId, speakerId, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(segment.Text, text, StringComparison.Ordinal)
+                ? selectedIndex
+                : -1;
+    }
 }
 
 /// <summary>When the live summary runs during a recording (design §7.2).</summary>

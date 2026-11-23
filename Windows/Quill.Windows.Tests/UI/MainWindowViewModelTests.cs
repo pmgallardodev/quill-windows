@@ -115,7 +115,14 @@ internal sealed class FakeSessionActions : ISessionActions
 
     public List<(string SessionId, TimeSpan Start, string SpeakerId)> Reassigned { get; } = new();
 
-    public Task ReassignSpeakerAsync(string sessionId, TimeSpan segmentStart, string speakerId, CancellationToken cancellationToken)
+    public Task ReassignSpeakerAsync(
+        string sessionId,
+        int segmentIndex,
+        TimeSpan segmentStart,
+        string expectedSpeakerId,
+        string expectedText,
+        string speakerId,
+        CancellationToken cancellationToken)
     {
         Reassigned.Add((sessionId, segmentStart, speakerId));
         return Task.CompletedTask;

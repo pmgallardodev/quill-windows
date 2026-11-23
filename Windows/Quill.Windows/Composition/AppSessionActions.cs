@@ -131,10 +131,17 @@ internal sealed class AppSessionActions(SessionAiServices services) : ISessionAc
         }
     }
 
-    public async Task ReassignSpeakerAsync(string sessionId, TimeSpan segmentStart, string speakerId, CancellationToken cancellationToken)
+    public async Task ReassignSpeakerAsync(
+        string sessionId,
+        int segmentIndex,
+        TimeSpan segmentStart,
+        string expectedSpeakerId,
+        string expectedText,
+        string speakerId,
+        CancellationToken cancellationToken)
     {
         var transcript = await _services.LoadFinalTranscript(sessionId, cancellationToken).ConfigureAwait(false);
-        var index = TranscriptSegmentLocator.IndexOf(transcript, segmentStart);
+        var index = TranscriptSegmentLocator.IndexOf(transcript, segmentIndex, segmentStart, expectedSpeakerId, expectedText);
         if (index < 0)
         {
             throw new InvalidOperationException(Resources.Loc.Get("Pipeline_SegmentNotFound"));

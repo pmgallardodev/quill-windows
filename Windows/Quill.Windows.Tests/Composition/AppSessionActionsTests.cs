@@ -66,10 +66,33 @@ public class AppSessionActionsTests
         var harness = new Harness();
         var actions = new AppSessionActions(harness.Services());
 
-        await actions.ReassignSpeakerAsync("s1", TimeSpan.FromSeconds(7), "speaker-2", CancellationToken.None);
+        await actions.ReassignSpeakerAsync("s1", 2, TimeSpan.FromSeconds(7), "speaker-1", "vale", "speaker-2", CancellationToken.None);
 
         Assert.True(actions.CanReassignSpeakers);
+        Assert.Equal(["reassign:s1:2:speaker-2"], harness.Calls);
+    }
+
+    [Fact]
+    public async Task ReassignUsesTheSelectedIndexWhenTracksShareAStartTime()
+    {
+        var harness = new Harness();
+        var actions = new AppSessionActions(harness.Services());
+
+        await actions.ReassignSpeakerAsync("s1", 1, TimeSpan.FromSeconds(1), "speaker-1", "hola", "speaker-2", CancellationToken.None);
+
         Assert.Equal(["reassign:s1:1:speaker-2"], harness.Calls);
+    }
+
+    [Fact]
+    public async Task ReassignRejectsASelectedIndexWhoseSegmentIdentityChanged()
+    {
+        var harness = new Harness();
+        var actions = new AppSessionActions(harness.Services());
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => actions.ReassignSpeakerAsync(
+            "s1", 1, TimeSpan.FromSeconds(1), "speaker-1", "different text", "speaker-2", CancellationToken.None));
+
+        Assert.Empty(harness.Calls);
     }
 
     [Fact]
@@ -145,6 +168,7 @@ public class AppSessionActionsTests
             LoadFinalTranscript = (_, _) => Task.FromResult<IReadOnlyList<TranscriptSegment>>(
             [
                 new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), "hola", "me", Track.Microphone),
+                new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), "hola", "speaker-1", Track.System),
                 new(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(9), "vale", "speaker-1", Track.System),
             ]),
             ReassignSegment = (id, index, speaker, _) =>

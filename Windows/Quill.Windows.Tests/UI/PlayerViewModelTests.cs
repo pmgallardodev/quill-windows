@@ -211,4 +211,33 @@ public sealed class PlayerViewModelTests
         player.Tick();
         Assert.Equal("Seguimos", transcript.PlayingEntry?.Text);
     }
+
+    [Fact]
+    public async Task HidingInvalidatesPendingOpenWithoutDisposingNewerAudio()
+    {
+        var pending = new TaskCompletionSource<ISessionAudio?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var calls = 0;
+        var source = new DelegateAudioSource((_, _) => Interlocked.Increment(ref calls) == 1
+            ? pending.Task
+            : Task.FromResult<ISessionAudio?>(_audio));
+        var player = new PlayerViewModel(source);
+        player.SetSession(Samples.SessionId);
+
+        var hiddenOpen = player.PlayPauseAsync();
+        player.CancelPendingOpen();
+        await player.PlayPauseAsync();
+        Assert.True(_audio.IsPlaying);
+
+        pending.SetResult(_audio);
+        await hiddenOpen;
+
+        Assert.True(_audio.IsPlaying);
+        Assert.False(_audio.Disposed);
+        Assert.True(player.IsPlaying);
+    }
+
+    private sealed class DelegateAudioSource(Func<string, CancellationToken, Task<ISessionAudio?>> open) : ISessionAudioSource
+    {
+        public Task<ISessionAudio?> OpenAsync(string sessionId, CancellationToken cancellationToken) => open(sessionId, cancellationToken);
+    }
 }
