@@ -10,7 +10,7 @@ using Quill.Windows.UI.Theme;
 namespace Quill.Windows.UI.Settings;
 
 /// <summary>
-/// Settings window: General, IA, Resúmenes, Plantillas, Exportación. Owns the dialogs and
+/// Settings window: General, IA, Resúmenes, Plantillas, Exportación, Privacidad. Owns the dialogs and
 /// shell calls; state and validation live in <see cref="SettingsViewModel"/>.
 /// </summary>
 internal partial class SettingsWindow
@@ -32,12 +32,12 @@ internal partial class SettingsWindow
     private void OnNavigationChanged(object sender, SelectionChangedEventArgs e)
     {
         // SelectionChanged fires during InitializeComponent, before the pages exist.
-        if (ExportPage is null)
+        if (PrivacyPage is null)
         {
             return;
         }
 
-        UIElement[] pages = [GeneralPage, AiPage, SummariesPage, TemplatesPage, ExportPage];
+        UIElement[] pages = [GeneralPage, AiPage, SummariesPage, TemplatesPage, ExportPage, PrivacyPage];
         for (var index = 0; index < pages.Length; index++)
         {
             pages[index].Visibility = index == Navigation.SelectedIndex ? Visibility.Visible : Visibility.Collapsed;
