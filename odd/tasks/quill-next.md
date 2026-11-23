@@ -57,6 +57,12 @@ Route legend: D = delegated writer in its own worktree (parallel). Parent integr
 - [ ] F5 Speaker separation (echo classifier, diarization on any track, rename, correction). Route D.
 - [ ] F6 Main window redesign (meetings by day, Summary/Transcript/Notes tabs, My tasks). Route D.
 
+### Migration (after Wave A merges, no agent touching csproj)
+- [ ] M1 Retarget all projects to net10.0 / net10.0-windows (owner decision 2026-11-23: .NET 8
+      support ended 2026-11-10); install .NET 10 SDK in ~/.dotnet; upgrade LLamaSharp to latest
+      (0.30.x) with explicit Vulkan/CPU backend selection; update README badges/requirements.
+      Route: inline if mechanical, else D.
+
 ### Wave B (parallel)
 - [ ] F7 Companion panel (floating, pill, live tabs, What did I miss?, markers, notes, optional
       recording-notice button). Route D.
